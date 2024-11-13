@@ -1,0 +1,18 @@
+you want to have
+1. commands that bring you to a new function / state / whatever
+2. flags that you can add to like change the date or whatever
+3. how to print all the flags and what they do and how to use them
+4. tests for it all
+5. ways to cancel stuff
+
+do it like the regular command line
+detect when things are - then set those flags to be distinct
+
+this mostly works
+create a configuation / memory / setting thing
+if you go into sub menus, you want the right map to be displayed
+what prints on the cli can be set in the cfg 
+set the state and the map so youre not always carrying around a map
+and then help doesn't have to load in the same map TWICE to print stuff
+cause it'll have access to it
+and then help just really iterates
