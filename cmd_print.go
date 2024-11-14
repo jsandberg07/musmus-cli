@@ -1,5 +1,11 @@
 package main
 
+import (
+	"errors"
+	"fmt"
+	"strings"
+)
+
 func getPrintCmd() Command {
 
 	printFlags := make(map[string]Flag)
@@ -26,4 +32,29 @@ func getPrintCmd() Command {
 	}
 
 	return printCmd
+}
+
+func printCommand(args []Argument) error {
+	fmt.Println("Printing...")
+	output := "Wow!"
+	uppercase := false
+
+	for _, argument := range args {
+		switch argument.flag {
+		case "-b":
+			uppercase = true
+		case "-c":
+			output = argument.value
+		default:
+			return errors.New("fake flag snuck into print")
+		}
+	}
+
+	if uppercase {
+		output = strings.ToUpper(output)
+	}
+
+	fmt.Println(output)
+
+	return nil
 }

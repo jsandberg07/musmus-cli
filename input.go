@@ -29,13 +29,6 @@ func readCommandName(input string) (string, []string, error) {
 
 }
 
-// TODO: you have the command, which contains acceptable flags
-// parse the parameters, check to see if it is in the flag list
-// if it is, check to see if it has a value
-// store the flag, then store the value.
-// if the flag accepts a value but there isn't one, error
-// if flag isn't approved, error
-// return arguments, which is a list of flags and their arguments
 func parseArguments(cmd *Command, parameters []string) ([]Argument, error) {
 	// no params passed in
 	if len(parameters) == 0 {
@@ -54,7 +47,7 @@ func parseArguments(cmd *Command, parameters []string) ([]Argument, error) {
 		flag, ok := cmd.flags[parameters[i]]
 		if !ok {
 			// flag now allowed for this command
-			err := fmt.Sprintf("%s a flag allowed for this command", parameters[i])
+			err := fmt.Sprintf("%s is not a flag allowed for this command", parameters[i])
 			return nil, errors.New(err)
 		}
 
@@ -67,13 +60,11 @@ func parseArguments(cmd *Command, parameters []string) ([]Argument, error) {
 				err := fmt.Sprintf("%s is a flag that takes a value", parameters[i])
 				return nil, errors.New(err)
 			}
-
 			i++
 			tArg.value = parameters[i]
 		} else {
 			tArg.flag = parameters[i]
 		}
-
 		arguments = append(arguments, tArg)
 	}
 
