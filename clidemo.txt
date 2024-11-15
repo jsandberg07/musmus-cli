@@ -16,3 +16,26 @@ set the state and the map so youre not always carrying around a map
 and then help doesn't have to load in the same map TWICE to print stuff
 cause it'll have access to it
 and then help just really iterates
+
+AM I INSANE ENOUGH TO CREATE A MIDDLEWARE THAT CHECKS PERMISSIONS INSTEAD OF A DIFFERENT FUNCTION  
+nah i dunno
+
+
+//
+Create a flag:
+symbol, description, and if it takes a value
+symbol is without the -
+in the getCmd function, $flag := flag{}
+add to commands map
+add handling in the function itself. takes value are used later, doesnt sets a bool
+
+Create a command:
+write the new function (handle flagss)
+create a new function getNewCmd() Command {}
+flags map := make(map[string]flag)
+newCmd := Command{name, description, function, flags}
+
+Create a state:
+getState() &State {map, cli message}
+make sure to add help by default, prints what is available in current map
+getStateMap() and put that in
