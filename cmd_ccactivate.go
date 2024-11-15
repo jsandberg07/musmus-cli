@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -114,9 +115,20 @@ func activateCommand(cfg *Config, args []Argument) error {
 		return nil
 	}
 
+	var wg sync.WaitGroup
+
 	if len(cardsToProcess) != 0 {
-		fmt.Println("Here's where cards would be processed :^3")
+		// fmt.Println("Here's where cards would be processed :^3")
+		for _, cc := range cardsToProcess {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				processCard(&cc)
+			}()
+		}
 	}
+
+	wg.Wait()
 
 	return nil
 
@@ -130,6 +142,6 @@ func parseDate(string) (time.Time, error) {
 
 // go routine for just printing cards, with a DB it'll be a sql thing
 func processCard(cc *CageCard) error {
-	fmt.Printf("# - %v Date - %v Person - %v", cc.CCid, cc.Date.Format("DateOnly"), cc.Person)
+	fmt.Printf("# - %v Date - %v Person - %v\n", cc.CCid, cc.Date.Format("DateOnly"), cc.Person)
 	return nil
 }

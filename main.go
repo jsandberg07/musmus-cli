@@ -7,9 +7,10 @@ import (
 )
 
 // NEXT:
-// make a different state
-// swap to it
-// have some dumb cage card function that just prints shit (with go routines!)
+// Create a common set of commands that are accesable from anywhere
+// like setting state, help, exit
+// save readding, reimplementing commands constantly
+// store it in the same map, just append again. they're in memory and its all garbage collected
 
 // ALSO:
 // set up CI testing
