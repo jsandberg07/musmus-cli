@@ -15,7 +15,7 @@ func getExitCmd() Command {
 	return exitCmd
 }
 
-func exitCommand(args []Argument) error {
+func exitCommand(cfg *Config, args []Argument) error {
 	fmt.Println("exiting...")
 	os.Exit(0)
 	return nil

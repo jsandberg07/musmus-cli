@@ -11,6 +11,10 @@ import (
 // swap to it
 // have some dumb cage card function that just prints shit (with go routines!)
 
+// ALSO:
+// set up CI testing
+// you probably wont use it often but it's nice ^_^
+
 func main() {
 	fmt.Println("Hello borld")
 	cfg := Config{
@@ -55,7 +59,7 @@ func main() {
 		}
 
 		// pass the args into the commands function, then run it
-		err = command.function(arguments)
+		err = command.function(&cfg, arguments)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

@@ -34,7 +34,7 @@ func getPrintCmd() Command {
 	return printCmd
 }
 
-func printCommand(args []Argument) error {
+func printCommand(cfg *Config, args []Argument) error {
 	fmt.Println("Printing...")
 	output := "Wow!"
 	uppercase := false

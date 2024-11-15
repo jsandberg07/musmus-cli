@@ -12,8 +12,8 @@ func getHelpCmd() Command {
 	return helpCmd
 }
 
-func helpCommand(args []Argument) error {
-	cmdMap := getMainMap()
+func helpCommand(cfg *Config, args []Argument) error {
+	cmdMap := cfg.currentState.currentCommands
 	for _, key := range cmdMap {
 		fmt.Println(key.name)
 		fmt.Println(key.description)
