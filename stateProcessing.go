@@ -6,11 +6,9 @@ package main
 // function that gets COMMON maps that are used often
 func getProcessingMap() map[string]Command {
 	activateCmd := getActivateCmd()
-	exitCmd := getExitCmd()
-	helpCmd := getHelpCmd()
-	setStateCmd := getSetStateCmd()
-
-	cmdSlice := []Command{exitCmd, helpCmd, activateCmd, setStateCmd}
+	commonCmds := getCommonCmds()
+	cmdSlice := []Command{activateCmd}
+	cmdSlice = append(cmdSlice, commonCmds...)
 	commandMap := make(map[string]Command)
 	for _, cmd := range cmdSlice {
 		commandMap[cmd.name] = cmd

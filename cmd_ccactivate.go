@@ -29,21 +29,21 @@ func getActivateCmd() Command {
 
 	dFlag := Flag{
 		symbol:      "d",
-		description: "sets date. Defaults to today",
+		description: "Sets date. Defaults to today.",
 		takesValue:  true,
 	}
 	activateFlags["-"+dFlag.symbol] = dFlag
 
 	pFlag := Flag{
 		symbol:      "p",
-		description: "sets person. Defaults to 'mouse'",
+		description: "Sets person. Defaults to 'Mouse.'",
 		takesValue:  true,
 	}
 	activateFlags["-"+pFlag.symbol] = pFlag
 
 	activateCmd := Command{
 		name:        "activate",
-		description: "used for activating cards",
+		description: "Used for activating cards.",
 		function:    activateCommand,
 		flags:       activateFlags,
 	}

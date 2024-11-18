@@ -7,10 +7,11 @@ import (
 )
 
 // NEXT:
-// Create a common set of commands that are accesable from anywhere
-// like setting state, help, exit
-// save readding, reimplementing commands constantly
-// store it in the same map, just append again. they're in memory and its all garbage collected
+// work on making activaing make sense, as in the date
+// shit this actually works pretty well
+// i might have to start actually doing DB work
+// then with DB we can worry about setting up people, orders, protocols, permissions, whatever
+// no point making a demo for those when i can already handle inputs ect
 
 // ALSO:
 // set up CI testing
@@ -63,8 +64,7 @@ func main() {
 		err = command.function(&cfg, arguments)
 		if err != nil {
 			fmt.Println(err)
-			os.Exit(1)
+			continue
 		}
-
 	}
 }

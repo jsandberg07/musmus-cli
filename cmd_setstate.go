@@ -11,21 +11,21 @@ func getSetStateCmd() Command {
 
 	aFlag := Flag{
 		symbol:      "a",
-		description: "Sets state to CC processing",
+		description: "Sets state to CC processing.",
 		takesValue:  false,
 	}
 	setStateFlags["-"+aFlag.symbol] = aFlag
 
 	mFlag := Flag{
 		symbol:      "m",
-		description: "Sets state to main",
+		description: "Sets state to main.",
 		takesValue:  false,
 	}
 	setStateFlags["-"+mFlag.symbol] = mFlag
 
 	setStateCmd := Command{
 		name:        "setstate",
-		description: "Sets the state to a different one",
+		description: "Sets the state to a different one.",
 		function:    setStateCommand,
 		flags:       setStateFlags,
 	}
@@ -35,10 +35,10 @@ func getSetStateCmd() Command {
 
 func setStateCommand(cfg *Config, args []Argument) error {
 	if len(args) == 0 {
-		return errors.New("Set State requires a state flag")
+		return errors.New("setstate requires a state flag")
 	}
 	if len(args) != 1 {
-		return errors.New("Set state only takes 1 flag")
+		return errors.New("setstate only takes 1 flag")
 	}
 
 	switch args[0].flag {
@@ -47,7 +47,7 @@ func setStateCommand(cfg *Config, args []Argument) error {
 	case "-m":
 		cfg.nextState = getMainState()
 	default:
-		return errors.New("Whoops a fake flag slipped into setStateCommand")
+		return errors.New("whoops a fake flag slipped into setStateCommand")
 	}
 
 	return nil

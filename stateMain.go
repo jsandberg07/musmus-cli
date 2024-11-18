@@ -1,12 +1,10 @@
 package main
 
 func getMainMap() map[string]Command {
-	exitCmd := getExitCmd()
 	printCmd := getPrintCmd()
-	helpCmd := getHelpCmd()
-	setStateCmd := getSetStateCmd()
-
-	cmdSlice := []Command{exitCmd, printCmd, helpCmd, setStateCmd}
+	commonCmds := getCommonCmds()
+	cmdSlice := []Command{printCmd}
+	cmdSlice = append(cmdSlice, commonCmds...)
 	commandMap := make(map[string]Command)
 	for _, cmd := range cmdSlice {
 		commandMap[cmd.name] = cmd
