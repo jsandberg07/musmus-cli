@@ -8,14 +8,14 @@ import (
 func getExitCmd() Command {
 	exitCmd := Command{
 		name:        "exit",
-		description: "Exits program",
+		description: "Exits program.",
 		function:    exitCommand,
 	}
 
 	return exitCmd
 }
 
-func exitCommand(args []Argument) error {
+func exitCommand(cfg *Config, args []Argument) error {
 	fmt.Println("exiting...")
 	os.Exit(0)
 	return nil

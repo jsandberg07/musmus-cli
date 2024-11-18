@@ -20,6 +20,10 @@ and then help just really iterates
 AM I INSANE ENOUGH TO CREATE A MIDDLEWARE THAT CHECKS PERMISSIONS INSTEAD OF A DIFFERENT FUNCTION  
 nah i dunno
 
+jax says refresh your colonies every 10 generation to avoid genetic drift
+CALCULATIONS
+ being absolutely berserk and crushing a huge amount of work then falling asleep during lunch and being like "what was i doing"
+ ALWAYS write notes when youre programming lucid
 
 //
 Create a flag:
@@ -39,3 +43,5 @@ Create a state:
 getState() &State {map, cli message}
 make sure to add help by default, prints what is available in current map
 getStateMap() and put that in
+
+

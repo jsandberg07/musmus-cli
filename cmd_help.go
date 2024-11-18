@@ -5,19 +5,26 @@ import "fmt"
 func getHelpCmd() Command {
 	helpCmd := Command{
 		name:        "help",
-		description: "prints descriptions of all available functions",
+		description: "Prints descriptions of all available functions.",
 		function:    helpCommand,
 	}
 
 	return helpCmd
 }
 
-func helpCommand(args []Argument) error {
-	cmdMap := getMainMap()
+func helpCommand(cfg *Config, args []Argument) error {
+	cmdMap := cfg.currentState.currentCommands
 	for _, key := range cmdMap {
-		fmt.Println(key.name)
+		fmt.Printf("Command name: %s\n", key.name)
 		fmt.Println(key.description)
-		fmt.Println(key.flags)
+		for _, key := range key.flags {
+			fmt.Printf("%s - %s", key.symbol, key.description)
+			if key.takesValue {
+				fmt.Print(" Requires value.")
+			}
+			fmt.Println()
+		}
+
 	}
 	return nil
 }

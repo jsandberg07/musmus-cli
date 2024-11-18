@@ -26,7 +26,7 @@ func getPrintCmd() Command {
 
 	printCmd := Command{
 		name:        "print",
-		description: "prints wow or sometimes something other than wow.",
+		description: "Prints 'wow' or sometimes something other than 'wow.'",
 		function:    printCommand,
 		flags:       printFlags,
 	}
@@ -34,7 +34,7 @@ func getPrintCmd() Command {
 	return printCmd
 }
 
-func printCommand(args []Argument) error {
+func printCommand(cfg *Config, args []Argument) error {
 	fmt.Println("Printing...")
 	output := "Wow!"
 	uppercase := false

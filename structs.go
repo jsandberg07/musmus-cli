@@ -1,5 +1,7 @@
 package main
 
+import "time"
+
 type Flag struct {
 	symbol      string
 	description string
@@ -14,7 +16,7 @@ type Argument struct {
 type Command struct {
 	name        string
 	description string
-	function    func(args []Argument) error
+	function    func(cfg *Config, args []Argument) error
 	flags       map[string]Flag
 }
 
@@ -26,6 +28,12 @@ type Config struct {
 type State struct {
 	currentCommands map[string]Command
 	cliMessage      string
+}
+
+type CageCard struct {
+	CCid   int
+	Date   time.Time
+	Person string
 }
 
 /*

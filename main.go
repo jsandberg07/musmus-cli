@@ -7,9 +7,16 @@ import (
 )
 
 // NEXT:
-// make a different state
-// swap to it
-// have some dumb cage card function that just prints shit (with go routines!)
+// work on making activaing make sense, as in inputting the date
+// bro it's time to write tests kek
+// shit this actually works pretty well
+// i might have to start actually doing DB work
+// then with DB we can worry about setting up people, orders, protocols, permissions, whatever
+// no point making a demo for those when i can already handle inputs ect
+
+// ALSO:
+// set up CI testing
+// you probably wont use it often but it's nice ^_^
 
 func main() {
 	fmt.Println("Hello borld")
@@ -55,11 +62,12 @@ func main() {
 		}
 
 		// pass the args into the commands function, then run it
-		err = command.function(arguments)
+		err = command.function(&cfg, arguments)
 		if err != nil {
 			fmt.Println(err)
-			os.Exit(1)
+			continue
 		}
-
+		// spacing :^3
+		fmt.Println()
 	}
 }
