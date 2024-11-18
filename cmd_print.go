@@ -26,7 +26,7 @@ func getPrintCmd() Command {
 
 	printCmd := Command{
 		name:        "print",
-		description: "prints wow or sometimes something other than wow.",
+		description: "Prints 'wow' or sometimes something other than 'wow.'",
 		function:    printCommand,
 		flags:       printFlags,
 	}

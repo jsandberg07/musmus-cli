@@ -7,7 +7,8 @@ import (
 )
 
 // NEXT:
-// work on making activaing make sense, as in the date
+// work on making activaing make sense, as in inputting the date
+// bro it's time to write tests kek
 // shit this actually works pretty well
 // i might have to start actually doing DB work
 // then with DB we can worry about setting up people, orders, protocols, permissions, whatever
@@ -66,5 +67,7 @@ func main() {
 			fmt.Println(err)
 			continue
 		}
+		// spacing :^3
+		fmt.Println()
 	}
 }

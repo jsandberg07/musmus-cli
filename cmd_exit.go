@@ -8,7 +8,7 @@ import (
 func getExitCmd() Command {
 	exitCmd := Command{
 		name:        "exit",
-		description: "Exits program",
+		description: "Exits program.",
 		function:    exitCommand,
 	}
 

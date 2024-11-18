@@ -52,9 +52,10 @@ func getActivateCmd() Command {
 }
 
 // process itself
+// TODO: Add a delete that just pops one of the cards off
 func activateCommand(cfg *Config, args []Argument) error {
-	date := time.Now()
-	person := "Mouse"
+	var date time.Time
+	var person string
 	var err error // because blocks
 
 	for _, argument := range args {
@@ -62,7 +63,7 @@ func activateCommand(cfg *Config, args []Argument) error {
 		case "-d":
 			date, err = parseDate(argument.value)
 			if err != nil {
-				return errors.New("Couldnt parse date. Try this format: day/month/year")
+				return errors.New("Couldn't parse date. Try this format: month/day/year.")
 			}
 		case "-p":
 			// when db, add to make sure somebody is in the db
@@ -70,7 +71,16 @@ func activateCommand(cfg *Config, args []Argument) error {
 		}
 	}
 
-	fmt.Printf("Enter cage cards to activate. Date: %v - Person: %s", date.Format("DateOnly"), person)
+	if date.IsZero() {
+		year, month, day := time.Now().Date()
+		date = time.Date(year, month, day, 0, 0, 0, 0, time.UTC)
+	}
+
+	if person == "" {
+		person = "Mouse"
+	}
+
+	fmt.Printf("Enter cage cards to activate. Date: %v - Person: %s\n", date, person)
 	fmt.Println("Enter 'process' to process the cards and exit, or exit to leave without processing.")
 	reader := bufio.NewReader(os.Stdin)
 	var cardsToProcess []CageCard
@@ -135,9 +145,27 @@ func activateCommand(cfg *Config, args []Argument) error {
 }
 
 // because who knows what dates people are going to enter
-func parseDate(string) (time.Time, error) {
-	// TODO: make this literally not just return yesterday
-	return time.Now().AddDate(0, 0, -1), nil
+// TODO: make sure there isnt fuckery like "this card technically wasn't this day beacuase the time was off"
+// set everything to be active at like midnight, queries at midnight and see if it works otherwise +1 second lmao
+
+func parseDate(input string) (time.Time, error) {
+	// create an array of the formats (with 0s, without, 4 digit year, 2 digit year)
+	// go through parse works and then return
+	var date time.Time
+	var err error
+	timeFormats := []string{"1/2/06", "1/2/2006", "01/02/06", "01/02/2006"}
+	for _, format := range timeFormats {
+		date, err = time.Parse(format, input)
+		if err == nil {
+			break
+		}
+	}
+	if err != nil {
+		fmt.Println("Error parsing date.")
+		return time.Time{}, err
+	}
+
+	return date, nil
 }
 
 // go routine for just printing cards, with a DB it'll be a sql thing

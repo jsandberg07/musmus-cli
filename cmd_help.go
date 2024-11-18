@@ -5,7 +5,7 @@ import "fmt"
 func getHelpCmd() Command {
 	helpCmd := Command{
 		name:        "help",
-		description: "prints descriptions of all available functions",
+		description: "Prints descriptions of all available functions.",
 		function:    helpCommand,
 	}
 
