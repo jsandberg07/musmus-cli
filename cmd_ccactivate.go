@@ -99,6 +99,15 @@ func activateCommand(cfg *Config, args []Argument) error {
 			exit = true
 			break
 		}
+		if text == "pop" || text == "delete" {
+			length := len(cardsToProcess)
+			if length == 0 {
+				fmt.Println("No cards have been entered.")
+				continue
+			}
+			cardsToProcess = cardsToProcess[:length-1]
+			continue
+		}
 
 		if err != nil {
 			fmt.Println("Error reading input string")
@@ -106,7 +115,7 @@ func activateCommand(cfg *Config, args []Argument) error {
 		}
 		ccid, err := strconv.Atoi(text)
 		if err != nil {
-			fmt.Println("Invalid input. Expecting a number or 'process'.")
+			fmt.Println("Invalid input. Expecting a number or valid command.")
 			continue
 		}
 

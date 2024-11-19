@@ -7,12 +7,16 @@ import (
 )
 
 // NEXT:
-// work on making activaing make sense, as in inputting the date
-// bro it's time to write tests kek
-// shit this actually works pretty well
-// i might have to start actually doing DB work
-// then with DB we can worry about setting up people, orders, protocols, permissions, whatever
-// no point making a demo for those when i can already handle inputs ect
+// pop off the last scanned card (just in case)
+// you doing DB work baby
+// create a new db
+// create your env
+// access URL
+// add a cage card
+// add several cage cards
+// add duplicate cards
+// run a query
+// get number of days active and have it not be berserk
 
 // ALSO:
 // set up CI testing
