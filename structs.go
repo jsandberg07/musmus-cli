@@ -1,6 +1,10 @@
 package main
 
-import "time"
+import (
+	"time"
+
+	"github.com/jsandberg07/clitest/internal/database"
+)
 
 type Flag struct {
 	symbol      string
@@ -23,6 +27,7 @@ type Command struct {
 type Config struct {
 	currentState *State
 	nextState    *State
+	db           *database.Queries
 }
 
 type State struct {
