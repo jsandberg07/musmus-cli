@@ -2,8 +2,14 @@ package main
 
 import (
 	"bufio"
+	"database/sql"
 	"fmt"
 	"os"
+
+	"github.com/joho/godotenv"
+	"github.com/jsandberg07/clitest/internal/database"
+
+	_ "github.com/lib/pq"
 )
 
 // NEXT:
@@ -23,10 +29,20 @@ import (
 // you probably wont use it often but it's nice ^_^
 
 func main() {
+	godotenv.Load()
+	dbURL := os.Getenv("DB_URL")
+	db, err := sql.Open("postgres", dbURL)
+	if err != nil {
+		fmt.Printf("Could not open DB: %s\n", err)
+		os.Exit(1)
+	}
+	dbQueries := database.New(db)
+
 	fmt.Println("Hello borld")
 	cfg := Config{
 		currentState: nil,
 		nextState:    getMainState(),
+		db:           dbQueries,
 	}
 
 	reader := bufio.NewReader(os.Stdin)
@@ -74,4 +90,6 @@ func main() {
 		// spacing :^3
 		fmt.Println()
 	}
+
+	resetCommand(&cfg, nil)
 }

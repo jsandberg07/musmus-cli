@@ -2,6 +2,8 @@ package main
 
 import (
 	"bufio"
+	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"os"
@@ -9,6 +11,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/jsandberg07/clitest/internal/database"
 )
 
 // uhh how do i want this to work
@@ -142,7 +146,7 @@ func activateCommand(cfg *Config, args []Argument) error {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				processCard(&cc)
+				processCard2(cfg, &cc)
 			}()
 		}
 	}
@@ -180,5 +184,19 @@ func parseDate(input string) (time.Time, error) {
 // go routine for just printing cards, with a DB it'll be a sql thing
 func processCard(cc *CageCard) error {
 	fmt.Printf("# - %v Date - %v Person - %v\n", cc.CCid, cc.Date.Format("DateOnly"), cc.Person)
+	return nil
+}
+
+func processCard2(cfg *Config, cc *CageCard) error {
+	ccParams := database.ActivateCageCardParams{
+		CcID:         int32(cc.CCid),
+		Activated:    sql.NullTime{Time: cc.Date, Valid: true},
+		Investigator: cc.Person,
+	}
+	createdCC, err := cfg.db.ActivateCageCard(context.Background(), ccParams)
+	if err != nil {
+		fmt.Println(createdCC)
+	}
+
 	return nil
 }
