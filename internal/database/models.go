@@ -6,11 +6,69 @@ package database
 
 import (
 	"database/sql"
+	"time"
+
+	"github.com/google/uuid"
 )
 
+type AddedToProtocol struct {
+	ID             uuid.UUID
+	InvestigatorID uuid.UUID
+	ProtocolID     uuid.UUID
+}
+
 type CageCard struct {
-	CcID         int32
-	Activated    sql.NullTime
-	Deactivated  sql.NullTime
-	Investigator string
+	CcID           int32
+	Protocol       string
+	ActivatedOn    sql.NullTime
+	DeactivatedOn  sql.NullTime
+	InvestigatorID uuid.UUID
+	Strain         uuid.NullUUID
+	Notes          sql.NullString
+	ActivatedBy    uuid.UUID
+	DeactivatedBy  uuid.UUID
+}
+
+type Config struct {
+	ConfigComplete   bool
+	OnlyActivateSelf bool
+}
+
+type Investigator struct {
+	ID       uuid.UUID
+	IName    string
+	Nickname sql.NullString
+	Email    sql.NullString
+	Position uuid.UUID
+	Active   bool
+}
+
+type Position struct {
+	ID                uuid.UUID
+	Title             string
+	CanActivate       bool
+	CanDeactivate     bool
+	CanAddOrders      bool
+	CanQuery          bool
+	CanChangeProtocol bool
+	CanAddStaff       bool
+}
+
+type Protocol struct {
+	ID                  uuid.UUID
+	PNumber             sql.NullString
+	PrimaryInvestigator uuid.UUID
+	Title               string
+	Allocated           int32
+	Balance             int32
+	ExpirationDate      time.Time
+	IsActive            bool
+	PreviousProtocol    uuid.NullUUID
+}
+
+type Strain struct {
+	ID         uuid.UUID
+	SName      string
+	Vendor     string
+	VendorCode string
 }

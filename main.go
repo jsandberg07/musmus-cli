@@ -13,15 +13,9 @@ import (
 )
 
 // NEXT:
-// pop off the last scanned card (just in case)
-// you doing DB work baby
-// create a new db
-// create your env
-// access URL
-// add a cage card
-// add several cage cards
-// add duplicate cards
-// run a query
+// writing the schema, like literally all of it
+// that's about it
+//
 // get number of days active and have it not be berserk
 
 // ALSO:
