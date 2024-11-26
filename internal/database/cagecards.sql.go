@@ -16,7 +16,7 @@ const activateCageCard = `-- name: ActivateCageCard :one
 
 INSERT INTO cage_cards(cc_id, activated_on, deactivated_on, investigator_id)
 VALUES($1, $2, NULL, $3)
-RETURNING cc_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by
+RETURNING cc_id, protocol, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by
 `
 
 type ActivateCageCardParams struct {
@@ -31,6 +31,7 @@ func (q *Queries) ActivateCageCard(ctx context.Context, arg ActivateCageCardPara
 	var i CageCard
 	err := row.Scan(
 		&i.CcID,
+		&i.Protocol,
 		&i.ActivatedOn,
 		&i.DeactivatedOn,
 		&i.InvestigatorID,
@@ -43,7 +44,7 @@ func (q *Queries) ActivateCageCard(ctx context.Context, arg ActivateCageCardPara
 }
 
 const getCageCards = `-- name: GetCageCards :many
-SELECT cc_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by FROM cage_cards
+SELECT cc_id, protocol, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by FROM cage_cards
 ORDER BY cc_id ASC
 `
 
@@ -58,6 +59,7 @@ func (q *Queries) GetCageCards(ctx context.Context) ([]CageCard, error) {
 		var i CageCard
 		if err := rows.Scan(
 			&i.CcID,
+			&i.Protocol,
 			&i.ActivatedOn,
 			&i.DeactivatedOn,
 			&i.InvestigatorID,

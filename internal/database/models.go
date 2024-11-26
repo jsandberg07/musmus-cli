@@ -19,6 +19,7 @@ type AddedToProtocol struct {
 
 type CageCard struct {
 	CcID           int32
+	Protocol       string
 	ActivatedOn    sql.NullTime
 	DeactivatedOn  sql.NullTime
 	InvestigatorID uuid.UUID
