@@ -1,5 +1,7 @@
+-- this is bunk and it's here just to not break sqlc
+
 -- name: ActivateCageCard :one
-INSERT INTO cage_cards(cc_id, activated, deactivated, investigator)
+INSERT INTO cage_cards(cc_id, activated_on, deactivated_on, investigator_id)
 VALUES($1, $2, NULL, $3)
 RETURNING *;
 

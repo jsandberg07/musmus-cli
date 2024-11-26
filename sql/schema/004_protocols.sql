@@ -1,6 +1,7 @@
 -- +goose Up
 CREATE TABLE protocols(
     id UUID PRIMARY KEY UNIQUE,
+    p_number TEXT UNIQUE,
     primary_investigator UUID NOT NULL REFERENCES investigators ON UPDATE CASCADE,
     title TEXT NOT NULL,
     allocated INTEGER NOT NULL,

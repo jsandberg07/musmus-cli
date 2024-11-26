@@ -8,34 +8,42 @@ package database
 import (
 	"context"
 	"database/sql"
+
+	"github.com/google/uuid"
 )
 
 const activateCageCard = `-- name: ActivateCageCard :one
-INSERT INTO cage_cards(cc_id, activated, deactivated, investigator)
+
+INSERT INTO cage_cards(cc_id, activated_on, deactivated_on, investigator_id)
 VALUES($1, $2, NULL, $3)
-RETURNING cc_id, activated, deactivated, investigator
+RETURNING cc_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by
 `
 
 type ActivateCageCardParams struct {
-	CcID         int32
-	Activated    sql.NullTime
-	Investigator string
+	CcID           int32
+	ActivatedOn    sql.NullTime
+	InvestigatorID uuid.UUID
 }
 
+// this is bunk and it's here just to not break sqlc
 func (q *Queries) ActivateCageCard(ctx context.Context, arg ActivateCageCardParams) (CageCard, error) {
-	row := q.db.QueryRowContext(ctx, activateCageCard, arg.CcID, arg.Activated, arg.Investigator)
+	row := q.db.QueryRowContext(ctx, activateCageCard, arg.CcID, arg.ActivatedOn, arg.InvestigatorID)
 	var i CageCard
 	err := row.Scan(
 		&i.CcID,
-		&i.Activated,
-		&i.Deactivated,
-		&i.Investigator,
+		&i.ActivatedOn,
+		&i.DeactivatedOn,
+		&i.InvestigatorID,
+		&i.Strain,
+		&i.Notes,
+		&i.ActivatedBy,
+		&i.DeactivatedBy,
 	)
 	return i, err
 }
 
 const getCageCards = `-- name: GetCageCards :many
-SELECT cc_id, activated, deactivated, investigator FROM cage_cards
+SELECT cc_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by FROM cage_cards
 ORDER BY cc_id ASC
 `
 
@@ -50,9 +58,13 @@ func (q *Queries) GetCageCards(ctx context.Context) ([]CageCard, error) {
 		var i CageCard
 		if err := rows.Scan(
 			&i.CcID,
-			&i.Activated,
-			&i.Deactivated,
-			&i.Investigator,
+			&i.ActivatedOn,
+			&i.DeactivatedOn,
+			&i.InvestigatorID,
+			&i.Strain,
+			&i.Notes,
+			&i.ActivatedBy,
+			&i.DeactivatedBy,
 		); err != nil {
 			return nil, err
 		}

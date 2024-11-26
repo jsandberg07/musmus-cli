@@ -1,7 +1,9 @@
+-- config is saving the settings. this should ONLY ever have one row
+
 -- +goose Up
 CREATE TABLE config(
-    first_time_run BOOLEAN NOT NULL DEFAULT true,
-    only_activate_self BOOLEAN NOT NULL DEFAULT true
+    config_complete BOOLEAN NOT NULL DEFAULT false,
+    only_activate_self BOOLEAN NOT NULL DEFAULT false
 );
 
 -- +goose Down
