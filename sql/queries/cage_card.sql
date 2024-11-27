@@ -14,7 +14,7 @@ SELECT * FROM cage_cards
 ORDER BY cc_id ASC;
 
 -- name: AddCageCard :one
-INSERT INTO cage_cards(cc_id, protocol, investigator_id)
+INSERT INTO cage_cards(cc_id, protocol_id, investigator_id)
 VALUES ($1, $2, $3)
 RETURNING *;
 

@@ -13,10 +13,11 @@ import (
 )
 
 // NEXT:
-// writing the schema, like literally all of it
-// that's about it
-//
-// get number of days active and have it not be berserk
+// start at the botom of the schema and write tests
+// insert some data as you go and play around with it
+// you have a reset to check it that way too
+// and remember to do a lot of printing
+// maybe set up the ephemeral db too cause that would look sick
 
 // ALSO:
 // set up CI testing
