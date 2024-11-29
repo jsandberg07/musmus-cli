@@ -7,7 +7,6 @@ package database
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,7 +18,7 @@ WHERE $1 = p_number
 `
 
 type AddBalanceParams struct {
-	PNumber sql.NullString
+	PNumber string
 	Balance int32
 }
 
@@ -35,7 +34,7 @@ RETURNING id, p_number, primary_investigator, title, allocated, balance, expirat
 `
 
 type CreateProtocolParams struct {
-	PNumber             sql.NullString
+	PNumber             string
 	PrimaryInvestigator uuid.UUID
 	Title               string
 	Allocated           int32
@@ -74,7 +73,7 @@ SELECT id, p_number, primary_investigator, title, allocated, balance, expiration
 WHERE $1 = p_number
 `
 
-func (q *Queries) GetProtocolByID(ctx context.Context, pNumber sql.NullString) (Protocol, error) {
+func (q *Queries) GetProtocolByID(ctx context.Context, pNumber string) (Protocol, error) {
 	row := q.db.QueryRowContext(ctx, getProtocolByID, pNumber)
 	var i Protocol
 	err := row.Scan(
@@ -135,7 +134,7 @@ WHERE $1 = p_number
 `
 
 type UpdateAllocatedParams struct {
-	PNumber   sql.NullString
+	PNumber   string
 	Allocated int32
 }
 

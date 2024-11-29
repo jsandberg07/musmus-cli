@@ -29,11 +29,6 @@ type CageCard struct {
 	DeactivatedBy  uuid.NullUUID
 }
 
-type Config struct {
-	ConfigComplete   bool
-	OnlyActivateSelf bool
-}
-
 type Investigator struct {
 	ID       uuid.UUID
 	IName    string
@@ -56,7 +51,7 @@ type Position struct {
 
 type Protocol struct {
 	ID                  uuid.UUID
-	PNumber             sql.NullString
+	PNumber             string
 	PrimaryInvestigator uuid.UUID
 	Title               string
 	Allocated           int32
@@ -64,6 +59,11 @@ type Protocol struct {
 	ExpirationDate      time.Time
 	IsActive            bool
 	PreviousProtocol    uuid.NullUUID
+}
+
+type Setting struct {
+	SettingsComplete bool
+	OnlyActivateSelf bool
 }
 
 type Strain struct {

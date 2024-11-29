@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"database/sql"
 	"fmt"
 	"os"
@@ -11,6 +12,9 @@ import (
 
 	_ "github.com/lib/pq"
 )
+
+// change if you want a million things printed or not
+const verbose bool = true
 
 // NEXT:
 // start at the botom of the schema and write tests
@@ -39,6 +43,20 @@ func main() {
 		nextState:    getMainState(),
 		db:           dbQueries,
 	}
+
+	err = cfg.db.ResetDatabase(context.Background())
+	if err != nil {
+		fmt.Printf("Error resetting DB: %s", err)
+		os.Exit(1)
+	}
+
+	err = cfg.checkSettings()
+	if err != nil {
+		fmt.Printf("Error checking settings from DB: %s", err)
+		os.Exit(1)
+	}
+
+	err = cfg.testData()
 
 	reader := bufio.NewReader(os.Stdin)
 
