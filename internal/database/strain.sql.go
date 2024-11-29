@@ -13,12 +13,18 @@ import (
 
 const addStrain = `-- name: AddStrain :one
 INSERT INTO strains(id, s_name, vendor, vendor_code)
-VALUES(gen_random_uuid(), s_name, vendor, vendor_code)
+VALUES(gen_random_uuid(), $1, $2, $3)
 RETURNING id, s_name, vendor, vendor_code
 `
 
-func (q *Queries) AddStrain(ctx context.Context) (Strain, error) {
-	row := q.db.QueryRowContext(ctx, addStrain)
+type AddStrainParams struct {
+	SName      string
+	Vendor     string
+	VendorCode string
+}
+
+func (q *Queries) AddStrain(ctx context.Context, arg AddStrainParams) (Strain, error) {
+	row := q.db.QueryRowContext(ctx, addStrain, arg.SName, arg.Vendor, arg.VendorCode)
 	var i Strain
 	err := row.Scan(
 		&i.ID,

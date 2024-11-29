@@ -57,6 +57,9 @@ func main() {
 	}
 
 	err = cfg.testData()
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	reader := bufio.NewReader(os.Stdin)
 

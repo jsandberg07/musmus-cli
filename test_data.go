@@ -20,12 +20,27 @@ func (cfg *Config) testData() error {
 
 	// add bunk investigators
 	err = addTestInvestigators(cfg)
+	if err != nil {
+		return err
+	}
 
 	// add protocols
+	err = addTestProtocols(cfg)
+	if err != nil {
+		return err
+	}
 
 	// add investigators to protocols
+	err = addTestInvestigatorToProtocol(cfg)
+	if err != nil {
+		return err
+	}
 
 	// add strains
+	err = addTestStrains(cfg)
+	if err != nil {
+		return err
+	}
 
 	// add cage cards
 
@@ -44,12 +59,6 @@ func addTestPositions(cfg *Config) error {
 		CanChangeProtocol: true,
 		CanAddStaff:       true,
 	}
-	cPosPI, err := cfg.db.CreatePosition(context.Background(), posPI)
-	if err != nil {
-		fmt.Println("Error creating PI position.")
-		return err
-	}
-
 	posRes := database.CreatePositionParams{
 		Title:         "Researcher",
 		CanActivate:   true,
@@ -57,26 +66,21 @@ func addTestPositions(cfg *Config) error {
 		CanAddOrders:  true,
 		CanQuery:      true,
 	}
-	cPosRes, err := cfg.db.CreatePosition(context.Background(), posRes)
-	if err != nil {
-		fmt.Println("Error creating Researcher position.")
-		return err
-	}
-
 	posAss := database.CreatePositionParams{
 		Title:    "Assistant",
 		CanQuery: true,
 	}
-	cPosAss, err := cfg.db.CreatePosition(context.Background(), posAss)
-	if err != nil {
-		fmt.Println("Error creating Assistant position.")
-		return err
-	}
+	positions := []database.CreatePositionParams{posPI, posRes, posAss}
 
-	if verbose {
-		fmt.Println(cPosPI)
-		fmt.Println(cPosRes)
-		fmt.Println(cPosAss)
+	for i, position := range positions {
+		cPos, err := cfg.db.CreatePosition(context.Background(), position)
+		if err != nil {
+			fmt.Printf("Error creating position %v -- %s\n", i, position.Title)
+			return err
+		}
+		if verbose {
+			fmt.Print(cPos)
+		}
 	}
 
 	return nil
@@ -99,11 +103,6 @@ func addTestInvestigators(cfg *Config) error {
 		Email:    sql.NullString{Valid: true, String: "je@test.com"},
 		Position: PIpos.ID,
 	}
-	cInvPI, err := cfg.db.CreateInvestigator(context.Background(), invPI)
-	if err != nil {
-		fmt.Println("Error creating investigator that is a PI")
-		return err
-	}
 
 	ResPos, err := cfg.db.GetPositionByTitle(context.Background(), "Researcher")
 	if err != nil {
@@ -113,11 +112,6 @@ func addTestInvestigators(cfg *Config) error {
 		IName:    "Sharon Thornton",
 		Email:    sql.NullString{Valid: true, String: "st@test.com"},
 		Position: ResPos.ID,
-	}
-	cInvRes, err := cfg.db.CreateInvestigator(context.Background(), invRes)
-	if err != nil {
-		fmt.Println("Error creating investigator that is a researcher")
-		return err
 	}
 
 	AssPos, err := cfg.db.GetPositionByTitle(context.Background(), "Assistant")
@@ -129,20 +123,19 @@ func addTestInvestigators(cfg *Config) error {
 		Nickname: sql.NullString{Valid: true, String: "Coco"},
 		Position: AssPos.ID,
 	}
-	cInvAss, err := cfg.db.CreateInvestigator(context.Background(), invAss)
-	if err != nil {
-		fmt.Println("Error creating investigator that is an assistant")
-		return err
-	}
-
-	if verbose {
-		fmt.Println(cInvPI)
-		fmt.Println(cInvRes)
-		fmt.Println(cInvAss)
+	investigators := []database.CreateInvestigatorParams{invPI, invRes, invAss}
+	for i, investigator := range investigators {
+		ci, err := cfg.db.CreateInvestigator(context.Background(), investigator)
+		if err != nil {
+			fmt.Printf("Error creating investigator %v -- %s\n", i, investigator.IName)
+			return err
+		}
+		if verbose {
+			fmt.Println(ci)
+		}
 	}
 
 	return nil
-
 }
 
 func addTestProtocols(cfg *Config) error {
@@ -164,12 +157,6 @@ func addTestProtocols(cfg *Config) error {
 		Balance:             50,
 		ExpirationDate:      time.Now().AddDate(3, 1, 1),
 	}
-	cProt1, err := cfg.db.CreateProtocol(context.Background(), prot1)
-	if err != nil {
-		fmt.Println("Error adding test protocol 1")
-		return err
-	}
-
 	prot2 := database.CreateProtocolParams{
 		PNumber:             "18-12-16",
 		PrimaryInvestigator: PI[0].ID,
@@ -178,17 +165,110 @@ func addTestProtocols(cfg *Config) error {
 		Balance:             110,
 		ExpirationDate:      time.Now().AddDate(0, 2, 0),
 	}
-	cProt2, err := cfg.db.CreateProtocol(context.Background(), prot2)
-	if err != nil {
-		fmt.Println("Error adding test protocol 2")
-		return err
-	}
-
-	if verbose {
-		fmt.Println(cProt1)
-		fmt.Println(cProt2)
+	protocols := []database.CreateProtocolParams{prot1, prot2}
+	for i, protocol := range protocols {
+		cp, err := cfg.db.CreateProtocol(context.Background(), protocol)
+		if err != nil {
+			fmt.Printf("Error creating protocol %v -- %s\n", i, cp.Title)
+			return err
+		}
+		if verbose {
+			fmt.Println(cp)
+		}
 	}
 
 	return nil
 
+}
+
+func addTestInvestigatorToProtocol(cfg *Config) error {
+	// get everybody, add them at once
+	fmt.Println("* Adding investigators to protocols...")
+
+	investigatorNames := []string{"Johnny Boi", "Sharon Thornton", "Sonya Ball"}
+	investigators := []database.Investigator{}
+	for i, name := range investigatorNames {
+		tID, err := cfg.db.GetInvestigatorByName(context.Background(), name)
+		if err != nil {
+			fmt.Printf("Error getting investigator #%v -- %v\n", i+1, name)
+			return err
+		}
+		if len(tID) == 0 {
+			fmt.Println("Investigator not found...")
+			continue
+		}
+		if len(tID) > 1 {
+			fmt.Printf("Error getting investigator #%v -- %v\n", i+1, name)
+			return errors.New("vague investigator name")
+		}
+
+		investigators = append(investigators, tID[0])
+	}
+
+	protocols, err := cfg.db.GetProtocols(context.Background())
+	if err != nil {
+		fmt.Println("Error getting protocols")
+		return err
+	}
+	fmt.Println(protocols)
+
+	for _, protocol := range protocols {
+		for _, investigator := range investigators {
+			addInvToProt := database.AddInvestigatorToProtocolParams{
+				InvestigatorID: investigator.ID,
+				ProtocolID:     protocol.ID,
+			}
+			_, err := cfg.db.AddInvestigatorToProtocol(context.Background(), addInvToProt)
+			if err != nil {
+				fmt.Printf("Error adding test %s to test %s\n", investigator.IName, protocol.PNumber)
+				return err
+			}
+		}
+	}
+
+	// now remove somebody from one >:^3
+	// Sonya isn't on uhh something it might not be consistent
+	rmvInvFromProt := database.RemoveInvestigatorFromProtocolParams{
+		InvestigatorID: investigators[2].ID,
+		ProtocolID:     protocols[0].ID,
+	}
+	err = cfg.db.RemoveInvestigatorFromProtocol(context.Background(), rmvInvFromProt)
+	if err != nil {
+		fmt.Println("Error removing test investigator from test protocol")
+		return err
+	}
+	fmt.Println("* Added investigators to protocols")
+	return nil
+
+}
+
+func addTestStrains(cfg *Config) error {
+	asC57 := database.AddStrainParams{
+		SName:      "C57BL6/J",
+		Vendor:     "Jax",
+		VendorCode: "000664",
+	}
+	asBALB := database.AddStrainParams{
+		SName:      "BALB/cJ",
+		Vendor:     "Jax",
+		VendorCode: "000651",
+	}
+	asCD1 := database.AddStrainParams{
+		SName:      "CD-1",
+		Vendor:     "CRL",
+		VendorCode: "022",
+	}
+	strains := []database.AddStrainParams{asC57, asBALB, asCD1}
+	for i, strain := range strains {
+		ts, err := cfg.db.AddStrain(context.Background(), strain)
+		if err != nil {
+			fmt.Printf("Error adding strain %v -- %s\n", i, strain.SName)
+			return err
+		}
+		if verbose {
+			fmt.Println(ts)
+		}
+	}
+
+	return nil
 }
