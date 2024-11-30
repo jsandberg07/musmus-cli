@@ -17,11 +17,14 @@ import (
 const verbose bool = false
 
 // NEXT:
-// start at the botom of the schema and write tests
-// insert some data as you go and play around with it
-// you have a reset to check it that way too
-// and remember to do a lot of printing
-// maybe set up the ephemeral db too cause that would look sick
+// work on the CLI
+// more states for protocols, positions, investigators, ect
+// each has an add, check, delete
+// activating cards changes so that you change the date mid thing
+// like -d to change the date, -a to change allotment
+// start there really
+// or just add the numbers
+// checking permissions
 
 // TODO:
 // DRY up get investigator by name because you always have to check the length of the returned array
@@ -43,9 +46,11 @@ func main() {
 
 	fmt.Println("Hello borld")
 	cfg := Config{
-		currentState: nil,
-		nextState:    getMainState(),
-		db:           dbQueries,
+		currentState:         nil,
+		nextState:            getMainState(),
+		db:                   dbQueries,
+		loggedInInvestigator: nil,
+		loggedInPosition:     nil,
 	}
 
 	err = cfg.db.ResetDatabase(context.Background())
@@ -66,6 +71,14 @@ func main() {
 	}
 
 	reader := bufio.NewReader(os.Stdin)
+
+	err = cfg.login()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	cfg.printLogin()
+	fmt.Println("\n* Welcome to Musmus!")
 
 	for true {
 		// check if new state

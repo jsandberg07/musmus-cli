@@ -72,6 +72,63 @@ func (q *Queries) GetPositionByTitle(ctx context.Context, title string) (Positio
 	return i, err
 }
 
+const getPositions = `-- name: GetPositions :many
+SELECT id, title, can_activate, can_deactivate, can_add_orders, can_query, can_change_protocol, can_add_staff FROM positions
+`
+
+func (q *Queries) GetPositions(ctx context.Context) ([]Position, error) {
+	rows, err := q.db.QueryContext(ctx, getPositions)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Position
+	for rows.Next() {
+		var i Position
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.CanActivate,
+			&i.CanDeactivate,
+			&i.CanAddOrders,
+			&i.CanQuery,
+			&i.CanChangeProtocol,
+			&i.CanAddStaff,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUserPosition = `-- name: GetUserPosition :one
+SELECT id, title, can_activate, can_deactivate, can_add_orders, can_query, can_change_protocol, can_add_staff FROM positions
+WHERE $1 = id
+`
+
+func (q *Queries) GetUserPosition(ctx context.Context, id uuid.UUID) (Position, error) {
+	row := q.db.QueryRowContext(ctx, getUserPosition, id)
+	var i Position
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.CanActivate,
+		&i.CanDeactivate,
+		&i.CanAddOrders,
+		&i.CanQuery,
+		&i.CanChangeProtocol,
+		&i.CanAddStaff,
+	)
+	return i, err
+}
+
 const updatePosition = `-- name: UpdatePosition :exec
 UPDATE positions
 SET can_activate = $2,
@@ -104,61 +161,4 @@ func (q *Queries) UpdatePosition(ctx context.Context, arg UpdatePositionParams) 
 		arg.CanAddStaff,
 	)
 	return err
-}
-
-const getPositions = `-- name: getPositions :many
-SELECT id, title, can_activate, can_deactivate, can_add_orders, can_query, can_change_protocol, can_add_staff FROM positions
-`
-
-func (q *Queries) getPositions(ctx context.Context) ([]Position, error) {
-	rows, err := q.db.QueryContext(ctx, getPositions)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Position
-	for rows.Next() {
-		var i Position
-		if err := rows.Scan(
-			&i.ID,
-			&i.Title,
-			&i.CanActivate,
-			&i.CanDeactivate,
-			&i.CanAddOrders,
-			&i.CanQuery,
-			&i.CanChangeProtocol,
-			&i.CanAddStaff,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getUserPosition = `-- name: getUserPosition :one
-SELECT id, title, can_activate, can_deactivate, can_add_orders, can_query, can_change_protocol, can_add_staff FROM positions
-WHERE $1 = id
-`
-
-func (q *Queries) getUserPosition(ctx context.Context, id uuid.UUID) (Position, error) {
-	row := q.db.QueryRowContext(ctx, getUserPosition, id)
-	var i Position
-	err := row.Scan(
-		&i.ID,
-		&i.Title,
-		&i.CanActivate,
-		&i.CanDeactivate,
-		&i.CanAddOrders,
-		&i.CanQuery,
-		&i.CanChangeProtocol,
-		&i.CanAddStaff,
-	)
-	return i, err
 }

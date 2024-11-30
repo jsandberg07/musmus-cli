@@ -25,9 +25,11 @@ type Command struct {
 }
 
 type Config struct {
-	currentState *State
-	nextState    *State
-	db           *database.Queries
+	currentState         *State
+	nextState            *State
+	db                   *database.Queries
+	loggedInInvestigator *database.Investigator
+	loggedInPosition     *database.Position
 }
 
 type State struct {

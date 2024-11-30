@@ -15,7 +15,7 @@ func getHelpCmd() Command {
 func helpCommand(cfg *Config, args []Argument) error {
 	cmdMap := cfg.currentState.currentCommands
 	for _, key := range cmdMap {
-		fmt.Printf("Command name: %s\n", key.name)
+		fmt.Printf("* Command name: %s\n", key.name)
 		fmt.Println(key.description)
 		for _, key := range key.flags {
 			fmt.Printf("%s - %s", key.symbol, key.description)
