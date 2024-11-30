@@ -14,7 +14,7 @@ import (
 )
 
 // change if you want a million things printed or not
-const verbose bool = true
+const verbose bool = false
 
 // NEXT:
 // start at the botom of the schema and write tests
@@ -22,6 +22,10 @@ const verbose bool = true
 // you have a reset to check it that way too
 // and remember to do a lot of printing
 // maybe set up the ephemeral db too cause that would look sick
+
+// TODO:
+// DRY up get investigator by name because you always have to check the length of the returned array
+// return errors.new
 
 // ALSO:
 // set up CI testing

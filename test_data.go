@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jsandberg07/clitest/internal/database"
 )
 
@@ -43,6 +44,22 @@ func (cfg *Config) testData() error {
 	}
 
 	// add cage cards
+	err = addTestCageCards(cfg)
+	if err != nil {
+		return err
+	}
+
+	// now activate them
+	err = activateTestCageCards(cfg)
+	if err != nil {
+		return err
+	}
+
+	// get active cage cards
+	err = getTestActiveCageCards(cfg)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -210,7 +227,9 @@ func addTestInvestigatorToProtocol(cfg *Config) error {
 		fmt.Println("Error getting protocols")
 		return err
 	}
-	fmt.Println(protocols)
+	if verbose {
+		fmt.Println(protocols)
+	}
 
 	for _, protocol := range protocols {
 		for _, investigator := range investigators {
@@ -243,6 +262,7 @@ func addTestInvestigatorToProtocol(cfg *Config) error {
 }
 
 func addTestStrains(cfg *Config) error {
+	fmt.Println("* Adding test strains...")
 	asC57 := database.AddStrainParams{
 		SName:      "C57BL6/J",
 		Vendor:     "Jax",
@@ -267,6 +287,115 @@ func addTestStrains(cfg *Config) error {
 		}
 		if verbose {
 			fmt.Println(ts)
+		}
+	}
+
+	return nil
+}
+
+func addTestCageCards(cfg *Config) error {
+	fmt.Println("* Adding test cage cards...")
+	invest, err := cfg.db.GetInvestigatorByName(context.Background(), "Sharon Thornton")
+	if err != nil {
+		fmt.Println("Error getting investigator for cage card")
+	}
+	if len(invest) > 1 {
+		fmt.Println("Error getting investigator for cage card")
+		return errors.New("Vague investigator name")
+	}
+	prot1, err := cfg.db.GetProtocolByID(context.Background(), "12-24-32")
+	if err != nil {
+		fmt.Println("Error getting protocol 1")
+		return err
+	}
+	prot2, err := cfg.db.GetProtocolByID(context.Background(), "18-12-16")
+	if err != nil {
+		fmt.Println("Error getting protocol 2")
+		return err
+	}
+	ccStart := 100
+	ccEnd := 120
+	for i := ccStart; i < ccEnd; i++ {
+		aCC := database.AddCageCardParams{
+			CcID:           int32(i),
+			InvestigatorID: invest[0].ID,
+			ProtocolID:     prot1.ID,
+		}
+		cCC, err := cfg.db.AddCageCard(context.Background(), aCC)
+		if err != nil {
+			fmt.Printf("Error adding cage card %v", i)
+			return err
+		}
+		if verbose {
+			fmt.Println(cCC)
+		}
+	}
+
+	ccStart = 121
+	ccEnd = 140
+	for i := ccStart; i < ccEnd; i++ {
+		aCC := database.AddCageCardParams{
+			CcID:           int32(i),
+			InvestigatorID: invest[0].ID,
+			ProtocolID:     prot2.ID,
+		}
+		cCC, err := cfg.db.AddCageCard(context.Background(), aCC)
+		if err != nil {
+			fmt.Printf("Error adding cage card %v\n", i)
+			return err
+		}
+		if verbose {
+			fmt.Println(cCC)
+		}
+	}
+
+	return nil
+
+}
+
+func activateTestCageCards(cfg *Config) error {
+	fmt.Println("* Activating test cage cards")
+	lastWeek := time.Now().AddDate(0, 0, -7)
+	activatedBy, err := cfg.db.GetInvestigatorByName(context.Background(), "Sonya Ball")
+	if err != nil {
+		fmt.Println("Error getting investigator for activation")
+		return err
+	}
+	if len(activatedBy) > 1 {
+		fmt.Println("Error getting investigator for activation")
+		return errors.New("Vague investigator name")
+	}
+
+	cardsToActivate := []int{100, 102, 103, 104, 108, 109, 111, 121, 123, 134, 139}
+	for i, cardID := range cardsToActivate {
+		aCC := database.NewActivateCageCardParams{
+			CcID:        int32(cardID),
+			ActivatedOn: sql.NullTime{Valid: true, Time: lastWeek},
+			ActivatedBy: uuid.NullUUID{Valid: true, UUID: activatedBy[0].ID},
+		}
+		err := cfg.db.NewActivateCageCard(context.Background(), aCC)
+		if err != nil {
+			fmt.Printf("Error activating cage card %v -- %v", i, cardID)
+			return err
+		}
+		if verbose {
+			fmt.Printf("CC %v activated by %s\n", cardID, activatedBy[0].IName)
+		}
+	}
+
+	return nil
+}
+
+func getTestActiveCageCards(cfg *Config) error {
+	fmt.Println("* Getting all active test cage cards")
+	activeCards, err := cfg.db.GetAllActiveCageCards(context.Background())
+	if err != nil {
+		fmt.Println("Error getting all active test cage cards")
+		return err
+	}
+	for _, cc := range activeCards {
+		if verbose {
+			fmt.Println(cc)
 		}
 	}
 
