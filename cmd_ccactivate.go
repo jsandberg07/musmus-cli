@@ -12,21 +12,18 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jsandberg07/clitest/internal/database"
 )
 
-// uhh how do i want this to work
-// you either add a number just with a number
-// or you set the date
-// try to parse to int and if that fails read the other stuff
-// for now have some confirmation
-// no that doesnt work cause its in the main loop FUCK
-// print some stuff and come back to this
-// have a CC loop instead, then you CALL activate or deact with params
-// new loop that just parses #s
-// then you type process or something and it runs them all
-// then returns to CC loop
-// yeah
+// TODO:
+// new activation
+// you go to the activate menu with params if youd like
+// then in that menu you can also set the params like change person, date, # animals
+// sum # of animals and then ding it later so you dont have a gorillion threads affecting that.
+// im gonna fucking hate all the UUIDs i bet
+// and i'll have plenty of anger with the other functions first
+// this is literally the last step but i have an idea of how i want to do it
 
 func getActivateCmd() Command {
 	activateFlags := make(map[string]Flag)
@@ -187,11 +184,12 @@ func processCard(cc *CageCard) error {
 	return nil
 }
 
+// TODO: processCard3 :^3
 func processCard2(cfg *Config, cc *CageCard) error {
 	ccParams := database.ActivateCageCardParams{
-		CcID:         int32(cc.CCid),
-		Activated:    sql.NullTime{Time: cc.Date, Valid: true},
-		Investigator: cc.Person,
+		CcID:           int32(cc.CCid),
+		ActivatedOn:    sql.NullTime{Time: cc.Date, Valid: true},
+		InvestigatorID: uuid.New(),
 	}
 	createdCC, err := cfg.db.ActivateCageCard(context.Background(), ccParams)
 	if err != nil {

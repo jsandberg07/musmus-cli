@@ -2,12 +2,12 @@
 CREATE TABLE positions(
     id UUID PRIMARY KEY UNIQUE,
     title TEXT NOT NULL UNIQUE,
-    can_activate BOOLEAN NOT NULL,
-    can_deactivate BOOLEAN NOT NULL,
-    can_add_orders BOOLEAN NOT NULL,
-    can_query BOOLEAN NOT NULL,
-    can_change_protocol BOOLEAN NOT NULL,
-    can_add_staff BOOLEAN NOT NULL
+    can_activate BOOLEAN NOT NULL DEFAULT false,
+    can_deactivate BOOLEAN NOT NULL DEFAULT false,
+    can_add_orders BOOLEAN NOT NULL DEFAULT false,
+    can_query BOOLEAN NOT NULL DEFAULT false,
+    can_change_protocol BOOLEAN NOT NULL DEFAULT false,
+    can_add_staff BOOLEAN NOT NULL DEFAULT false
 );
 
 -- +goose Down

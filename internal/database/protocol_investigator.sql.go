@@ -12,8 +12,8 @@ import (
 )
 
 const addInvestigatorToProtocol = `-- name: AddInvestigatorToProtocol :one
-INSERT INTO added_to_protocol(investigator_id, protocol_id)
-VALUES($1, $2)
+INSERT INTO added_to_protocol(id, investigator_id, protocol_id)
+VALUES(gen_random_uuid(), $1, $2)
 RETURNING id, investigator_id, protocol_id
 `
 

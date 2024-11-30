@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"database/sql"
 	"fmt"
 	"os"
@@ -12,11 +13,19 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// change if you want a million things printed or not
+const verbose bool = false
+
 // NEXT:
-// writing the schema, like literally all of it
-// that's about it
-//
-// get number of days active and have it not be berserk
+// start at the botom of the schema and write tests
+// insert some data as you go and play around with it
+// you have a reset to check it that way too
+// and remember to do a lot of printing
+// maybe set up the ephemeral db too cause that would look sick
+
+// TODO:
+// DRY up get investigator by name because you always have to check the length of the returned array
+// return errors.new
 
 // ALSO:
 // set up CI testing
@@ -37,6 +46,23 @@ func main() {
 		currentState: nil,
 		nextState:    getMainState(),
 		db:           dbQueries,
+	}
+
+	err = cfg.db.ResetDatabase(context.Background())
+	if err != nil {
+		fmt.Printf("Error resetting DB: %s", err)
+		os.Exit(1)
+	}
+
+	err = cfg.checkSettings()
+	if err != nil {
+		fmt.Printf("Error checking settings from DB: %s", err)
+		os.Exit(1)
+	}
+
+	err = cfg.testData()
+	if err != nil {
+		fmt.Println(err)
 	}
 
 	reader := bufio.NewReader(os.Stdin)

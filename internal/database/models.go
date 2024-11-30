@@ -19,19 +19,14 @@ type AddedToProtocol struct {
 
 type CageCard struct {
 	CcID           int32
-	Protocol       string
+	ProtocolID     uuid.UUID
 	ActivatedOn    sql.NullTime
 	DeactivatedOn  sql.NullTime
 	InvestigatorID uuid.UUID
 	Strain         uuid.NullUUID
 	Notes          sql.NullString
-	ActivatedBy    uuid.UUID
-	DeactivatedBy  uuid.UUID
-}
-
-type Config struct {
-	ConfigComplete   bool
-	OnlyActivateSelf bool
+	ActivatedBy    uuid.NullUUID
+	DeactivatedBy  uuid.NullUUID
 }
 
 type Investigator struct {
@@ -56,7 +51,7 @@ type Position struct {
 
 type Protocol struct {
 	ID                  uuid.UUID
-	PNumber             sql.NullString
+	PNumber             string
 	PrimaryInvestigator uuid.UUID
 	Title               string
 	Allocated           int32
@@ -64,6 +59,11 @@ type Protocol struct {
 	ExpirationDate      time.Time
 	IsActive            bool
 	PreviousProtocol    uuid.NullUUID
+}
+
+type Setting struct {
+	SettingsComplete bool
+	OnlyActivateSelf bool
 }
 
 type Strain struct {

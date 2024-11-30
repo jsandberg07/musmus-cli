@@ -10,7 +10,12 @@ import (
 )
 
 const resetDatabase = `-- name: ResetDatabase :exec
-DELETE FROM cage_cards *
+TRUNCATE cage_cards, 
+    strains, 
+    added_to_protocol, 
+    investigators, 
+    positions, 
+    settings CASCADE
 `
 
 func (q *Queries) ResetDatabase(ctx context.Context) error {

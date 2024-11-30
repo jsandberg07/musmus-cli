@@ -4,7 +4,7 @@ ORDER BY vendor DESC;
 
 -- name: AddStrain :one
 INSERT INTO strains(id, s_name, vendor, vendor_code)
-VALUES(gen_random_uuid(), s_name, vendor, vendor_code)
+VALUES(gen_random_uuid(), $1, $2, $3)
 RETURNING *;
 
 -- name: GetStrainByName :one
