@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/jsandberg07/clitest/internal/database"
 )
@@ -86,7 +85,7 @@ func activateSubcommand(cfg *Config, args []Argument) error {
 	// set defaults for the command
 	exit := false
 	cardsToProcess := []database.ActivateCageCardParams{}
-	date := time.Now()
+	// date := time.Now()
 
 	reader := bufio.NewReader(os.Stdin)
 	for {
