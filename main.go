@@ -124,5 +124,5 @@ func main() {
 		fmt.Println()
 	}
 
-	resetCommand(&cfg, nil)
+	// cool facts: this part of the code is never reached beacuse exit uses os dot Exit(0)
 }

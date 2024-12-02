@@ -5,7 +5,7 @@ package main
 // map just for states?
 // function that gets COMMON maps that are used often
 func getProcessingMap() map[string]Command {
-	activateCmd := getActivateCmd()
+	activateCmd := getCCActivationCmd()
 	resetCmd := getResetCmd()
 	commonCmds := getCommonCmds()
 	cmdSlice := []Command{activateCmd, resetCmd}

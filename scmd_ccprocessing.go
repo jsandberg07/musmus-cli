@@ -2,9 +2,13 @@ package main
 
 import (
 	"bufio"
+	"database/sql"
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/jsandberg07/clitest/internal/database"
 )
@@ -20,7 +24,7 @@ func getCCActivationCmd() Command {
 	// subcommand that starts its own loop
 	activateFlags := make(map[string]Flag)
 	ccActivationCmd := Command{
-		name:        "activate",
+		name:        "2activate",
 		description: "Used for activating cage cards",
 		function:    activateSubcommand,
 		flags:       activateFlags,
@@ -60,6 +64,13 @@ func getActivationFlags() map[string]Flag {
 	}
 	activateFlags[popFlag.symbol] = popFlag
 
+	helpFlag := Flag{
+		symbol:      "help",
+		description: "Prints help messages and flags for commands available",
+		takesValue:  false,
+	}
+	activateFlags[helpFlag.symbol] = helpFlag
+
 	exitFlag := Flag{
 		symbol:      "exit",
 		description: "Exits without processing cards",
@@ -85,11 +96,13 @@ func activateSubcommand(cfg *Config, args []Argument) error {
 	// set defaults for the command
 	exit := false
 	cardsToProcess := []database.ActivateCageCardParams{}
-	// date := time.Now()
+	date := time.Now()
 
 	reader := bufio.NewReader(os.Stdin)
+	fmt.Println("Cage card activation.")
 	for {
 
+		fmt.Print("> ")
 		text, err := reader.ReadString('\n')
 		if err != nil {
 			fmt.Printf("Error reading input string: %s", err)
@@ -101,10 +114,27 @@ func activateSubcommand(cfg *Config, args []Argument) error {
 			fmt.Println(err)
 			continue
 		}
+		fmt.Printf("** %v\n", inputs)
 
 		// try to run as a number, and add it to the list of cards to activate using the current values
 		if len(inputs) == 1 {
-
+			cc, err := strconv.Atoi(inputs[0])
+			if err != nil && !strings.Contains(err.Error(), "invalid syntax") {
+				// an error occured and it was not from passing a word in to atoi
+				fmt.Println("Error convering input to cage card number")
+				fmt.Println(err)
+				continue
+			}
+			if cc != 0 {
+				tAccp := database.ActivateCageCardParams{
+					CcID:           int32(cc),
+					ActivatedOn:    sql.NullTime{Valid: true, Time: date},
+					InvestigatorID: cfg.loggedInInvestigator.ID,
+				}
+				fmt.Println("** card added!")
+				cardsToProcess = append(cardsToProcess, tAccp)
+				continue
+			}
 		}
 
 		// otherwise set values based on what was passed in, or process things
@@ -118,8 +148,15 @@ func activateSubcommand(cfg *Config, args []Argument) error {
 			switch arg.flag {
 			case "-d":
 				// parse the time, dont fuck it up
-
+				newDate, err := parseDate(arg.value)
+				if err != nil {
+					fmt.Println(err)
+					break
+				}
+				date = newDate
+				fmt.Printf("Date set: %v\n", date)
 			case "-a":
+				fmt.Println("TODO: add allotments to the protocols")
 				// set the allotment, just parsing an int how hard could it be
 				// make sure you see if it's like above a gorillion or not
 			case "process":
@@ -129,8 +166,19 @@ func activateSubcommand(cfg *Config, args []Argument) error {
 				}
 				exit = true
 			case "pop":
-				// delete one
+				length := len(cardsToProcess)
+				if length == 0 {
+					fmt.Println("No cards have been entered")
+					break
+				}
+				cardsToProcess = cardsToProcess[0 : length-1]
+			case "help":
+				err := scmdHelp(flags)
+				if err != nil {
+					fmt.Println(err)
+				}
 			case "exit":
+				fmt.Println("Exiting without processing")
 				exit = true
 			default:
 				fmt.Printf("Oops a fake flag snuck in: %s", arg.flag)
@@ -155,4 +203,28 @@ func processCageCards(cctp []database.ActivateCageCardParams) error {
 	}
 
 	return nil
+}
+
+// because who knows what dates people are going to enter
+// TODO: make sure there isnt fuckery like "this card technically wasn't this day beacuase the time was off"
+// set everything to be active at like midnight, queries at midnight and see if it works otherwise +1 second lmao
+
+func parseDate(input string) (time.Time, error) {
+	// create an array of the formats (with 0s, without, 4 digit year, 2 digit year)
+	// go through parse works and then return
+	var date time.Time
+	var err error
+	timeFormats := []string{"1/2/06", "1/2/2006", "01/02/06", "01/02/2006"}
+	for _, format := range timeFormats {
+		date, err = time.Parse(format, input)
+		if err == nil {
+			break
+		}
+	}
+	if err != nil {
+		fmt.Println("Error parsing date.")
+		return time.Time{}, err
+	}
+
+	return date, nil
 }

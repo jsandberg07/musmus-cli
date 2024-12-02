@@ -154,30 +154,6 @@ func activateCommand(cfg *Config, args []Argument) error {
 
 }
 
-// because who knows what dates people are going to enter
-// TODO: make sure there isnt fuckery like "this card technically wasn't this day beacuase the time was off"
-// set everything to be active at like midnight, queries at midnight and see if it works otherwise +1 second lmao
-
-func parseDate(input string) (time.Time, error) {
-	// create an array of the formats (with 0s, without, 4 digit year, 2 digit year)
-	// go through parse works and then return
-	var date time.Time
-	var err error
-	timeFormats := []string{"1/2/06", "1/2/2006", "01/02/06", "01/02/2006"}
-	for _, format := range timeFormats {
-		date, err = time.Parse(format, input)
-		if err == nil {
-			break
-		}
-	}
-	if err != nil {
-		fmt.Println("Error parsing date.")
-		return time.Time{}, err
-	}
-
-	return date, nil
-}
-
 // go routine for just printing cards, with a DB it'll be a sql thing
 func processCard(cc *CageCard) error {
 	fmt.Printf("# - %v Date - %v Person - %v\n", cc.CCid, cc.Date.Format("DateOnly"), cc.Person)

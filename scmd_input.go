@@ -19,13 +19,7 @@ func readSubcommandInput(input string) ([]string, error) {
 		splitArgs[i] = strings.TrimSpace(arg)
 	}
 
-	var arguments []string
-
-	if len(splitArgs) != 0 {
-		arguments = splitArgs[1:]
-	}
-
-	return arguments, nil
+	return splitArgs, nil
 
 }
 
@@ -41,21 +35,16 @@ func parseSubcommand(flags map[string]Flag, parameters []string) ([]Argument, er
 	var arguments []Argument
 
 	for i := 0; i < len(parameters); i++ {
-		if !strings.Contains(parameters[i], "-") {
-			// - not included in flag
-			err := fmt.Sprintf("%s isn't formatted as a flag, or a value without a flag", parameters[i])
-			return nil, errors.New(err)
-		}
+		// REWRITE
+		// just do the two: flags with values, commands without
+		// why is it like this? who the fuck know
 		flag, ok := flags[parameters[i]]
 		if !ok {
-			// flag now allowed for this command
 			err := fmt.Sprintf("%s is not a flag allowed for this command", parameters[i])
 			return nil, errors.New(err)
 		}
 
 		tArg := Argument{}
-		// check to see if the flag exists (not indexing out of bounds) && isn't also a flag
-		// TODO: if the next param contains a - (like a name with a hyphen) it'll throw so make sure it just checks the first character
 		if flag.takesValue {
 			tArg.flag = parameters[i]
 			if i+1 == len(parameters) || strings.Contains(parameters[i+1], "-") {
@@ -68,6 +57,8 @@ func parseSubcommand(flags map[string]Flag, parameters []string) ([]Argument, er
 			tArg.flag = parameters[i]
 		}
 		arguments = append(arguments, tArg)
+
 	}
+
 	return arguments, nil
 }
