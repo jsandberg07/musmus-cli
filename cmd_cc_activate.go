@@ -21,7 +21,6 @@ func fart() {
 }
 
 func getCCActivationCmd() Command {
-	// subcommand that starts its own loop
 	activateFlags := make(map[string]Flag)
 	ccActivationCmd := Command{
 		name:        "activate",
@@ -171,10 +170,10 @@ func activateSubcommand(cfg *Config, args []Argument) error {
 					break
 				}
 				popped := cardsToProcess[length-1]
-				fmt.Printf("Popped %v", popped.CcID)
+				fmt.Printf("Popped %v\n", popped.CcID)
 				cardsToProcess = cardsToProcess[0 : length-1]
 			case "help":
-				err := scmdHelp(flags)
+				err := cmdHelp(flags)
 				if err != nil {
 					fmt.Println(err)
 				}

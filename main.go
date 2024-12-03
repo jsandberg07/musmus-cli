@@ -16,6 +16,10 @@ import (
 // change if you want a million things printed or not
 const verbose bool = false
 
+// LOL:
+// you were working on the get_map_helper function, copy from state processing
+// drying up putting the common commands into a slice and returning that
+
 // NEXT:
 // you more or less have cage card activation
 // plan the states and stuff

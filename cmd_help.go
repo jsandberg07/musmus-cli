@@ -2,29 +2,16 @@ package main
 
 import "fmt"
 
-func getHelpCmd() Command {
-	helpCmd := Command{
-		name:        "help",
-		description: "Prints descriptions of all available functions.",
-		function:    helpCommand,
-	}
-
-	return helpCmd
-}
-
-func helpCommand(cfg *Config, args []Argument) error {
-	cmdMap := cfg.currentState.currentCommands
-	for _, key := range cmdMap {
-		fmt.Printf("* %s\n", key.name)
-		fmt.Println(key.description)
-		for _, key := range key.flags {
-			fmt.Printf("%s - %s", key.symbol, key.description)
-			if key.takesValue {
-				fmt.Print(" Requires value.")
-			}
-			fmt.Println()
+// for use in a command like card activation or add investigator
+// prints available commands or flags
+func cmdHelp(scmdMap map[string]Flag) error {
+	for _, key := range scmdMap {
+		fmt.Printf("* %s\n", key.symbol)
+		fmt.Print(key.description)
+		if key.takesValue {
+			fmt.Print(" Requires value.")
 		}
-
+		fmt.Println()
 	}
 	return nil
 }

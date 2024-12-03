@@ -4,6 +4,6 @@ package main
 // help, exit, set state
 
 func getCommonCmds() []Command {
-	commonCmds := []Command{getBackCmd(), getHelpCmd(), getExitCmd()}
+	commonCmds := []Command{getBackCmd(), getStateHelpCmd(), getExitCmd()}
 	return commonCmds
 }
