@@ -24,7 +24,7 @@ func getCCActivationCmd() Command {
 	// subcommand that starts its own loop
 	activateFlags := make(map[string]Flag)
 	ccActivationCmd := Command{
-		name:        "2activate",
+		name:        "activate",
 		description: "Used for activating cage cards",
 		function:    activateSubcommand,
 		flags:       activateFlags,
@@ -114,7 +114,6 @@ func activateSubcommand(cfg *Config, args []Argument) error {
 			fmt.Println(err)
 			continue
 		}
-		fmt.Printf("** %v\n", inputs)
 
 		// try to run as a number, and add it to the list of cards to activate using the current values
 		if len(inputs) == 1 {
@@ -131,7 +130,7 @@ func activateSubcommand(cfg *Config, args []Argument) error {
 					ActivatedOn:    sql.NullTime{Valid: true, Time: date},
 					InvestigatorID: cfg.loggedInInvestigator.ID,
 				}
-				fmt.Println("** card added!")
+				fmt.Printf("%v card added\n", cc)
 				cardsToProcess = append(cardsToProcess, tAccp)
 				continue
 			}
@@ -171,6 +170,8 @@ func activateSubcommand(cfg *Config, args []Argument) error {
 					fmt.Println("No cards have been entered")
 					break
 				}
+				popped := cardsToProcess[length-1]
+				fmt.Printf("Popped %v", popped.CcID)
 				cardsToProcess = cardsToProcess[0 : length-1]
 			case "help":
 				err := scmdHelp(flags)
@@ -199,7 +200,7 @@ func processCageCards(cctp []database.ActivateCageCardParams) error {
 		return errors.New("Oops! No cards!")
 	}
 	for i := 0; i < len(cctp); i++ {
-		fmt.Printf("Processing card %v... ;^3", i)
+		fmt.Printf("Processing card %v... ;^3\n", i)
 	}
 
 	return nil

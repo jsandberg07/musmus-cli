@@ -16,12 +16,12 @@ func getSetStateCmd() Command {
 	}
 	setStateFlags["-"+aFlag.symbol] = aFlag
 
-	mFlag := Flag{
-		symbol:      "m",
-		description: "Sets state to main.",
+	iFlag := Flag{
+		symbol:      "i",
+		description: "Sets state to investigator.",
 		takesValue:  false,
 	}
-	setStateFlags["-"+mFlag.symbol] = mFlag
+	setStateFlags["-"+iFlag.symbol] = iFlag
 
 	setStateCmd := Command{
 		name:        "setstate",
@@ -46,6 +46,8 @@ func setStateCommand(cfg *Config, args []Argument) error {
 		cfg.nextState = getProcessingState()
 	case "-m":
 		cfg.nextState = getMainState()
+	case "-i":
+		cfg.nextState = getInvesitatorsState()
 	default:
 		return errors.New("whoops a fake flag slipped into setStateCommand")
 	}

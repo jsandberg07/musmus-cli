@@ -1,9 +1,9 @@
 package main
 
 func getMainMap() map[string]Command {
-	printCmd := getPrintCmd()
+	setStateCmd := getSetStateCmd()
 	commonCmds := getCommonCmds()
-	cmdSlice := []Command{printCmd}
+	cmdSlice := []Command{setStateCmd}
 	cmdSlice = append(cmdSlice, commonCmds...)
 	commandMap := make(map[string]Command)
 	for _, cmd := range cmdSlice {

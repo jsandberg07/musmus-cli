@@ -17,18 +17,16 @@ import (
 const verbose bool = false
 
 // NEXT:
-// work on the CLI
-// more states for protocols, positions, investigators, ect
-// each has an add, check, delete
-// activating cards changes so that you change the date mid thing
-// like -d to change the date, -a to change allotment
-// start there really
-// or just add the numbers
-// checking permissions
+// you more or less have cage card activation
+// plan the states and stuff
+// remove print, its not useful as a place holder
+// remove its parser
+// then create states for what you want and commands form here
+// remove the name subcommand, your method for creating print is outdated for now
+// query menu eventually
 
-// TODO:
-// DRY up get investigator by name because you always have to check the length of the returned array
-// return errors.new
+// main is now a main menu, common functions should only really be help and back, which sets state back to main
+// work on making states first
 
 // ALSO:
 // set up CI testing
