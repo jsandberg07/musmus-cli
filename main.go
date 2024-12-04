@@ -17,7 +17,7 @@ import (
 const verbose bool = false
 
 // NEXT:
-// create a "template" for adding functions
+// create a "template" for creating functions
 // add, remove, update, ect. there's consistency to their structure,
 // less to their behavior, but getting a bunch done and fine tuning is better
 // than getting bogged down in making activating cards *perfect* currently

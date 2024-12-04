@@ -25,7 +25,7 @@ func getCCActivationCmd() Command {
 	ccActivationCmd := Command{
 		name:        "activate",
 		description: "Used for activating cage cards",
-		function:    activateSubcommand,
+		function:    activateFunction,
 		flags:       activateFlags,
 	}
 
@@ -86,7 +86,7 @@ func getActivationFlags() map[string]Flag {
 // then for NOW acticate them individually
 // do batch later
 // return and print errors
-func activateSubcommand(cfg *Config, args []Argument) error {
+func activateFunction(cfg *Config, args []Argument) error {
 	// start another loop
 	// parse subflags and set from there
 	// dont mix commands and cards and flags
@@ -181,7 +181,7 @@ func activateSubcommand(cfg *Config, args []Argument) error {
 				fmt.Println("Exiting without processing")
 				exit = true
 			default:
-				fmt.Printf("Oops a fake flag snuck in: %s", arg.flag)
+				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
 			}
 		}
 
