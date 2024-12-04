@@ -1,14 +1,8 @@
 package main
 
 func getProcessingMap() map[string]Command {
-	activateCmd := getCCActivationCmd()
-	commonCmds := getCommonCmds()
-	cmdSlice := []Command{activateCmd}
-	cmdSlice = append(cmdSlice, commonCmds...)
-	commandMap := make(map[string]Command)
-	for _, cmd := range cmdSlice {
-		commandMap[cmd.name] = cmd
-	}
+	cmds := []Command{getCCActivationCmd()}
+	commandMap := cmdMapHelper(cmds)
 
 	return commandMap
 }

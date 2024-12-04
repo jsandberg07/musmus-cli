@@ -16,21 +16,14 @@ import (
 // change if you want a million things printed or not
 const verbose bool = false
 
-// LOL:
-// you were working on the get_map_helper function, copy from state processing
-// drying up putting the common commands into a slice and returning that
-
 // NEXT:
-// you more or less have cage card activation
-// plan the states and stuff
-// remove print, its not useful as a place holder
-// remove its parser
-// then create states for what you want and commands form here
-// remove the name subcommand, your method for creating print is outdated for now
-// query menu eventually
-
-// main is now a main menu, common functions should only really be help and back, which sets state back to main
-// work on making states first
+// create a "template" for adding functions
+// add, remove, update, ect. there's consistency to their structure,
+// less to their behavior, but getting a bunch done and fine tuning is better
+// than getting bogged down in making activating cards *perfect* currently
+// in the past you have done things that are good
+// today you have done something that was right
+// the end was inevitable but eventually you saw the light of forgiveness
 
 // ALSO:
 // set up CI testing
