@@ -15,6 +15,8 @@ func getExitCmd() Command {
 	return exitCmd
 }
 
+// because you os exit this way, you never hit the end of the program to clean things
+// if you want to reset anything, put it here
 func exitCommand(cfg *Config, args []Argument) error {
 	fmt.Println("exiting...")
 	os.Exit(0)

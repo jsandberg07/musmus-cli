@@ -17,15 +17,13 @@ import (
 const verbose bool = false
 
 // NEXT:
-// start at the botom of the schema and write tests
-// insert some data as you go and play around with it
-// you have a reset to check it that way too
-// and remember to do a lot of printing
-// maybe set up the ephemeral db too cause that would look sick
-
-// TODO:
-// DRY up get investigator by name because you always have to check the length of the returned array
-// return errors.new
+// create a "template" for adding functions
+// add, remove, update, ect. there's consistency to their structure,
+// less to their behavior, but getting a bunch done and fine tuning is better
+// than getting bogged down in making activating cards *perfect* currently
+// in the past you have done things that are good
+// today you have done something that was right
+// the end was inevitable but eventually you saw the light of forgiveness
 
 // ALSO:
 // set up CI testing
@@ -43,9 +41,11 @@ func main() {
 
 	fmt.Println("Hello borld")
 	cfg := Config{
-		currentState: nil,
-		nextState:    getMainState(),
-		db:           dbQueries,
+		currentState:         nil,
+		nextState:            getMainState(),
+		db:                   dbQueries,
+		loggedInInvestigator: nil,
+		loggedInPosition:     nil,
 	}
 
 	err = cfg.db.ResetDatabase(context.Background())
@@ -66,6 +66,14 @@ func main() {
 	}
 
 	reader := bufio.NewReader(os.Stdin)
+
+	err = cfg.login()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	cfg.printLogin()
+	fmt.Println("\n* Welcome to Musmus!")
 
 	for true {
 		// check if new state
@@ -111,5 +119,5 @@ func main() {
 		fmt.Println()
 	}
 
-	resetCommand(&cfg, nil)
+	// cool facts: this part of the code is never reached beacuse exit uses os dot Exit(0)
 }

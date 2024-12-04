@@ -256,7 +256,6 @@ func addTestInvestigatorToProtocol(cfg *Config) error {
 		fmt.Println("Error removing test investigator from test protocol")
 		return err
 	}
-	fmt.Println("* Added investigators to protocols")
 	return nil
 
 }

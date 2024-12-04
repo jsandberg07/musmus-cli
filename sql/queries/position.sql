@@ -1,7 +1,7 @@
--- name: getPositions :many
+-- name: GetPositions :many
 SELECT * FROM positions;
 
--- name: getUserPosition :one
+-- name: GetUserPosition :one
 SELECT * FROM positions
 WHERE $1 = id;
 

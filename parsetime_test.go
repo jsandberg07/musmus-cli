@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 	"time"
 )
@@ -56,7 +55,7 @@ func TestParseTime(t *testing.T) {
 			}
 		}
 
-		fmt.Printf("%v: %v -- %v\n", i+1, test.expected, output)
+		// fmt.Printf("%v: %v -- %v\n", i+1, test.expected, output)
 
 	}
 
