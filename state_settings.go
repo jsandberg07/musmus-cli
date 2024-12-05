@@ -2,7 +2,7 @@ package main
 
 func getSettingsMap() map[string]Command {
 	// put your settings Commands here
-	cmds := []Command{}
+	cmds := []Command{getChangeSettingsCmd()}
 	commandMap := cmdMapHelper(cmds)
 
 	return commandMap

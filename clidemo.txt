@@ -31,6 +31,7 @@ add to commands map
 add handling in the function itself. takes value are used later, doesnt sets a bool
 
 Create a command:
+There's a template now!
 write the new function (handle flagss)
 create a new function getNewCmd() Command {}
 flags map := make(map[string]flag)
@@ -41,4 +42,5 @@ getState() &State {map, cli message}
 make sure to add help by default, prints what is available in current map
 getStateMap() and put that in
 
-
+when getting 0 rows from a query (which can be expected)
+sql: no rows in result set

@@ -16,6 +16,13 @@ func getSetStateCmd() Command {
 	}
 	gotoFlags["-"+ccFlag.symbol] = ccFlag
 
+	psFlag := Flag{
+		symbol:      "ps",
+		description: "Goes to positions menu.",
+		takesValue:  false,
+	}
+	gotoFlags["-"+psFlag.symbol] = psFlag
+
 	iFlag := Flag{
 		symbol:      "in",
 		description: "Goes to investigator menu.",
@@ -65,6 +72,8 @@ func gotoCommand(cfg *Config, args []Argument) error {
 	switch args[0].flag {
 	case "-cc":
 		cfg.nextState = getProcessingState()
+	case "-ps":
+		cfg.nextState = getPositionState()
 	case "-in":
 		cfg.nextState = getInvesitatorsState()
 	case "-pr":

@@ -15,7 +15,7 @@ func TestParse(t *testing.T) {
 	}
 	fmt.Println(inputs)
 
-	args, err := parseSubcommand(flags, inputs)
+	args, err := parseArguments(flags, inputs)
 	if err != nil {
 		t.Fatalf("Error parseSubcommand: %s", err)
 	}

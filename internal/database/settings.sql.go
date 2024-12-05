@@ -29,15 +29,31 @@ func (q *Queries) FirstTimeSetupComplete(ctx context.Context) error {
 	return err
 }
 
-const getSettings = `-- name: GetSettings :one
+const getSettings = `-- name: GetSettings :many
 SELECT settings_complete, only_activate_self FROM settings
 `
 
-func (q *Queries) GetSettings(ctx context.Context) (Setting, error) {
-	row := q.db.QueryRowContext(ctx, getSettings)
-	var i Setting
-	err := row.Scan(&i.SettingsComplete, &i.OnlyActivateSelf)
-	return i, err
+func (q *Queries) GetSettings(ctx context.Context) ([]Setting, error) {
+	rows, err := q.db.QueryContext(ctx, getSettings)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Setting
+	for rows.Next() {
+		var i Setting
+		if err := rows.Scan(&i.SettingsComplete, &i.OnlyActivateSelf); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const setUpSettings = `-- name: SetUpSettings :exec
@@ -58,5 +74,15 @@ UPDATE settings SET only_activate_self = $1
 
 func (q *Queries) UpdateActivateSelf(ctx context.Context, onlyActivateSelf bool) error {
 	_, err := q.db.ExecContext(ctx, updateActivateSelf, onlyActivateSelf)
+	return err
+}
+
+const updateSettings = `-- name: UpdateSettings :exec
+UPDATE settings
+SET only_activate_self = $1
+`
+
+func (q *Queries) UpdateSettings(ctx context.Context, onlyActivateSelf bool) error {
+	_, err := q.db.ExecContext(ctx, updateSettings, onlyActivateSelf)
 	return err
 }

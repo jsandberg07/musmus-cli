@@ -136,7 +136,7 @@ func activateFunction(cfg *Config, args []Argument) error {
 		}
 
 		// otherwise set values based on what was passed in, or process things
-		args, err := parseSubcommand(flags, inputs)
+		args, err := parseArguments(flags, inputs)
 		if err != nil {
 			fmt.Println(err)
 			continue

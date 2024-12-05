@@ -24,7 +24,8 @@ func readSubcommandInput(input string) ([]string, error) {
 }
 
 // maps is already reference type
-func parseSubcommand(flags map[string]Flag, parameters []string) ([]Argument, error) {
+// used in commands
+func parseArguments(flags map[string]Flag, parameters []string) ([]Argument, error) {
 	// used when in a subcommand, not expecting a command name. just give it the subcommand map.
 	// flags -p, command like things do not so figure out how to do that
 	// flags should also take a value for now so exploit that

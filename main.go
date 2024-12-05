@@ -54,7 +54,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = cfg.checkSettings()
+	err = cfg.loadSettings()
 	if err != nil {
 		fmt.Printf("Error checking settings from DB: %s", err)
 		os.Exit(1)
@@ -103,7 +103,7 @@ func main() {
 			continue
 		}
 		// check to see if the flags are available, and if they take values, return flags and args
-		arguments, err := parseArguments(&command, parameters)
+		arguments, err := parseCommandArguments(&command, parameters)
 		if err != nil {
 			fmt.Println(err)
 			continue

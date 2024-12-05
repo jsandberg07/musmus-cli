@@ -17,7 +17,7 @@ func getXXXCmd() Command {
 	XXXCmd := Command{
 		name:        "XXX",
 		description: "Used for XXX",
-		function:    XXXFunction,
+		function:    addPositionFunction,
 		flags:       XXXFlags,
 	}
 
@@ -42,7 +42,7 @@ func getXXXFlags() map[string]Flag {
 // look into removing the args thing, might have to stay
 func XXXFunction(cfg *Config, args []Argument) error {
 	// get flags
-	flags := getXXXFlags()
+	flags := getAddPositionFlags()
 
 	// set defaults
 	exit := false
@@ -67,9 +67,8 @@ func XXXFunction(cfg *Config, args []Argument) error {
 
 		// do weird behavior here
 
-		// change this name!
 		// but normal loop now
-		args, err := parseSubcommand(flags, inputs)
+		args, err := parseArguments(flags, inputs)
 		if err != nil {
 			fmt.Println(err)
 			continue

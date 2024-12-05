@@ -43,6 +43,11 @@ type CageCard struct {
 	Person string
 }
 
+type Reviewed struct {
+	Printed     bool
+	ChangesMade bool
+}
+
 /*
 Create a flag:
 symbol, description, and if it takes a value
