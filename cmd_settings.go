@@ -68,7 +68,7 @@ func getChangeSettingsFlags() map[string]Flag {
 // look into removing the args thing, might have to stay
 func changeSettingsFunction(cfg *Config, args []Argument) error {
 	// get flags
-	flags := getAddPositionFlags()
+	flags := getPositionFlags()
 
 	// set defaults
 	exit := false

@@ -22,54 +22,62 @@ func getAddPositionCmd() Command {
 	return addPositionCmd
 }
 
-func getAddPositionFlags() map[string]Flag {
-	addPositionFlags := make(map[string]Flag)
-	// [a]ctivate, [d]eact, add [o]rders, [q]uery, [p]rotocol, [s]taff
+// TODO: extremely minor, but maybe add a check to see if ANY changes have been made and just discard if they havent
+func getPositionFlags() map[string]Flag {
+	PositionFlags := make(map[string]Flag)
+	// [a]ctivate, [d]eact, add [o]rders, [q]uery, [p]rotocol, [s]taff, [n]ame
 	// START with setting a name
 	// and previewing
 	// check to see if previewed before saving, print anyway
 	// and saving
+	tFlag := Flag{
+		symbol:      "t",
+		description: "Changes the title",
+		takesValue:  true,
+	}
+	PositionFlags["-"+tFlag.symbol] = tFlag
+
 	aFlag := Flag{
 		symbol:      "a",
 		description: "Toggles if the role has permission to add or activate cage cards",
 		takesValue:  false,
 	}
-	addPositionFlags["-"+aFlag.symbol] = aFlag
+	PositionFlags["-"+aFlag.symbol] = aFlag
 
 	dFlag := Flag{
 		symbol:      "d",
 		description: "Toggles if the role has permission to deactivate cage cards",
 		takesValue:  false,
 	}
-	addPositionFlags["-"+dFlag.symbol] = dFlag
+	PositionFlags["-"+dFlag.symbol] = dFlag
 
 	oFlag := Flag{
 		symbol:      "o",
 		description: "Toggles if the role has permission to add or mark orders as recieved",
 		takesValue:  false,
 	}
-	addPositionFlags["-"+oFlag.symbol] = oFlag
+	PositionFlags["-"+oFlag.symbol] = oFlag
 
 	qFlag := Flag{
 		symbol:      "q",
 		description: "Toggles if the role has permission to run queries",
 		takesValue:  false,
 	}
-	addPositionFlags["-"+qFlag.symbol] = qFlag
+	PositionFlags["-"+qFlag.symbol] = qFlag
 
 	pFlag := Flag{
 		symbol:      "p",
 		description: "Toggles if the role has permission to make changes to protocols including adding staff to them",
 		takesValue:  false,
 	}
-	addPositionFlags["-"+pFlag.symbol] = pFlag
+	PositionFlags["-"+pFlag.symbol] = pFlag
 
 	sFlag := Flag{
 		symbol:      "s",
 		description: "Toggles if the role has permission to add or remove staff or positions",
 		takesValue:  false,
 	}
-	addPositionFlags["-"+sFlag.symbol] = sFlag
+	PositionFlags["-"+sFlag.symbol] = sFlag
 
 	// ect as needed or remove the "-"+ for longer ones
 
@@ -78,36 +86,35 @@ func getAddPositionFlags() map[string]Flag {
 		description: "Prints all available flags for the command",
 		takesValue:  false,
 	}
-	addPositionFlags[helpFlag.symbol] = helpFlag
+	PositionFlags[helpFlag.symbol] = helpFlag
 
 	printFlag := Flag{
 		symbol:      "print",
 		description: "Prints WIP permissions current settings",
 		takesValue:  false,
 	}
-	addPositionFlags[printFlag.symbol] = printFlag
+	PositionFlags[printFlag.symbol] = printFlag
 
 	saveFlag := Flag{
 		symbol:      "save",
 		description: "Saves the new position and exits",
 		takesValue:  false,
 	}
-	addPositionFlags[saveFlag.symbol] = saveFlag
+	PositionFlags[saveFlag.symbol] = saveFlag
 
 	exitFlag := Flag{
 		symbol:      "exit",
 		description: "Exits without saving",
 		takesValue:  false,
 	}
-	addPositionFlags[exitFlag.symbol] = exitFlag
+	PositionFlags[exitFlag.symbol] = exitFlag
 
-	return addPositionFlags
+	return PositionFlags
 
 }
 
-// look into removing the args thing, might have to stay
 func addPositionFunction(cfg *Config, args []Argument) error {
-	// get hname before anything else, or exit early
+	// get name before anything else, or exit early
 	name, err := getNewPositionTitle(cfg)
 	if err != nil {
 		return err
@@ -118,7 +125,7 @@ func addPositionFunction(cfg *Config, args []Argument) error {
 	}
 
 	// get flags
-	flags := getAddPositionFlags()
+	flags := getPositionFlags()
 
 	// the reader
 	reader := bufio.NewReader(os.Stdin)
@@ -189,6 +196,12 @@ func addPositionFunction(cfg *Config, args []Argument) error {
 			case "-s":
 				cpParams.CanAddStaff = !cpParams.CanAddStaff
 				reviewed.ChangesMade = true
+			case "-t":
+				newName := checkIfPositionTitleUnique(cfg, arg.value)
+				if newName != "" {
+					cpParams.Title = newName
+					fmt.Printf("New title for new position set: %s\n", cpParams.Title)
+				}
 			case "help":
 				err := cmdHelp(flags)
 				if err != nil {
@@ -196,7 +209,7 @@ func addPositionFunction(cfg *Config, args []Argument) error {
 				}
 			case "print":
 				fmt.Println("Printing...")
-				err := printPositionPermissions(&cpParams)
+				err := printCreatePermissions(&cpParams)
 				if err != nil {
 					fmt.Println("Error printing permissions")
 				}
@@ -206,7 +219,7 @@ func addPositionFunction(cfg *Config, args []Argument) error {
 				fmt.Println("Saving and exiting...")
 				if reviewed.Printed == false {
 					fmt.Println("Creating a role with these permissions:")
-					err := printPositionPermissions(&cpParams)
+					err := printCreatePermissions(&cpParams)
 					if err != nil {
 						fmt.Println("Error printing permissions")
 					}
@@ -260,23 +273,30 @@ func getNewPositionTitle(cfg *Config) (string, error) {
 			return "", nil
 		}
 
-		_, err = cfg.db.GetPositionByTitle(context.Background(), input)
-		if err != nil && err.Error() == "sql: no rows in result set" {
-			// no position by that name was found
-			return input, nil
+		name := checkIfPositionTitleUnique(cfg, input)
+		if name != "" {
+			return name, nil
 		}
-		if err != nil {
-			// any other DB error so exit
-			fmt.Printf("Error checking database for title: %s\n", err)
-			os.Exit(1)
-		}
-		fmt.Println("Position with that name was found. Please try again.")
-
 	}
 
 }
 
-func printPositionPermissions(cp *database.CreatePositionParams) error {
+func checkIfPositionTitleUnique(cfg *Config, input string) string {
+	_, err := cfg.db.GetPositionByTitle(context.Background(), input)
+	if err != nil && err.Error() == "sql: no rows in result set" {
+		// no position by that name was found
+		return input
+	}
+	if err != nil {
+		// any other DB error so exit
+		fmt.Printf("Error checking database for title: %s\n", err)
+		os.Exit(1)
+	}
+	fmt.Println("Position with that name was found. Please try again.")
+	return ""
+}
+
+func printCreatePermissions(cp *database.CreatePositionParams) error {
 	granted := []string{}
 	denied := []string{}
 	as := "Activate cage cards"

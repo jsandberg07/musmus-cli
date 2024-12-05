@@ -11,6 +11,10 @@ func literallyJustHere() {
 }
 
 // creating a template for implementing commands
+// reminders:
+// include the help and exit flags
+// add getXXXcmd to the function's state
+//
 
 func getXXXCmd() Command {
 	XXXFlags := make(map[string]Flag)
@@ -42,7 +46,7 @@ func getXXXFlags() map[string]Flag {
 // look into removing the args thing, might have to stay
 func XXXFunction(cfg *Config, args []Argument) error {
 	// get flags
-	flags := getAddPositionFlags()
+	flags := getPositionFlags()
 
 	// set defaults
 	exit := false

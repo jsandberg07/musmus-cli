@@ -1,8 +1,8 @@
 package main
 
 func getPositionMap() map[string]Command {
-	// put that commands related to investigators you want here
-	cmds := []Command{getAddPositionCmd()}
+	// put that commands related to positions you want here
+	cmds := []Command{getAddPositionCmd(), getEditPositionCmd()}
 	commandMap := cmdMapHelper(cmds)
 
 	return commandMap
