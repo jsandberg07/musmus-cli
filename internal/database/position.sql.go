@@ -131,13 +131,14 @@ func (q *Queries) GetUserPosition(ctx context.Context, id uuid.UUID) (Position, 
 
 const updatePosition = `-- name: UpdatePosition :exec
 UPDATE positions
-SET can_activate = $2,
+SET title = $1,
+    can_activate = $2,
     can_deactivate = $3,
     can_add_orders = $4,
     can_query = $5,
     can_change_protocol = $6,
     can_add_staff = $7
-WHERE $1 = title
+WHERE $8 = id
 `
 
 type UpdatePositionParams struct {
@@ -148,6 +149,7 @@ type UpdatePositionParams struct {
 	CanQuery          bool
 	CanChangeProtocol bool
 	CanAddStaff       bool
+	ID                uuid.UUID
 }
 
 func (q *Queries) UpdatePosition(ctx context.Context, arg UpdatePositionParams) error {
@@ -159,6 +161,7 @@ func (q *Queries) UpdatePosition(ctx context.Context, arg UpdatePositionParams) 
 		arg.CanQuery,
 		arg.CanChangeProtocol,
 		arg.CanAddStaff,
+		arg.ID,
 	)
 	return err
 }

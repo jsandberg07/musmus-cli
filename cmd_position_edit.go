@@ -50,6 +50,7 @@ func editPositionFunction(cfg *Config, args []Argument) error {
 		CanQuery:          position.CanQuery,
 		CanChangeProtocol: position.CanChangeProtocol,
 		CanAddStaff:       position.CanAddStaff,
+		ID:                position.ID,
 	}
 
 	fmt.Println("Use flags to toggle permission. All permissions default to false. Multiple flags can be passed in at once.\nUse help to see flags and what permissions they toggle")
@@ -106,14 +107,14 @@ func editPositionFunction(cfg *Config, args []Argument) error {
 				newName := checkIfPositionTitleUnique(cfg, arg.value)
 				if newName != "" {
 					upParams.Title = newName
-					fmt.Printf("New title for new position set: %s\n", upParams.Title)
+					fmt.Printf("Position title set: %s\n", upParams.Title)
 				}
 			case "help":
 				err := cmdHelp(flags)
 				if err != nil {
 					fmt.Println(err)
 				}
-			case "print":
+			case "review":
 				fmt.Println("Printing...")
 				err := printUpdatePermissions(&upParams)
 				if err != nil {

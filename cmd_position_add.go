@@ -89,8 +89,8 @@ func getPositionFlags() map[string]Flag {
 	PositionFlags[helpFlag.symbol] = helpFlag
 
 	printFlag := Flag{
-		symbol:      "print",
-		description: "Prints WIP permissions current settings",
+		symbol:      "review",
+		description: "Display WIP permissions current settings",
 		takesValue:  false,
 	}
 	PositionFlags[printFlag.symbol] = printFlag
@@ -207,7 +207,7 @@ func addPositionFunction(cfg *Config, args []Argument) error {
 				if err != nil {
 					fmt.Println(err)
 				}
-			case "print":
+			case "review":
 				fmt.Println("Printing...")
 				err := printCreatePermissions(&cpParams)
 				if err != nil {

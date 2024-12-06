@@ -12,13 +12,14 @@ RETURNING *;
 
 -- name: UpdatePosition :exec
 UPDATE positions
-SET can_activate = $2,
+SET title = $1,
+    can_activate = $2,
     can_deactivate = $3,
     can_add_orders = $4,
     can_query = $5,
     can_change_protocol = $6,
     can_add_staff = $7
-WHERE $1 = title;
+WHERE $8 = id;
 
 -- name: GetPositionByTitle :one
 SELECT * FROM positions
