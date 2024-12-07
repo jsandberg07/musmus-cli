@@ -1,15 +1,10 @@
 package main
 
 func getInvestigatorsMap() map[string]Command {
-	// addInvestigatorCmd := getAddInvestigatorCmd()
-	commonCmds := getCommonCmds()
-	cmdSlice := commonCmds
-	commandMap := make(map[string]Command)
-	for _, cmd := range cmdSlice {
-		commandMap[cmd.name] = cmd
-	}
+	cmds := []Command{getAddInvestigatorCmd()}
+	commandsMap := cmdMapHelper(cmds)
 
-	return commandMap
+	return commandsMap
 }
 
 func getInvesitatorsState() *State {

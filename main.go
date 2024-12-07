@@ -21,9 +21,8 @@ const verbose bool = false
 // add, remove, update, ect. there's consistency to their structure,
 // less to their behavior, but getting a bunch done and fine tuning is better
 // than getting bogged down in making activating cards *perfect* currently
-// in the past you have done things that are good
-// today you have done something that was right
-// the end was inevitable but eventually you saw the light of forgiveness
+// investigators
+// add, edit like the other one. test vagueness.
 
 // ALSO:
 // set up CI testing

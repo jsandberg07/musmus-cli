@@ -21,7 +21,7 @@ func getXXXCmd() Command {
 	XXXCmd := Command{
 		name:        "XXX",
 		description: "Used for XXX",
-		function:    addPositionFunction,
+		function:    XXXFunction,
 		flags:       XXXFlags,
 	}
 
