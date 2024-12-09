@@ -24,6 +24,10 @@ const verbose bool = false
 // investigators
 // add, edit like the other one. test vagueness.
 
+// CURRENTLY:
+// edit investigator
+// should be faster than add investigators
+
 // ALSO:
 // set up CI testing
 // you probably wont use it often but it's nice ^_^

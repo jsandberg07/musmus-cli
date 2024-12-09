@@ -1,7 +1,7 @@
 package main
 
 func getInvestigatorsMap() map[string]Command {
-	cmds := []Command{getAddInvestigatorCmd()}
+	cmds := []Command{getAddInvestigatorCmd(), getEditInvestigatorCmd()}
 	commandsMap := cmdMapHelper(cmds)
 
 	return commandsMap
