@@ -59,7 +59,7 @@ func getEditInvestigatorFlags() map[string]Flag {
 	eFlag := Flag{
 		symbol:      "e",
 		description: "Changes email. Enter 'delete' to remove email",
-		takesValue:  false,
+		takesValue:  true,
 	}
 	editInvestigatorFlags["-"+eFlag.symbol] = eFlag
 
@@ -111,7 +111,7 @@ func editInvestigatorFunction(cfg *Config, args []Argument) error {
 		return nil
 	}
 
-	position, err := cfg.db.GetUserPosition(context.Background(), investigator.ID)
+	position, err := cfg.db.GetUserPosition(context.Background(), investigator.Position)
 	if err != nil {
 		fmt.Printf("Error getting position for investigator: %s\n", err)
 		os.Exit(1)
@@ -138,7 +138,7 @@ func editInvestigatorFunction(cfg *Config, args []Argument) error {
 	// the reader
 	reader := bufio.NewReader(os.Stdin)
 
-	fmt.Printf("Making changes to %s", investigator.IName)
+	fmt.Printf("Making changes to %s\n", investigator.IName)
 	fmt.Println("If entering a value that uses spaces (like between a first and last name) use an underscore")
 	fmt.Println("It will be changed to a space after")
 
@@ -181,7 +181,13 @@ func editInvestigatorFunction(cfg *Config, args []Argument) error {
 				fmt.Println("Exiting without saving...")
 				exit = true
 			case "save":
-				fmt.Println("Saving...")
+				if reviewed.Printed {
+					fmt.Println("Saving...")
+				} else {
+					fmt.Println("Saving with the following information")
+					printEditInvestigator(&uiParam, &position)
+				}
+
 				err := cfg.db.UpdateInvestigator(context.Background(), uiParam)
 				if err != nil {
 					fmt.Println("Error updating investigator in DB")
@@ -205,8 +211,27 @@ func editInvestigatorFunction(cfg *Config, args []Argument) error {
 				}
 				reviewed.ChangesMade = true
 			case "-p":
+				position, err = getPositionByFlag(cfg, arg.value)
+				if err != nil {
+					return err
+				}
+				uiParam.Position = position.ID
+				reviewed.ChangesMade = true
 			case "-a":
+				uiParam.Active = !uiParam.Active
+				if uiParam.Active {
+					fmt.Println("Investigator is flagged as active")
+				} else {
+					fmt.Println("Invetstigator is flagged as inactive")
+				}
+				reviewed.ChangesMade = true
 			case "-e":
+				if arg.value == "delete" {
+					uiParam.Email = sql.NullString{Valid: false}
+				} else {
+					uiParam.Email = sql.NullString{Valid: true, String: arg.value}
+				}
+				reviewed.ChangesMade = true
 			default:
 				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
 			}

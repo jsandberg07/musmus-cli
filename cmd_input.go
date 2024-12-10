@@ -36,6 +36,13 @@ func parseArguments(flags map[string]Flag, parameters []string) ([]Argument, err
 		return nil, errors.New("Nothing entered. Please try again.")
 	}
 
+	underscore := false
+	for _, param := range parameters {
+		if strings.Contains(param, "_") {
+			underscore = true
+		}
+	}
+
 	var arguments []Argument
 
 	for i := 0; i < len(parameters); i++ {
@@ -62,6 +69,15 @@ func parseArguments(flags map[string]Flag, parameters []string) ([]Argument, err
 		}
 		arguments = append(arguments, tArg)
 
+	}
+
+	// can't use range because it works via value and not reference, wont copy changes
+	if underscore {
+		for i := 0; i < len(arguments); i++ {
+			if strings.Contains(arguments[i].value, "_") {
+				arguments[i].value = strings.Replace(arguments[i].value, "_", " ", -1)
+			}
+		}
 	}
 
 	return arguments, nil
