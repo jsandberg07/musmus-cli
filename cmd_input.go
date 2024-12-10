@@ -36,6 +36,8 @@ func parseArguments(flags map[string]Flag, parameters []string) ([]Argument, err
 		return nil, errors.New("Nothing entered. Please try again.")
 	}
 
+	// split breaks on spaces, for when entering a value with a space like first last names
+	// can use an underscore that will be replaced before added to DB
 	underscore := false
 	for _, param := range parameters {
 		if strings.Contains(param, "_") {

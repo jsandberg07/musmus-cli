@@ -2,7 +2,7 @@ package main
 
 func getProtocolMap() map[string]Command {
 	// put your protocol Commands here
-	cmds := []Command{}
+	cmds := []Command{getAddProtocolCmd()}
 	commandMap := cmdMapHelper(cmds)
 
 	return commandMap
