@@ -28,6 +28,11 @@ const verbose bool = false
 // edit investigator
 // should be faster than add investigators
 
+// TODO: Flags have an order so they print in a not disoganized way
+// but also to order them when processing so you always save after you print
+// and maybe check if there's an exit AND save cause that would be gross (you never know what users will do)
+// OR test is breaking out of a switch works
+
 // ALSO:
 // set up CI testing
 // you probably wont use it often but it's nice ^_^

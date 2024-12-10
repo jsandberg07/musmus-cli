@@ -97,7 +97,7 @@ func addInvestigatorFunction(cfg *Config, args []Argument) error {
 	// the reader
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("New investigator will be added with the following info:")
-	printInvestigator(&ciParams, &position)
+	printNewInvestigator(&ciParams, &position)
 
 	// TODO: add the ability to use flags to edit values after the fact
 	fmt.Println("Enter 'save' to add the investigator to the database")
@@ -181,6 +181,14 @@ func getNewInvestigatorName(cfg *Config) (string, error) {
 			return "", nil
 		}
 
+		err = checkIfInvestigatorNameUnique(cfg, input)
+		if err != nil {
+			return "", err
+		}
+
+		return input, nil
+
+		/* commented out because i dry'd up some of the code and fingers crossed there's no problems
 		investigators, err := cfg.db.GetInvestigatorByName(context.Background(), input)
 		if err != nil && err.Error() != "sql: no rows in result set" {
 			// error that isnt related to no rows returned
@@ -191,6 +199,7 @@ func getNewInvestigatorName(cfg *Config) (string, error) {
 			fmt.Println("An investigator by that name is already in the system.\nConsider adding a nickname to both investigators.")
 		}
 		return input, nil
+		*/
 
 	}
 }
@@ -264,7 +273,7 @@ func getNewInvestigatorExtraInfo(ciParams *database.CreateInvestigatorParams) er
 	return nil
 }
 
-func printInvestigator(ci *database.CreateInvestigatorParams, p *database.Position) {
+func printNewInvestigator(ci *database.CreateInvestigatorParams, p *database.Position) {
 	nullfield := sql.NullString{
 		Valid: false,
 	}

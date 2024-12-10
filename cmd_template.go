@@ -46,7 +46,7 @@ func getXXXFlags() map[string]Flag {
 // look into removing the args thing, might have to stay
 func XXXFunction(cfg *Config, args []Argument) error {
 	// get flags
-	flags := getPositionFlags()
+	flags := getXXXFlags()
 
 	// set defaults
 	exit := false

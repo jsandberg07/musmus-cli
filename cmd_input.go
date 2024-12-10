@@ -25,6 +25,9 @@ func readSubcommandInput(input string) ([]string, error) {
 
 // maps is already reference type
 // used in commands
+// DONT HANDLE QUOTES
+// JUST REPLACE _ WITH SPACES
+// BINGOBANGO
 func parseArguments(flags map[string]Flag, parameters []string) ([]Argument, error) {
 	// used when in a subcommand, not expecting a command name. just give it the subcommand map.
 	// flags -p, command like things do not so figure out how to do that
