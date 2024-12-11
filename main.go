@@ -25,8 +25,10 @@ const verbose bool = false
 // add, edit like the other one. test vagueness.
 
 // CURRENTLY:
-// edit investigator
-// should be faster than add investigators
+// add, edit protocls
+// an SQL error, needs to use the ID not the number for consistency
+// also make a reader get input return trimmed test function
+// you use is in EVERY helper function
 
 // TODO: Flags have an order so they print in a not disoganized way
 // but also to order them when processing so you always save after you print

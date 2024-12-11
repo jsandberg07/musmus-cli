@@ -5,7 +5,9 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jsandberg07/clitest/internal/database"
@@ -24,16 +26,29 @@ func getAddProtocolCmd() Command {
 }
 
 // TODO: add editing it before saving it, goes hand in hand with editing but that can wait
+// just save and exit in the mean time
 func getAddProtocolFlags() map[string]Flag {
 	addProtocolFlags := make(map[string]Flag)
-	XFlag := Flag{
-		symbol:      "X",
-		description: "Sets X",
+	saveFlag := Flag{
+		symbol:      "save",
+		description: "Saves the new protocol",
 		takesValue:  false,
 	}
-	addProtocolFlags["-"+XFlag.symbol] = XFlag
+	addProtocolFlags[saveFlag.symbol] = saveFlag
 
-	// ect as needed or remove the "-"+ for longer ones
+	exitFlag := Flag{
+		symbol:      "exit",
+		description: "Exits without saving",
+		takesValue:  false,
+	}
+	addProtocolFlags[exitFlag.symbol] = exitFlag
+
+	helpFlag := Flag{
+		symbol:      "help",
+		description: "Prints all available flags",
+		takesValue:  false,
+	}
+	addProtocolFlags[helpFlag.symbol] = helpFlag
 
 	return addProtocolFlags
 
@@ -50,7 +65,42 @@ func addProtocolFunction(cfg *Config, args []Argument) error {
 	// the reader
 	reader := bufio.NewReader(os.Stdin)
 
+	// TODO: not all of these even have errs that can be returned, remove as needed
+	pi, err := getNewProtocolPI(cfg)
+	if err != nil {
+		return err
+	}
+	title, err := getNewProtocolTitle()
+	if err != nil {
+		return err
+	}
+	number, err := getNewProtocolNumber(cfg)
+	if err != nil {
+		return err
+	}
+	allocated, err := getNewProtocolAlocated()
+	if err != nil {
+		return err
+	}
+	expiration, err := getNewProtocolExpiration()
+	if err != nil {
+		return err
+	}
+
+	cpParam := database.CreateProtocolParams{
+		PNumber:             number,
+		PrimaryInvestigator: pi.ID,
+		Title:               title,
+		Allocated:           int32(allocated),
+		Balance:             int32(0),
+		ExpirationDate:      expiration,
+	}
+
+	// save and exit for now
 	// da loop
+	fmt.Println("Current info:")
+	printAddProtocol(cpParam, pi)
+	fmt.Println("Enter 'save' to save, 'exit' to exit without saving")
 	for {
 		fmt.Print("> ")
 		text, err := reader.ReadString('\n')
@@ -76,7 +126,21 @@ func addProtocolFunction(cfg *Config, args []Argument) error {
 
 		for _, arg := range args {
 			switch arg.flag {
-			case "-X":
+			case "help":
+				cmdHelp(flags)
+			case "save":
+				fmt.Println("Saving...")
+				protocol, err := cfg.db.CreateProtocol(context.Background(), cpParam)
+				if err != nil {
+					fmt.Println("Error saving protocol")
+					return err
+				}
+				exit = true
+				if verbose {
+					fmt.Println(protocol)
+				}
+			case "exit":
+				fmt.Println("Exiting without saving...")
 				exit = true
 			default:
 				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
@@ -96,6 +160,11 @@ func addProtocolFunction(cfg *Config, args []Argument) error {
 // get everything else going first
 // requires a DB change, add a field for like name_on_protocol or is_pi_protocol for position
 // just another prompt and tag that should be easy, then test data included
+
+// TODO: enter previous protocol FIRST, copies a lot of work, updates cards
+// increasing todo list buddy
+
+// TODO: add exit for when you dont want to make a whole new protocol
 func getNewProtocolPI(cfg *Config) (database.Investigator, error) {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Enter the name of the PI overseeing the protocol")
@@ -132,7 +201,7 @@ func getNewProtocolPI(cfg *Config) (database.Investigator, error) {
 }
 
 // TODO: add check if protocol by that title already in the DB (number more important really)
-func getNewProtocolTitle(cfg *Config) (string, error) {
+func getNewProtocolTitle() (string, error) {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Enter the title of the protocol")
 	for {
@@ -157,7 +226,7 @@ func getNewProtocolNumber(cfg *Config) (string, error) {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Enter the protocol number")
 	for {
-		fmt.Println("> ")
+		fmt.Print("> ")
 		text, err := reader.ReadString('\n')
 		if err != nil {
 			fmt.Printf("Error reading input string: %s", err)
@@ -183,25 +252,68 @@ func getNewProtocolNumber(cfg *Config) (string, error) {
 		if err == nil {
 			fmt.Println("A protocol with that number already exists. Please try again.")
 			fmt.Printf("Protocol with same number: %s\n", protocol.Title)
+		}
+	}
+}
+
+func getNewProtocolAlocated() (int, error) {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Println("Enter the numbers of animals allocated to the protocol")
+	for {
+		fmt.Print("> ")
+		text, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Printf("Error reading input string: %s", err)
+			os.Exit(1)
+		}
+		input := strings.TrimSpace(text)
+		if input == "" {
+			fmt.Println("No input found. Please try again")
 			continue
 		}
 
-		fmt.Println("This message shouldn't appear")
+		allocated, err := strconv.Atoi(input)
+		if err != nil {
+			fmt.Println("Error getting number. Be sure to enter an integer.")
+			continue
+		}
 
+		return allocated, nil
+	}
+}
+
+func getNewProtocolExpiration() (time.Time, error) {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Println("Enter expiration date of the protocol")
+	fmt.Println("Enter nothing to set it to 3 years from today")
+	for {
+		fmt.Print("> ")
+		text, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Printf("Error reading input string: %s", err)
+			os.Exit(1)
+		}
+		input := strings.TrimSpace(text)
+		if input == "" {
+			today := time.Now()
+			then := today.AddDate(3, 0, 0)
+			return then, nil
+		}
+
+		expirationDate, err := parseDate(input)
+		if err != nil {
+			continue
+		}
+
+		return expirationDate, nil
 	}
 
 }
 
-/*
-func getNewProtocolAlocated(cfg *Config) (int, error) {
-
+func printAddProtocol(cp database.CreateProtocolParams, pi database.Investigator) {
+	fmt.Printf("PI: %s\n", pi.IName)
+	fmt.Printf("Number: %s\n", cp.PNumber)
+	fmt.Printf("Title: %s\n", cp.Title)
+	fmt.Printf("Allocated: %v\n", cp.Allocated)
+	fmt.Printf("Expiration Date: %v\n", cp.ExpirationDate)
 }
-
-func getNewProtocolExpiration(cfg *Config) (time.Time, error) {
-
-}
-
-func getPreviousProtocol(cfg *Config) (uuid.UUID, error) {
-
-}
-*/
