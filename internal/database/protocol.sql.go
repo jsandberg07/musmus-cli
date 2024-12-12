@@ -142,3 +142,37 @@ func (q *Queries) UpdateAllocated(ctx context.Context, arg UpdateAllocatedParams
 	_, err := q.db.ExecContext(ctx, updateAllocated, arg.PNumber, arg.Allocated)
 	return err
 }
+
+const updateProtocol = `-- name: UpdateProtocol :exec
+UPDATE protocols
+SET p_number = $2,
+    primary_investigator = $3,
+    title = $4,
+    allocated = $5,
+    balance = $6,
+    expiration_date = $7
+WHERE $1 = id
+`
+
+type UpdateProtocolParams struct {
+	ID                  uuid.UUID
+	PNumber             string
+	PrimaryInvestigator uuid.UUID
+	Title               string
+	Allocated           int32
+	Balance             int32
+	ExpirationDate      time.Time
+}
+
+func (q *Queries) UpdateProtocol(ctx context.Context, arg UpdateProtocolParams) error {
+	_, err := q.db.ExecContext(ctx, updateProtocol,
+		arg.ID,
+		arg.PNumber,
+		arg.PrimaryInvestigator,
+		arg.Title,
+		arg.Allocated,
+		arg.Balance,
+		arg.ExpirationDate,
+	)
+	return err
+}

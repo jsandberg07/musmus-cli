@@ -35,6 +35,9 @@ const verbose bool = false
 // and maybe check if there's an exit AND save cause that would be gross (you never know what users will do)
 // OR test is breaking out of a switch works
 
+// What if all the adds prompted in order for a complete creation
+// then the edits just let you pass in flags and then prompted from there lemoo
+
 // ALSO:
 // set up CI testing
 // you probably wont use it often but it's nice ^_^
