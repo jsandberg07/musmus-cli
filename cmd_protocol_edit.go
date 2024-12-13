@@ -136,6 +136,8 @@ func editProtocolFunction(cfg *Config, args []Argument) error {
 
 	// the reader
 	reader := bufio.NewReader(os.Stdin)
+	fmt.Println("Use flags to change protocol parameters. Enter 'help' to see all available flags")
+	fmt.Println("When entering values with a space, replace it with an underscore")
 
 	// da loop
 	// [t]itle, [P]I, [N]umber, [A]llocated, [B]alance, [E]xpiration
@@ -302,6 +304,10 @@ func getInvestigatorByFlag(cfg *Config, i string) (database.Investigator, error)
 	}
 	if len(investigators) > 1 {
 		fmt.Println("Vague investigator name. Please try again")
+		return database.Investigator{}, nil
+	}
+	if len(investigators) == 0 {
+		fmt.Println("Investigator not found. Please try again")
 		return database.Investigator{}, nil
 	}
 	return investigators[0], nil

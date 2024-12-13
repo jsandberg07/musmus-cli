@@ -48,9 +48,9 @@ func parseArguments(flags map[string]Flag, parameters []string) ([]Argument, err
 	var arguments []Argument
 
 	for i := 0; i < len(parameters); i++ {
-		// REWRITE
-		// just do the two: flags with values, commands without
-		// why is it like this? who the fuck know
+		// RIGHT NOW we're looking for "-" as a contains, but we need the first char only
+		// how to we golang the first char of a string
+
 		flag, ok := flags[parameters[i]]
 		if !ok {
 			err := fmt.Sprintf("%s is not a flag allowed for this command", parameters[i])
@@ -60,7 +60,7 @@ func parseArguments(flags map[string]Flag, parameters []string) ([]Argument, err
 		tArg := Argument{}
 		if flag.takesValue {
 			tArg.flag = parameters[i]
-			if i+1 == len(parameters) || strings.Contains(parameters[i+1], "-") {
+			if i+1 == len(parameters) || string(parameters[i+1][0]) == "-" {
 				err := fmt.Sprintf("%s is a flag that takes a value", parameters[i])
 				return nil, errors.New(err)
 			}
