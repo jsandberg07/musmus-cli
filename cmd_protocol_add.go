@@ -239,7 +239,7 @@ func getNewProtocolNumber(cfg *Config) (string, error) {
 		}
 
 		// TODO: this is actually protocol by number, not ID, needs fixing
-		protocol, err := cfg.db.GetProtocolByID(context.Background(), input)
+		protocol, err := cfg.db.GetProtocolByNumber(context.Background(), input)
 		if err != nil && err.Error() != "sql: no rows in result set" {
 			// any other error than no rows
 			fmt.Println("Error getting protocol from DB")

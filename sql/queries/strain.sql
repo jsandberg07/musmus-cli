@@ -11,7 +11,10 @@ RETURNING *;
 SELECT * FROM strains
 WHERE $1 = vendor_code OR $1 = s_name;
 
--- name: getStrainByID :one
+-- name: GetStrainByID :one
 SELECT * FROM strains
 WHERE $1 = id;
 
+-- name: GetStrainByCode :one
+SELECT * FROM strains
+WHERE $1 = vendor_code;

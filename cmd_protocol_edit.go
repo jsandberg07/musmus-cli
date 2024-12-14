@@ -275,7 +275,7 @@ func getProtocolByNumber(cfg *Config) (database.Protocol, error) {
 			return database.Protocol{ID: uuid.Nil}, nil
 		}
 
-		protocol, err := cfg.db.GetProtocolByID(context.Background(), input)
+		protocol, err := cfg.db.GetProtocolByNumber(context.Background(), input)
 		if err != nil && err.Error() != "sql: no rows in result set" {
 			// error that isnt related to no rows returned
 			fmt.Println("Error checking DB for protocol")
@@ -314,7 +314,7 @@ func getInvestigatorByFlag(cfg *Config, i string) (database.Investigator, error)
 }
 
 func checkIfProtocolNumberUnique(cfg *Config, n string) (string, error) {
-	_, err := cfg.db.GetProtocolByID(context.Background(), n)
+	_, err := cfg.db.GetProtocolByNumber(context.Background(), n)
 	if err != nil && err.Error() != "sql: no rows in result set" {
 		// any other error
 		fmt.Println("Error getting protocols from DB")

@@ -213,7 +213,7 @@ func addInvestigatorToProtocolFunction(cfg *Config, args []Argument) error {
 }
 
 func getProtocolByFlag(cfg *Config, n string) (database.Protocol, error) {
-	protocol, err := cfg.db.GetProtocolByID(context.Background(), n)
+	protocol, err := cfg.db.GetProtocolByNumber(context.Background(), n)
 	if err != nil && err.Error() != "sql: no rows in result set" {
 		// any other error
 		fmt.Println("Error getting protocol from DB")

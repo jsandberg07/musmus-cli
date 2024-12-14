@@ -1,7 +1,7 @@
 package main
 
 func getStrainsMap() map[string]Command {
-	cmds := []Command{getSetStateCmd()}
+	cmds := []Command{getAddStrainCmd()}
 	commandMap := cmdMapHelper(cmds)
 
 	return commandMap
@@ -10,10 +10,10 @@ func getStrainsMap() map[string]Command {
 func getStrainsState() *State {
 	strainsMap := getStrainsMap()
 
-	mainState := State{
+	strainState := State{
 		currentCommands: strainsMap,
 		cliMessage:      "strains",
 	}
 
-	return &mainState
+	return &strainState
 }

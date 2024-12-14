@@ -302,12 +302,12 @@ func addTestCageCards(cfg *Config) error {
 		fmt.Println("Error getting investigator for cage card")
 		return errors.New("Vague investigator name")
 	}
-	prot1, err := cfg.db.GetProtocolByID(context.Background(), "12-24-32")
+	prot1, err := cfg.db.GetProtocolByNumber(context.Background(), "12-24-32")
 	if err != nil {
 		fmt.Println("Error getting protocol 1")
 		return err
 	}
-	prot2, err := cfg.db.GetProtocolByID(context.Background(), "18-12-16")
+	prot2, err := cfg.db.GetProtocolByNumber(context.Background(), "18-12-16")
 	if err != nil {
 		fmt.Println("Error getting protocol 2")
 		return err
