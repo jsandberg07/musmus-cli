@@ -63,6 +63,7 @@ func addStrainFunction(cfg *Config, args []Argument) error {
 	}
 	if name == "" {
 		fmt.Println("Exiting...")
+		return nil
 	}
 
 	vendor, err := getStringPrompt(cfg, "Enter vendor", checkFuncNil)
@@ -71,6 +72,7 @@ func addStrainFunction(cfg *Config, args []Argument) error {
 	}
 	if vendor == "" {
 		fmt.Println("Exiting...")
+		return nil
 	}
 
 	code, err := getStringPrompt(cfg, "Enter strain code", checkIfStrainCodeUnique)
@@ -79,6 +81,7 @@ func addStrainFunction(cfg *Config, args []Argument) error {
 	}
 	if code == "" {
 		fmt.Println("Exiting...")
+		return nil
 	}
 
 	asParams := database.AddStrainParams{
@@ -99,7 +102,7 @@ func addStrainFunction(cfg *Config, args []Argument) error {
 	// da loop
 	fmt.Println("Please review the following information")
 	fmt.Println("Enter 'save' to save the strain or 'exit' to leave without saving")
-	printStrain(&asParams)
+	printAddStrain(&asParams)
 	for {
 		fmt.Print("> ")
 		text, err := reader.ReadString('\n')
@@ -212,7 +215,7 @@ func checkFuncNil(cfg *Config, s string) error {
 	return nil
 }
 
-func printStrain(as *database.AddStrainParams) {
+func printAddStrain(as *database.AddStrainParams) {
 	fmt.Printf("Name: %s\n", as.SName)
 	fmt.Printf("Vendor: %s\n", as.Vendor)
 	fmt.Printf("Code: %s\n", as.VendorCode)

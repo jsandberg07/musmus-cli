@@ -1,7 +1,7 @@
 package main
 
 func getStrainsMap() map[string]Command {
-	cmds := []Command{getAddStrainCmd()}
+	cmds := []Command{getAddStrainCmd(), getEditStrainCmd()}
 	commandMap := cmdMapHelper(cmds)
 
 	return commandMap

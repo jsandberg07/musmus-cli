@@ -18,3 +18,10 @@ WHERE $1 = id;
 -- name: GetStrainByCode :one
 SELECT * FROM strains
 WHERE $1 = vendor_code;
+
+-- name: UpdateStrain :exec
+UPDATE strains
+SET s_name = $2,
+    vendor = $3,
+    vendor_code = $4
+WHERE $1 = id;

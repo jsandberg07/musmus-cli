@@ -118,3 +118,28 @@ func (q *Queries) GetStrains(ctx context.Context) ([]Strain, error) {
 	}
 	return items, nil
 }
+
+const updateStrain = `-- name: UpdateStrain :exec
+UPDATE strains
+SET s_name = $2,
+    vendor = $3,
+    vendor_code = $4
+WHERE $1 = id
+`
+
+type UpdateStrainParams struct {
+	ID         uuid.UUID
+	SName      string
+	Vendor     string
+	VendorCode string
+}
+
+func (q *Queries) UpdateStrain(ctx context.Context, arg UpdateStrainParams) error {
+	_, err := q.db.ExecContext(ctx, updateStrain,
+		arg.ID,
+		arg.SName,
+		arg.Vendor,
+		arg.VendorCode,
+	)
+	return err
+}
