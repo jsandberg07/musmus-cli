@@ -17,26 +17,11 @@ import (
 const verbose bool = false
 
 // NEXT:
-// create a "template" for creating functions
-// add, remove, update, ect. there's consistency to their structure,
-// less to their behavior, but getting a bunch done and fine tuning is better
-// than getting bogged down in making activating cards *perfect* currently
-// investigators
-// add, edit like the other one. test vagueness.
-
-// CURRENTLY:
-// add, edit protocls
-// an SQL error, needs to use the ID not the number for consistency
-// also make a reader get input return trimmed test function
-// you use is in EVERY helper function
-
-// TODO: Flags have an order so they print in a not disoganized way
-// but also to order them when processing so you always save after you print
-// and maybe check if there's an exit AND save cause that would be gross (you never know what users will do)
-// OR test is breaking out of a switch works
-
-// What if all the adds prompted in order for a complete creation
-// then the edits just let you pass in flags and then prompted from there lemoo
+// 563 lines of code aint bad (even if 25% of it is if err != nil {})
+// cage card cards
+// adding cage card by range, activating and checking, printing errors and handling them.
+// most hands on one and ironically the one that will require the most specialization anyway.
+// framework is there but needs more specifics and some sql, some go routines, ect.
 
 // ALSO:
 // set up CI testing

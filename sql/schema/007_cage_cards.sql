@@ -14,6 +14,10 @@ CREATE TABLE cage_cards(
     FOREIGN KEY(protocol_id)
     REFERENCES protocols(id),
 
+    CONSTRAINT fk_investigator
+    FOREIGN KEY(investigator_id)
+    REFERENCES investigators(id),
+
     CONSTRAINT fk_strain
     FOREIGN KEY(strain)
     REFERENCES strains(id),

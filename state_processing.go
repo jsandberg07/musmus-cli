@@ -1,7 +1,7 @@
 package main
 
 func getProcessingMap() map[string]Command {
-	cmds := []Command{getCCActivationCmd()}
+	cmds := []Command{getCCActivationCmd(), getAddCCCmd()}
 	commandMap := cmdMapHelper(cmds)
 
 	return commandMap
