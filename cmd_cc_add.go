@@ -49,6 +49,20 @@ func getAddCCFlags() map[string]Flag {
 	}
 	addCCFlags["-"+aFlag.symbol] = aFlag
 
+	iFlag := Flag{
+		symbol:      "i",
+		description: "Sets who the cards will be added under",
+		takesValue:  true,
+	}
+	addCCFlags["-"+iFlag.symbol] = iFlag
+
+	pFlag := Flag{
+		symbol:      "p",
+		description: "Sets the protocol the cards will be added under",
+		takesValue:  true,
+	}
+	addCCFlags["-"+pFlag.symbol] = pFlag
+
 	// ect as needed or remove the "-"+ for longer ones
 
 	helpFlag := Flag{
@@ -143,6 +157,7 @@ func addCCFunction(cfg *Config, args []Argument) error {
 					fmt.Println(err)
 				}
 				end = num
+				fmt.Printf("Protocol set as %s\n", protocol.PNumber)
 
 			case "-i":
 				inv, err := getInvestigatorByFlag2(cfg, arg.value)
@@ -150,6 +165,8 @@ func addCCFunction(cfg *Config, args []Argument) error {
 					return err
 				}
 				investigator = inv
+				fmt.Printf("Investigator set as %s\n", investigator.IName)
+
 			case "-p":
 				pro, err := getProtocolByFlag(cfg, arg.value)
 				if err != nil {
