@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/jsandberg07/clitest/internal/database"
 )
@@ -208,6 +209,9 @@ func addCCtoDB(cfg *Config, start, end int, inv database.Investigator, pro datab
 		return nil
 	}
 
+	// maybe remove
+	fmt.Printf("Adding %v cards\n", (end-start)+1)
+	added := 0
 	// inclusive. Not interating an array. The <= is intended.
 	for i := start; i <= end; i++ {
 		accParams := database.AddCageCardParams{
@@ -215,18 +219,23 @@ func addCCtoDB(cfg *Config, start, end int, inv database.Investigator, pro datab
 			ProtocolID:     pro.ID,
 			InvestigatorID: inv.ID,
 		}
-		// check what happens when you add a card that isnt unique and handle that separately
 		cc, err := cfg.db.AddCageCard(context.Background(), accParams)
 		if err != nil {
-			fmt.Println("Error adding cage card to DB")
-			fmt.Println(err)
-			continue
+			if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+				fmt.Printf("%v has already been added to the DB\n", i)
+				continue
+			} else {
+				fmt.Println("Error adding cage card to DB")
+				fmt.Println(err)
+				continue
+			}
 		}
 		if verbose {
 			fmt.Println(cc)
 		}
+		added++
 	}
-
+	fmt.Printf("%v cards added!\n", added)
 	return nil
 }
 
