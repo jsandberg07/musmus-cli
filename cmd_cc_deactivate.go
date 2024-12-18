@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"database/sql"
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -192,4 +193,19 @@ func getCCToDeactivate(cc int, date *time.Time, deactivatedBy *database.Investig
 	}
 
 	return tdccp
+}
+
+func deactivateCageCards(cfg *Config, ctd []database.DeactivateCageCardParams) error {
+	if len(ctd) == 0 {
+		return errors.New("Oops! No cards!")
+	}
+	deactivationErrors := []ccError{}
+	totalDeactivated := 0
+
+	for _, cc := range ctd {
+		// check if card is in the system
+
+		// check if not active or previously deact
+
+	}
 }
