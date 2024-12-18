@@ -226,6 +226,18 @@ func (q *Queries) GetCageCardsByInvestigator(ctx context.Context, investigatorID
 	return items, nil
 }
 
+const getDeactivationDate = `-- name: GetDeactivationDate :one
+SELECT deactivated_on FROM cage_cards
+WHERE $1 = cc_id
+`
+
+func (q *Queries) GetDeactivationDate(ctx context.Context, ccID int32) (sql.NullTime, error) {
+	row := q.db.QueryRowContext(ctx, getDeactivationDate, ccID)
+	var deactivated_on sql.NullTime
+	err := row.Scan(&deactivated_on)
+	return deactivated_on, err
+}
+
 const newActivateCageCard = `-- name: NewActivateCageCard :exec
 UPDATE cage_cards
 SET activated_on = $2,

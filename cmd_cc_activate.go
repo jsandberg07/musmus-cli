@@ -192,7 +192,7 @@ func activateFunction(cfg *Config, args []Argument) error {
 
 			// a misread on cc means the value 0 init
 			if cc != 0 {
-				tAccp := getCCToAdd(cc, &date, &strain, cfg.loggedInInvestigator, &notes)
+				tAccp := getCCToActivate(cc, &date, &strain, cfg.loggedInInvestigator, &notes)
 				cardsToProcess = append(cardsToProcess, tAccp)
 				fmt.Printf("%v card added\n", cc)
 
@@ -235,7 +235,7 @@ func activateFunction(cfg *Config, args []Argument) error {
 					continue
 				}
 
-				tAccp := getCCToAdd(cc, &date, &strain, cfg.loggedInInvestigator, &notes)
+				tAccp := getCCToActivate(cc, &date, &strain, cfg.loggedInInvestigator, &notes)
 				cardsToProcess = append(cardsToProcess, tAccp)
 				fmt.Printf("%v card added\n", cc)
 
@@ -353,26 +353,10 @@ func processCageCards(cfg *Config, cctp []database.TrueActivateCageCardParams) e
 	totalActivated := 0
 
 	for _, cc := range cctp {
-		// check if already active
-		td, err := cfg.db.GetActivationDate(context.Background(), cc.CcID)
-		if err != nil && err.Error() == "sql: no rows in result set" {
-			// cc not added to db or not found
-			tcce := ccError{
-				CCid: int(cc.CcID),
-				Err:  "CC not added to database",
-			}
-			activationErrors = append(activationErrors, tcce)
-			continue
-		}
-		if td.Valid {
-			// card was previously activated
-			errmsg := fmt.Sprintf("CC is already active -- %s", td.Time)
-			tcce := ccError{
-				CCid: int(cc.CcID),
-				Err:  errmsg,
-			}
-			activationErrors = append(activationErrors, tcce)
-			continue
+
+		ccErr := checkCCError(cfg, &cc)
+		if ccErr.CCid == 0 {
+			activationErrors = append(activationErrors, ccErr)
 		}
 
 		acc, err := cfg.db.TrueActivateCageCard(context.Background(), cc)
@@ -474,7 +458,7 @@ func getStrainByFlag(cfg *Config, input string) (database.Strain, error) {
 }
 
 // probably a candidate for using channels and a go routine to feed this into another function
-func getCCToAdd(cc int,
+func getCCToActivate(cc int,
 	date *time.Time,
 	strain *database.Strain,
 	activatedBy *database.Investigator,
@@ -508,4 +492,62 @@ func getCCToAdd(cc int,
 		Notes:       tnote,
 	}
 	return taccp
+}
+
+func checkCCError(cfg *Config, cc *database.TrueActivateCageCardParams) ccError {
+	// check if already active
+	td, err := cfg.db.GetActivationDate(context.Background(), cc.CcID)
+	if err != nil && err.Error() == "sql: no rows in result set" {
+		// cc not added to db or not found
+		tcce := ccError{
+			CCid: int(cc.CcID),
+			Err:  "CC not added to database",
+		}
+
+		return tcce
+	}
+
+	if td.Valid {
+		// card was previously activated
+		errmsg := fmt.Sprintf("CC is already active -- %s", td.Time)
+		tcce := ccError{
+			CCid: int(cc.CcID),
+			Err:  errmsg,
+		}
+		return tcce
+	}
+
+	if err != nil {
+		// any other error
+		tcce := ccError{
+			CCid: int(cc.CcID),
+			Err:  err.Error(),
+		}
+		return tcce
+	}
+
+	// check if previously deactivated
+	dd, err := cfg.db.GetDeactivationDate(context.Background(), cc.CcID)
+	// dont need to check if not in db
+	if dd.Valid {
+		// card was previously deactivated
+		errmsg := fmt.Sprintf("CC is already deactivated -- %s", dd.Time)
+		tcce := ccError{
+			CCid: int(cc.CcID),
+			Err:  errmsg,
+		}
+		return tcce
+	}
+
+	if err != nil {
+		// any other error
+		tcce := ccError{
+			CCid: int(cc.CcID),
+			Err:  err.Error(),
+		}
+		return tcce
+	}
+
+	// everything ok
+	return ccError{}
 }
