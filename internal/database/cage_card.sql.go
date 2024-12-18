@@ -75,6 +75,18 @@ func (q *Queries) DeactivateCageCard(ctx context.Context, arg DeactivateCageCard
 	return err
 }
 
+const getActivationDate = `-- name: GetActivationDate :one
+SELECT activated_on FROM cage_cards
+WHERE $1 = cc_id
+`
+
+func (q *Queries) GetActivationDate(ctx context.Context, ccID int32) (sql.NullTime, error) {
+	row := q.db.QueryRowContext(ctx, getActivationDate, ccID)
+	var activated_on sql.NullTime
+	err := row.Scan(&activated_on)
+	return activated_on, err
+}
+
 const getAllActiveCageCards = `-- name: GetAllActiveCageCards :many
 SELECT cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by FROM cage_cards
 WHERE activated_on IS NOT NULL AND deactivated_on IS NULL

@@ -48,4 +48,6 @@ RETURNING *;
 SELECT * FROM cage_cards
 WHERE $1 = cc_id;
 
-    
+-- name: GetActivationDate :one
+SELECT activated_on FROM cage_cards
+WHERE $1 = cc_id;

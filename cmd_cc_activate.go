@@ -21,6 +21,12 @@ import (
 // would also work for investigator
 
 // TODO: set reminders with a flag. either by like E17 for a date or just a date
+// TODO: actually add an allotment and way to handle it, what to do if an activation errors
+// cause it's not passed in with the activation struct
+// an allotment stuct that is the cc, allot, pro, then removes ccs with errors, then sums them
+// maybe
+// or i just add a number of animals field to the CC activation and never use it for anything else
+// yeah keep it as a reference just add it....... later
 
 // TODO: update the sql for activation, need more fields
 // actually making the activate cards uhh contact the db
@@ -221,11 +227,38 @@ func activateFunction(cfg *Config, args []Argument) error {
 				fmt.Printf("Date set: %v\n", date)
 
 			case "-cc":
+				cc, err := strconv.Atoi(arg.value)
+				if err != nil && !strings.Contains(err.Error(), "invalid syntax") {
+					// an error occured and it was not from passing a word in to atoi
+					fmt.Println("Error convering input to cage card number")
+					fmt.Println(err)
+					continue
+				}
+
+				tAccp := getCCToAdd(cc, &date, &strain, cfg.loggedInInvestigator, &notes)
+				cardsToProcess = append(cardsToProcess, tAccp)
+				fmt.Printf("%v card added\n", cc)
+
+				if keepNote == false {
+					notes = ""
+				}
+				if keepStrain == false {
+					strain.ID = uuid.Nil
+				}
 
 			case "-a":
-				fmt.Println("TODO: add allotments to the protocols")
-				// set the allotment, just parsing an int how hard could it be
-				// make sure you see if it's like above a gorillion or not
+				num, err := strconv.Atoi(arg.value)
+				if err != nil && !strings.Contains(err.Error(), "invalid syntax") {
+					// an error occured and it was not from passing a word in to atoi
+					fmt.Println("Error convering input to cage card number")
+					fmt.Println(err)
+					continue
+				}
+				if num < 0 {
+					allotment = 0
+				} else {
+					allotment = num
+				}
 
 			case "-s":
 				s, err := getStrainByFlag(cfg, arg.value)
@@ -260,7 +293,7 @@ func activateFunction(cfg *Config, args []Argument) error {
 				keepNote = true
 
 			case "process":
-				err := processCageCards(cardsToProcess)
+				err := processCageCards(cfg, cardsToProcess)
 				if err != nil {
 					fmt.Println(err)
 				}
@@ -305,14 +338,67 @@ func activateFunction(cfg *Config, args []Argument) error {
 
 }
 
-func processCageCards(cctp []database.TrueActivateCageCardParams) error {
+// if it isn't there, "sql: no rows in result set"
+// if card is already active, throw a fit about that too
+
+// if you dont have time to do it right now, what makes you think you'll have time to do it later?
+// TODO: check the whole array for duplicate #s. deleting slices is tricky business, maybe appends around it
+// especially if indexing in a loop and shifting numbers
+// something to test
+func processCageCards(cfg *Config, cctp []database.TrueActivateCageCardParams) error {
 	if len(cctp) == 0 {
 		return errors.New("Oops! No cards!")
 	}
-	for i := 0; i < len(cctp); i++ {
-		fmt.Printf("Processing card %v... ;^3\n", i)
+	activationErrors := []ccError{}
+	totalActivated := 0
+
+	for _, cc := range cctp {
+		// check if already active
+		td, err := cfg.db.GetActivationDate(context.Background(), cc.CcID)
+		if err != nil && err.Error() == "sql: no rows in result set" {
+			// cc not added to db or not found
+			tcce := ccError{
+				CCid: int(cc.CcID),
+				Err:  "CC not added to database",
+			}
+			activationErrors = append(activationErrors, tcce)
+			continue
+		}
+		if td.Valid {
+			// card was previously activated
+			errmsg := fmt.Sprintf("CC is already active -- %s", td.Time)
+			tcce := ccError{
+				CCid: int(cc.CcID),
+				Err:  errmsg,
+			}
+			activationErrors = append(activationErrors, tcce)
+			continue
+		}
+
+		acc, err := cfg.db.TrueActivateCageCard(context.Background(), cc)
+		if err != nil {
+			// any other error
+			tcce := ccError{
+				CCid: int(acc.CcID),
+				Err:  err.Error(),
+			}
+			activationErrors = append(activationErrors, tcce)
+		}
+
+		if verbose {
+			fmt.Println(acc)
+		}
+
+		totalActivated++
 	}
 
+	fmt.Printf("%v cards activated\n", totalActivated)
+	if len(activationErrors) > 0 {
+		fmt.Println("Errors activating these cage cards:")
+		for _, cce := range activationErrors {
+			fmt.Printf("%v -- %s\n", cce.CCid, cce.Err)
+		}
+	}
 	return nil
 }
 
@@ -344,7 +430,7 @@ func parseDate(input string) (time.Time, error) {
 func printCurrentActivationParams(date *time.Time, allotment *int, strain *database.Strain, note *string) {
 	fmt.Println("Current settings for cards being added to activation queue:")
 	fmt.Printf("Date: %v\n", date)
-	fmt.Printf("Number of animals: %v\n", allotment)
+	fmt.Printf("Number of animals: %v\n", *allotment)
 	if strain.ID != uuid.Nil {
 		fmt.Printf("Strain: %v\n", strain.SName)
 	}

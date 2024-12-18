@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jsandberg07/clitest/internal/database"
 )
 
@@ -46,6 +47,16 @@ type CageCard struct {
 type Reviewed struct {
 	Printed     bool
 	ChangesMade bool
+}
+
+type ccError struct {
+	CCid int
+	Err  string
+}
+
+type addAllotment struct {
+	protocolID uuid.UUID
+	total      int
 }
 
 /*
