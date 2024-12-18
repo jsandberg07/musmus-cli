@@ -355,6 +355,7 @@ func processCageCards(cfg *Config, cctp []database.TrueActivateCageCardParams) e
 	for _, cc := range cctp {
 
 		ccErr := checkCCError(cfg, &cc)
+		// hacky way to see if a nil struct was returned, meaning no error
 		if ccErr.CCid == 0 {
 			activationErrors = append(activationErrors, ccErr)
 		}
