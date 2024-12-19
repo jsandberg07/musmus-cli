@@ -57,11 +57,12 @@ func (q *Queries) AddNote(ctx context.Context, arg AddNoteParams) error {
 	return err
 }
 
-const deactivateCageCard = `-- name: DeactivateCageCard :exec
+const deactivateCageCard = `-- name: DeactivateCageCard :one
 UPDATE cage_cards
 SET deactivated_on = $2,
     deactivated_by = $3
 WHERE cc_id = $1
+RETURNING cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by
 `
 
 type DeactivateCageCardParams struct {
@@ -70,9 +71,21 @@ type DeactivateCageCardParams struct {
 	DeactivatedBy uuid.NullUUID
 }
 
-func (q *Queries) DeactivateCageCard(ctx context.Context, arg DeactivateCageCardParams) error {
-	_, err := q.db.ExecContext(ctx, deactivateCageCard, arg.CcID, arg.DeactivatedOn, arg.DeactivatedBy)
-	return err
+func (q *Queries) DeactivateCageCard(ctx context.Context, arg DeactivateCageCardParams) (CageCard, error) {
+	row := q.db.QueryRowContext(ctx, deactivateCageCard, arg.CcID, arg.DeactivatedOn, arg.DeactivatedBy)
+	var i CageCard
+	err := row.Scan(
+		&i.CcID,
+		&i.ProtocolID,
+		&i.ActivatedOn,
+		&i.DeactivatedOn,
+		&i.InvestigatorID,
+		&i.Strain,
+		&i.Notes,
+		&i.ActivatedBy,
+		&i.DeactivatedBy,
+	)
+	return i, err
 }
 
 const getActivationDate = `-- name: GetActivationDate :one

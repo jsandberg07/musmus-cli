@@ -24,11 +24,12 @@ SET activated_on = $2,
     activated_by = $3
 WHERE cc_id = $1;
 
--- name: DeactivateCageCard :exec
+-- name: DeactivateCageCard :one
 UPDATE cage_cards
 SET deactivated_on = $2,
     deactivated_by = $3
-WHERE cc_id = $1;
+WHERE cc_id = $1
+RETURNING *;
 
 -- name: AddNote :exec
 UPDATE cage_cards

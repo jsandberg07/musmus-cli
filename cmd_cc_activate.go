@@ -354,10 +354,11 @@ func processCageCards(cfg *Config, cctp []database.TrueActivateCageCardParams) e
 
 	for _, cc := range cctp {
 
-		ccErr := checkCCError(cfg, &cc)
+		ccErr := checkActivateError(cfg, &cc)
 		// hacky way to see if a nil struct was returned, meaning no error
-		if ccErr.CCid == 0 {
+		if ccErr.CCid != 0 {
 			activationErrors = append(activationErrors, ccErr)
+			continue
 		}
 
 		acc, err := cfg.db.TrueActivateCageCard(context.Background(), cc)
@@ -368,6 +369,7 @@ func processCageCards(cfg *Config, cctp []database.TrueActivateCageCardParams) e
 				Err:  err.Error(),
 			}
 			activationErrors = append(activationErrors, tcce)
+			continue
 		}
 
 		if verbose {
@@ -495,7 +497,7 @@ func getCCToActivate(cc int,
 	return taccp
 }
 
-func checkCCError(cfg *Config, cc *database.TrueActivateCageCardParams) ccError {
+func checkActivateError(cfg *Config, cc *database.TrueActivateCageCardParams) ccError {
 	// check if already active
 	td, err := cfg.db.GetActivationDate(context.Background(), cc.CcID)
 	if err != nil && err.Error() == "sql: no rows in result set" {

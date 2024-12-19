@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -36,6 +37,13 @@ func getDeactivationFlags() map[string]Flag {
 	}
 	deactivationFlags["-"+ccFlag.symbol] = ccFlag
 
+	dFlag := Flag{
+		symbol:      "d",
+		description: "Sets the date the cage card will be deactivated",
+		takesValue:  true,
+	}
+	deactivationFlags["-"+dFlag.symbol] = dFlag
+
 	// ect as needed or remove the "-"+ for longer ones
 
 	popFlag := Flag{
@@ -44,6 +52,13 @@ func getDeactivationFlags() map[string]Flag {
 		takesValue:  false,
 	}
 	deactivationFlags[popFlag.symbol] = popFlag
+
+	printFlag := Flag{
+		symbol:      "print",
+		description: "Prints the current settings for card deactivation",
+		takesValue:  false,
+	}
+	deactivationFlags[printFlag.symbol] = printFlag
 
 	exitFlag := Flag{
 		symbol:      "exit",
@@ -131,6 +146,23 @@ func deactivateFunction(cfg *Config, args []Argument) error {
 		// TODO: make sure activated cards check if previously deact too
 		for _, arg := range args {
 			switch arg.flag {
+
+			case "-d":
+				newDate, err := parseDate(arg.value)
+				if err != nil {
+					fmt.Println(err)
+					break
+				}
+
+				// cant be after today ie cant deactivate on a day that hasnt happened
+				if newDate.After(time.Now()) {
+					fmt.Println("Deactivation date can't be set in the future")
+					break
+				}
+
+				date = newDate
+				fmt.Printf("Date set: %v\n", date)
+
 			case "-cc":
 				cc, err := strconv.Atoi(inputs[0])
 				if err != nil && !strings.Contains(err.Error(), "invalid syntax") {
@@ -148,6 +180,9 @@ func deactivateFunction(cfg *Config, args []Argument) error {
 					continue
 				}
 
+			case "print":
+				printCurrentDeactivationParams(&date)
+
 			case "help":
 				cmdHelp(flags)
 
@@ -162,9 +197,15 @@ func deactivateFunction(cfg *Config, args []Argument) error {
 				cardsToDeactivate = cardsToDeactivate[0 : length-1]
 
 			case "process":
+				fmt.Println("Processing...")
+				err := deactivateCageCards(cfg, cardsToDeactivate)
+				if err != nil {
+					fmt.Println(err)
+				}
 				exit = true
 
 			case "exit":
+				fmt.Println("Exiting without saving...")
 				exit = true
 
 			default:
@@ -195,6 +236,9 @@ func getCCToDeactivate(cc int, date *time.Time, deactivatedBy *database.Investig
 	return tdccp
 }
 
+// candidate for DRYing up with a "process cc" function with an activate/deactivate enum
+// behavior is just different enough to have them disentangled
+// ie activating checks to see if it's already active, deact checks to see if it isnt active
 func deactivateCageCards(cfg *Config, ctd []database.DeactivateCageCardParams) error {
 	if len(ctd) == 0 {
 		return errors.New("Oops! No cards!")
@@ -203,9 +247,114 @@ func deactivateCageCards(cfg *Config, ctd []database.DeactivateCageCardParams) e
 	totalDeactivated := 0
 
 	for _, cc := range ctd {
-		// check if card is in the system
+		ccErr := checkDeactivateError(cfg, &cc)
+		// hacky way to see if a nil struct was returned, meaning no error
+		if ccErr.CCid != 0 {
+			deactivationErrors = append(deactivationErrors, ccErr)
+			continue
+		}
 
-		// check if not active or previously deact
+		dcc, err := cfg.db.DeactivateCageCard(context.Background(), cc)
+		if err != nil {
+			// any other error
+			tcce := ccError{
+				CCid: int(dcc.CcID),
+				Err:  err.Error(),
+			}
+			deactivationErrors = append(deactivationErrors, tcce)
+			continue
+		}
+
+		if verbose {
+			fmt.Println(dcc)
+		}
+
+		totalDeactivated++
 
 	}
+
+	fmt.Printf("%v cards deactivated\n", totalDeactivated)
+	if len(deactivationErrors) > 0 {
+		fmt.Println("Errors deactivating these cage cards:")
+		for _, cce := range deactivationErrors {
+			fmt.Printf("%v -- %s\n", cce.CCid, cce.Err)
+		}
+	}
+	return nil
+}
+
+// TODO: maybe add a check for if deactivation date is after today too
+// like can only deactivate today or past, not future, to prevent errors of course
+// no "this card will have had been deactivated"
+// WORKING: seeing why stopping cards isn't working
+// I FORGOT TO FINISH THE CASES LE MOO ALSO ADD A DATE SETTER AND CHECK IF ITS IN THE FUTURE
+func checkDeactivateError(cfg *Config, cc *database.DeactivateCageCardParams) ccError {
+	// check if already active
+	td, err := cfg.db.GetActivationDate(context.Background(), cc.CcID)
+	if err != nil && err.Error() == "sql: no rows in result set" {
+		// cc not added to db or not found
+		tcce := ccError{
+			CCid: int(cc.CcID),
+			Err:  "CC not added to database",
+		}
+
+		return tcce
+	}
+
+	if td.Valid == false {
+		tcce := ccError{
+			CCid: int(cc.CcID),
+			Err:  "CC is not currently active",
+		}
+		return tcce
+	}
+
+	// check if deactivation date is before activation date
+	if cc.DeactivatedOn.Time.Before(td.Time) {
+		tcce := ccError{
+			CCid: int(cc.CcID),
+			Err:  "Deactivation date is before activation date",
+		}
+		return tcce
+	}
+
+	if err != nil {
+		// any other error
+		tcce := ccError{
+			CCid: int(cc.CcID),
+			Err:  err.Error(),
+		}
+		return tcce
+	}
+
+	// check if previously deactivated
+	dd, err := cfg.db.GetDeactivationDate(context.Background(), cc.CcID)
+	// dont need to check if not in db
+	if dd.Valid {
+		// card was previously deactivated
+		errmsg := fmt.Sprintf("CC is already deactivated -- %s", dd.Time)
+		tcce := ccError{
+			CCid: int(cc.CcID),
+			Err:  errmsg,
+		}
+		return tcce
+	}
+
+	if err != nil {
+		// any other error
+		tcce := ccError{
+			CCid: int(cc.CcID),
+			Err:  err.Error(),
+		}
+		return tcce
+	}
+
+	// everything ok
+	return ccError{}
+}
+
+// yeah, just the date. Keep the 'deactivated_by' hidden
+func printCurrentDeactivationParams(date *time.Time) {
+	fmt.Println("Current settings for cards being added to deactivation queue:")
+	fmt.Printf("Date: %v\n", *date)
 }
