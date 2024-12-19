@@ -43,6 +43,9 @@ import (
 // then more of the same for deactivation ect
 // cards that haven't been activated
 
+// IDEA: actually have the cards get processed with a go routine as they come in
+// would look cooler, and threaded would mean they dont lag like cayuse
+
 func fart() {
 	fmt.Println("Fart")
 }
@@ -217,7 +220,6 @@ func activateFunction(cfg *Config, args []Argument) error {
 		for _, arg := range args {
 			switch arg.flag {
 			case "-d":
-				// parse the time, dont fuck it up
 				newDate, err := parseDate(arg.value)
 				if err != nil {
 					fmt.Println(err)
@@ -293,6 +295,7 @@ func activateFunction(cfg *Config, args []Argument) error {
 				keepNote = true
 
 			case "process":
+				fmt.Println("Processing...")
 				err := processCageCards(cfg, cardsToProcess)
 				if err != nil {
 					fmt.Println(err)

@@ -56,3 +56,8 @@ WHERE $1 = cc_id;
 -- name: GetDeactivationDate :one
 SELECT deactivated_on FROM cage_cards
 WHERE $1 = cc_id;
+
+-- name: ReactivateCageCard :exec
+UPDATE cage_cards
+SET deactivated_on = NULL
+WHERE $1 = cc_id;
