@@ -24,13 +24,45 @@ SET activated_on = $2,
     activated_by = $3
 WHERE cc_id = $1;
 
--- name: DeactivateCageCard :exec
+-- name: DeactivateCageCard :one
 UPDATE cage_cards
 SET deactivated_on = $2,
     deactivated_by = $3
-WHERE cc_id = $1;
+WHERE cc_id = $1
+RETURNING *;
 
 -- name: AddNote :exec
 UPDATE cage_cards
 SET notes = $2
 WHERE cc_id = $1;
+
+-- name: TrueActivateCageCard :one
+UPDATE cage_cards
+SET activated_on = $2,
+    activated_by = $3,
+    strain = $4,
+    notes = $5
+WHERE cc_id = $1
+RETURNING *;
+
+-- name: GetCageCardByID :one
+SELECT * FROM cage_cards
+WHERE $1 = cc_id;
+
+-- name: GetActivationDate :one
+SELECT activated_on FROM cage_cards
+WHERE $1 = cc_id;
+
+-- name: GetDeactivationDate :one
+SELECT deactivated_on FROM cage_cards
+WHERE $1 = cc_id;
+
+-- name: ReactivateCageCard :exec
+UPDATE cage_cards
+SET deactivated_on = NULL
+WHERE $1 = cc_id;
+
+-- name: InactivateCageCard :exec
+UPDATE cage_cards
+SET activated_on = NULL
+WHERE $1 = cc_id;

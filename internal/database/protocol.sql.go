@@ -68,13 +68,13 @@ func (q *Queries) CreateProtocol(ctx context.Context, arg CreateProtocolParams) 
 	return i, err
 }
 
-const getProtocolByID = `-- name: GetProtocolByID :one
+const getProtocolByNumber = `-- name: GetProtocolByNumber :one
 SELECT id, p_number, primary_investigator, title, allocated, balance, expiration_date, is_active, previous_protocol FROM protocols
 WHERE $1 = p_number
 `
 
-func (q *Queries) GetProtocolByID(ctx context.Context, pNumber string) (Protocol, error) {
-	row := q.db.QueryRowContext(ctx, getProtocolByID, pNumber)
+func (q *Queries) GetProtocolByNumber(ctx context.Context, pNumber string) (Protocol, error) {
+	row := q.db.QueryRowContext(ctx, getProtocolByNumber, pNumber)
 	var i Protocol
 	err := row.Scan(
 		&i.ID,
@@ -140,5 +140,39 @@ type UpdateAllocatedParams struct {
 
 func (q *Queries) UpdateAllocated(ctx context.Context, arg UpdateAllocatedParams) error {
 	_, err := q.db.ExecContext(ctx, updateAllocated, arg.PNumber, arg.Allocated)
+	return err
+}
+
+const updateProtocol = `-- name: UpdateProtocol :exec
+UPDATE protocols
+SET p_number = $2,
+    primary_investigator = $3,
+    title = $4,
+    allocated = $5,
+    balance = $6,
+    expiration_date = $7
+WHERE $1 = id
+`
+
+type UpdateProtocolParams struct {
+	ID                  uuid.UUID
+	PNumber             string
+	PrimaryInvestigator uuid.UUID
+	Title               string
+	Allocated           int32
+	Balance             int32
+	ExpirationDate      time.Time
+}
+
+func (q *Queries) UpdateProtocol(ctx context.Context, arg UpdateProtocolParams) error {
+	_, err := q.db.ExecContext(ctx, updateProtocol,
+		arg.ID,
+		arg.PNumber,
+		arg.PrimaryInvestigator,
+		arg.Title,
+		arg.Allocated,
+		arg.Balance,
+		arg.ExpirationDate,
+	)
 	return err
 }

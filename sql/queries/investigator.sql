@@ -20,4 +20,6 @@ SET i_name = $2,
     active = $6
 WHERE $1 = id;
 
-
+-- name: GetInvestigatorByID :one
+SELECT * FROM investigators
+WHERE $1 = id;

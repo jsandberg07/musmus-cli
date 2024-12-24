@@ -1,19 +1,19 @@
 package main
 
-func getInvestigatorMap() map[string]Command {
-	// put that commands related to investigators you want here
-	cmds := []Command{}
+func getPositionMap() map[string]Command {
+	// put that commands related to positions you want here
+	cmds := []Command{getAddPositionCmd(), getEditPositionCmd()}
 	commandMap := cmdMapHelper(cmds)
 
 	return commandMap
 }
 
-func getInvestigatorState() *State {
-	investigatorMap := getInvestigatorMap()
-	processingState := State{
-		currentCommands: investigatorMap,
-		cliMessage:      "investigator",
+func getPositionState() *State {
+	positionsMap := getPositionMap()
+	positionState := State{
+		currentCommands: positionsMap,
+		cliMessage:      "position",
 	}
 
-	return &processingState
+	return &positionState
 }

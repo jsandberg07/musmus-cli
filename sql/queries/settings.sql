@@ -4,7 +4,7 @@
 INSERT INTO settings(settings_complete, only_activate_self)
 VALUES (false, false);
 
--- name: GetSettings :one
+-- name: GetSettings :many
 SELECT * FROM settings;
 
 -- name: ActivateSelfOnly :one
@@ -15,3 +15,7 @@ UPDATE settings SET only_activate_self = $1;
 
 -- name: FirstTimeSetupComplete :exec
 UPDATE settings SET settings_complete = true;
+
+-- name: UpdateSettings :exec
+UPDATE settings
+SET only_activate_self = $1;

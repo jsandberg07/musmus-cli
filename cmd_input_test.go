@@ -15,7 +15,24 @@ func TestParse(t *testing.T) {
 	}
 	fmt.Println(inputs)
 
-	args, err := parseSubcommand(flags, inputs)
+	args, err := parseArguments(flags, inputs)
+	if err != nil {
+		t.Fatalf("Error parseSubcommand: %s", err)
+	}
+	fmt.Println(args)
+}
+
+func TestParseProtocol(t *testing.T) {
+	fmt.Println("Parsing with - //")
+	flags := getAddInvestToProtFlags()
+	input := "-p 12-24-32"
+	inputs, err := readSubcommandInput(input)
+	if err != nil {
+		t.Fatalf("Error readSubcommandInput: %s\n", err)
+	}
+	fmt.Println(inputs)
+
+	args, err := parseArguments(flags, inputs)
 	if err != nil {
 		t.Fatalf("Error parseSubcommand: %s", err)
 	}

@@ -63,6 +63,25 @@ func (q *Queries) GetInvestigatorByEmail(ctx context.Context, email sql.NullStri
 	return i, err
 }
 
+const getInvestigatorByID = `-- name: GetInvestigatorByID :one
+SELECT id, i_name, nickname, email, position, active FROM investigators
+WHERE $1 = id
+`
+
+func (q *Queries) GetInvestigatorByID(ctx context.Context, id uuid.UUID) (Investigator, error) {
+	row := q.db.QueryRowContext(ctx, getInvestigatorByID, id)
+	var i Investigator
+	err := row.Scan(
+		&i.ID,
+		&i.IName,
+		&i.Nickname,
+		&i.Email,
+		&i.Position,
+		&i.Active,
+	)
+	return i, err
+}
+
 const getInvestigatorByName = `-- name: GetInvestigatorByName :many
 SELECT id, i_name, nickname, email, position, active FROM investigators
 WHERE $1 = i_name OR $1 = nickname

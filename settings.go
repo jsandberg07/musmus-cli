@@ -2,30 +2,39 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 )
 
 // TODO: this will load the basic settings, checking if it was set up already
 // as a place holder, just say "first time set up complete"
 // set the values as you want so you don't have to repeatedly
 // not a stored value, grab bools as needed from the db
-func (cfg *Config) checkSettings() error {
+// ALSO TODO: there's a first time setup complete row that doesnt do anything yet
+// and i'll add functionality to that later (asking what settings to use, or load test data)
+// but for now this is FINE
+func (cfg *Config) loadSettings() error {
 	settings, err := cfg.db.GetSettings(context.Background())
-	if err != nil {
-		if strings.Contains(err.Error(), "no rows in result set") {
-			fmt.Println("Creating settings file...")
-			cfg.db.SetUpSettings(context.Background())
-		} else {
+	if err != nil && err.Error() != "sql: no rows in result set" {
+		return err
+	}
+
+	if len(settings) == 1 {
+		return nil
+	}
+
+	if len(settings) == 0 {
+		fmt.Println("Creating settings file...")
+		err := cfg.db.SetUpSettings(context.Background())
+		if err != nil {
 			return err
 		}
+		return nil
 	}
 
-	if settings.SettingsComplete == false {
-		cfg.db.UpdateActivateSelf(context.Background(), true)
-		cfg.db.FirstTimeSetupComplete(context.Background())
-		fmt.Println("First time set up complete!")
+	if len(settings) > 1 {
+		return errors.New("Too many rows of settings found. Should only ever be 1")
 	}
 
-	return nil
+	return errors.New("Shouldn't see this error while loading settings")
 }

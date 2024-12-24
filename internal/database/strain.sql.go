@@ -35,6 +35,40 @@ func (q *Queries) AddStrain(ctx context.Context, arg AddStrainParams) (Strain, e
 	return i, err
 }
 
+const getStrainByCode = `-- name: GetStrainByCode :one
+SELECT id, s_name, vendor, vendor_code FROM strains
+WHERE $1 = vendor_code
+`
+
+func (q *Queries) GetStrainByCode(ctx context.Context, vendorCode string) (Strain, error) {
+	row := q.db.QueryRowContext(ctx, getStrainByCode, vendorCode)
+	var i Strain
+	err := row.Scan(
+		&i.ID,
+		&i.SName,
+		&i.Vendor,
+		&i.VendorCode,
+	)
+	return i, err
+}
+
+const getStrainByID = `-- name: GetStrainByID :one
+SELECT id, s_name, vendor, vendor_code FROM strains
+WHERE $1 = id
+`
+
+func (q *Queries) GetStrainByID(ctx context.Context, id uuid.UUID) (Strain, error) {
+	row := q.db.QueryRowContext(ctx, getStrainByID, id)
+	var i Strain
+	err := row.Scan(
+		&i.ID,
+		&i.SName,
+		&i.Vendor,
+		&i.VendorCode,
+	)
+	return i, err
+}
+
 const getStrainByName = `-- name: GetStrainByName :one
 SELECT id, s_name, vendor, vendor_code FROM strains
 WHERE $1 = vendor_code OR $1 = s_name
@@ -85,19 +119,27 @@ func (q *Queries) GetStrains(ctx context.Context) ([]Strain, error) {
 	return items, nil
 }
 
-const getStrainByID = `-- name: getStrainByID :one
-SELECT id, s_name, vendor, vendor_code FROM strains
+const updateStrain = `-- name: UpdateStrain :exec
+UPDATE strains
+SET s_name = $2,
+    vendor = $3,
+    vendor_code = $4
 WHERE $1 = id
 `
 
-func (q *Queries) getStrainByID(ctx context.Context, id uuid.UUID) (Strain, error) {
-	row := q.db.QueryRowContext(ctx, getStrainByID, id)
-	var i Strain
-	err := row.Scan(
-		&i.ID,
-		&i.SName,
-		&i.Vendor,
-		&i.VendorCode,
+type UpdateStrainParams struct {
+	ID         uuid.UUID
+	SName      string
+	Vendor     string
+	VendorCode string
+}
+
+func (q *Queries) UpdateStrain(ctx context.Context, arg UpdateStrainParams) error {
+	_, err := q.db.ExecContext(ctx, updateStrain,
+		arg.ID,
+		arg.SName,
+		arg.Vendor,
+		arg.VendorCode,
 	)
-	return i, err
+	return err
 }

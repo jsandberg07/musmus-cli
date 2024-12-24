@@ -29,7 +29,8 @@ func readCommandName(input string) (string, []string, error) {
 
 }
 
-func parseArguments(cmd *Command, parameters []string) ([]Argument, error) {
+// for now used outside of commands but is a lot for what is essentially "goto this state"
+func parseCommandArguments(cmd *Command, parameters []string) ([]Argument, error) {
 	// no params passed in
 	if len(parameters) == 0 {
 		return nil, nil
