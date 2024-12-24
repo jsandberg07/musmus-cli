@@ -61,3 +61,8 @@ WHERE $1 = cc_id;
 UPDATE cage_cards
 SET deactivated_on = NULL
 WHERE $1 = cc_id;
+
+-- name: InactivateCageCard :exec
+UPDATE cage_cards
+SET activated_on = NULL
+WHERE $1 = cc_id;

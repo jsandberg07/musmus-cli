@@ -251,6 +251,17 @@ func (q *Queries) GetDeactivationDate(ctx context.Context, ccID int32) (sql.Null
 	return deactivated_on, err
 }
 
+const inactivateCageCard = `-- name: InactivateCageCard :exec
+UPDATE cage_cards
+SET activated_on = NULL
+WHERE $1 = cc_id
+`
+
+func (q *Queries) InactivateCageCard(ctx context.Context, ccID int32) error {
+	_, err := q.db.ExecContext(ctx, inactivateCageCard, ccID)
+	return err
+}
+
 const newActivateCageCard = `-- name: NewActivateCageCard :exec
 UPDATE cage_cards
 SET activated_on = $2,

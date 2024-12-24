@@ -10,28 +10,29 @@ import (
 	"strings"
 )
 
-func getCCReactivateCmd() Command {
-	reactivateFlags := make(map[string]Flag)
-	reactivateCmd := Command{
-		name:        "reactivate",
-		description: "Reactivate cage cards, removing their deactivation date",
-		function:    reactivateFunction,
-		flags:       reactivateFlags,
+// return to inactive
+
+func getCCInactivateCmd() Command {
+	inactivateFlags := make(map[string]Flag)
+	inactivateCmd := Command{
+		name:        "inactivate",
+		description: "Used for returning cards to inactive status",
+		function:    inactivateFunction,
+		flags:       inactivateFlags,
 	}
 
-	return reactivateCmd
+	return inactivateCmd
 }
 
-func getCCReactivateFlags() map[string]Flag {
+func getInactivateFlags() map[string]Flag {
 	// cc, process, exit, help
-
-	ReactivateFlags := make(map[string]Flag)
+	InactivateFlags := make(map[string]Flag)
 	ccFlag := Flag{
 		symbol:      "cc",
 		description: "Adds CC to queue to be reactivated",
 		takesValue:  true,
 	}
-	ReactivateFlags["-"+ccFlag.symbol] = ccFlag
+	InactivateFlags["-"+ccFlag.symbol] = ccFlag
 
 	// ect as needed or remove the "-"+ for longer ones
 
@@ -40,38 +41,38 @@ func getCCReactivateFlags() map[string]Flag {
 		description: "Reactivates card in queue",
 		takesValue:  false,
 	}
-	ReactivateFlags[processFlag.symbol] = processFlag
+	InactivateFlags[processFlag.symbol] = processFlag
 
 	exitFlag := Flag{
 		symbol:      "exit",
 		description: "Exits without processing queue",
 		takesValue:  false,
 	}
-	ReactivateFlags[exitFlag.symbol] = exitFlag
+	InactivateFlags[exitFlag.symbol] = exitFlag
 
 	helpFlag := Flag{
 		symbol:      "help",
 		description: "Prints list of available flags for this command",
 		takesValue:  false,
 	}
-	ReactivateFlags[helpFlag.symbol] = helpFlag
+	InactivateFlags[helpFlag.symbol] = helpFlag
 
-	return ReactivateFlags
+	return InactivateFlags
 
 }
 
 // look into removing the args thing, might have to stay
-func reactivateFunction(cfg *Config, args []Argument) error {
+func inactivateFunction(cfg *Config, args []Argument) error {
 	// get flags
-	flags := getCCReactivateFlags()
+	flags := getInactivateFlags()
 
 	// set defaults
 	exit := false
-	cardsToReactivate := []int{}
+	cardsToInactivate := []int{}
 
 	// the reader
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Println("Enter cards to reactivate")
+	fmt.Println("Enter cards to inactivate")
 
 	// da loop
 	for {
@@ -89,7 +90,6 @@ func reactivateFunction(cfg *Config, args []Argument) error {
 		}
 
 		// do weird behavior here
-
 		// try to run as a number, and add it to the list of cards to activate using the current values
 		if len(inputs) == 1 {
 			cc, err := strconv.Atoi(inputs[0])
@@ -102,7 +102,7 @@ func reactivateFunction(cfg *Config, args []Argument) error {
 
 			// a misread on cc means the value 0 init
 			if cc != 0 {
-				cardsToReactivate = append(cardsToReactivate, cc)
+				cardsToInactivate = append(cardsToInactivate, cc)
 				continue
 			}
 		}
@@ -114,7 +114,6 @@ func reactivateFunction(cfg *Config, args []Argument) error {
 			continue
 		}
 
-		// cc, process, exit, help
 		for _, arg := range args {
 			switch arg.flag {
 			case "-cc":
@@ -125,11 +124,11 @@ func reactivateFunction(cfg *Config, args []Argument) error {
 					fmt.Println(err)
 					continue
 				}
-				cardsToReactivate = append(cardsToReactivate, cc)
+				cardsToInactivate = append(cardsToInactivate, cc)
 				fmt.Printf("%v card added\n", cc)
 
 			case "process":
-				err := reactivateCageCards(cfg, cardsToReactivate)
+				err := inactivateCageCards(cfg, cardsToInactivate)
 				if err != nil {
 					return err
 				}
@@ -141,9 +140,6 @@ func reactivateFunction(cfg *Config, args []Argument) error {
 
 			case "help":
 				cmdHelp(flags)
-
-			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
 			}
 		}
 
@@ -156,49 +152,48 @@ func reactivateFunction(cfg *Config, args []Argument) error {
 	return nil
 }
 
-func reactivateCageCards(cfg *Config, ctr []int) error {
-	if len(ctr) == 0 {
+func inactivateCageCards(cfg *Config, cti []int) error {
+	if len(cti) == 0 {
 		return errors.New("Oops! No cards!")
 	}
-	reactivationErrors := []ccError{}
-	totalReactivated := 0
+	inactivationErrors := []ccError{}
+	totalInactivated := 0
 
-	for _, cc := range ctr {
-		ccErr := checkReactivateError(cfg, cc)
+	for _, cc := range cti {
+		ccErr := checkInactivateError(cfg, cc)
 		if ccErr.CCid != 0 {
-			reactivationErrors = append(reactivationErrors, ccErr)
+			inactivationErrors = append(inactivationErrors, ccErr)
 			continue
 		}
 
-		err := cfg.db.ReactivateCageCard(context.Background(), int32(cc))
+		err := cfg.db.InactivateCageCard(context.Background(), int32(cc))
 		if err != nil {
 			tcce := ccError{
 				CCid: cc,
 				Err:  err.Error(),
 			}
-			reactivationErrors = append(reactivationErrors, tcce)
+			inactivationErrors = append(inactivationErrors, tcce)
 			continue
 		}
 
 		// nothing to verbose
-		totalReactivated++
+		totalInactivated++
 	}
 
-	fmt.Printf("%v cards reactivated\n", totalReactivated)
-	if len(reactivationErrors) > 0 {
+	fmt.Printf("%v cards inactivated\n", totalInactivated)
+	if len(inactivationErrors) > 0 {
 		fmt.Println("Errors reactivating these cage cards:")
-		for _, cce := range reactivationErrors {
+		for _, cce := range inactivationErrors {
 			fmt.Printf("%v -- %s\n", cce.CCid, cce.Err)
 		}
 	}
 
 	return nil
-
 }
 
-func checkReactivateError(cfg *Config, cc int) ccError {
-	// check if not deactivated at all
-	dd, err := cfg.db.GetDeactivationDate(context.Background(), int32(cc))
+func checkInactivateError(cfg *Config, cc int) ccError {
+	// check if not in db
+	ad, err := cfg.db.GetActivationDate(context.Background(), int32(cc))
 	if err != nil && err.Error() == "sql: no rows in result set" {
 		// card not in db
 		tcce := ccError{
@@ -208,6 +203,7 @@ func checkReactivateError(cfg *Config, cc int) ccError {
 		return tcce
 	}
 
+	// any other db error
 	if err != nil {
 		// any other error
 		tcce := ccError{
@@ -217,15 +213,35 @@ func checkReactivateError(cfg *Config, cc int) ccError {
 		return tcce
 	}
 
-	if dd.Valid == false {
-		// not deactivated anyway
+	if ad.Valid == false {
+		// not already active
 		tcce := ccError{
 			CCid: int(cc),
-			Err:  "CC was not deactivated",
+			Err:  "CC was not activated",
 		}
 		return tcce
 	}
 
-	// everything ok :^3
+	// check if already deactivated
+	dd, err := cfg.db.GetDeactivationDate(context.Background(), int32(cc))
+	if err != nil {
+		// any other error
+		tcce := ccError{
+			CCid: int(cc),
+			Err:  err.Error(),
+		}
+		return tcce
+	}
+
+	// previously deactivated
+	if dd.Valid {
+		tcce := ccError{
+			CCid: int(cc),
+			Err:  "CC is deactivated",
+		}
+		return tcce
+	}
+
+	// everything ok
 	return ccError{}
 }

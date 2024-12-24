@@ -16,16 +16,17 @@ import (
 // change if you want a million things printed or not
 const verbose bool = false
 
-// NEXT:
-// 563 lines of code aint bad (even if 25% of it is if err != nil {})
-// cage card cards
-// adding cage card by range, activating and checking, printing errors and handling them.
-// most hands on one and ironically the one that will require the most specialization anyway.
-// framework is there but needs more specifics and some sql, some go routines, ect.
+// CURRENTLY:
+// one more function to do, merge branches
 
-// ALSO:
-// set up CI testing
-// you probably wont use it often but it's nice ^_^
+// NEXT:
+// queries
+// AFTER THAT:
+// the great refactoring
+// AFTER THAT:
+// the EASY CICD testing
+// AFTER THAT:
+// adding reminders, orders, and tests for those
 
 func main() {
 	godotenv.Load()

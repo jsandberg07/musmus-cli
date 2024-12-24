@@ -39,6 +39,7 @@ func getXXXFlags() map[string]Flag {
 
 	// ect as needed or remove the "-"+ for longer ones
 
+	fmt.Println("If you see this, you accidentally left the template flag function in")
 	return XXXFlags
 
 }
