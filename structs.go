@@ -59,6 +59,12 @@ type addAllotment struct {
 	total      int
 }
 
+type ccQueryParameters struct {
+	PI           *database.Investigator
+	Investigator *database.Investigator
+	Protocol     *database.Protocol
+}
+
 /*
 Create a flag:
 symbol, description, and if it takes a value

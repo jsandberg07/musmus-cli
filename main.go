@@ -17,16 +17,41 @@ import (
 const verbose bool = false
 
 // CURRENTLY:
-// one more function to do, merge branches
+// queries! now that you have data, let's actually be able to see it
+// after the success of like adding all these functions (kinda)
+// i know where the top of the mountain is. I'm above the tree line.
+// there's still much to do and that's scary but it won't take as long
+// 5k lines of code added want to work more consistently
+// FOR NOW literally just write to a file
+// mostly about getting cage cards
+// do active by date, active for investigator, active by protocol
+// and a custom query
+// to get a particular param, deactivated on a particular day, activated on a particular day
+// how do to that? i dont want 16 functions with each option on or not
+// gotta remember joins
 
 // NEXT:
-// queries
-// AFTER THAT:
 // the great refactoring
+// using like 'get cc from flag' instead of copy and pasting code
+// using check functions and prompts for what i actually want
+// greatly neatening up clode
 // AFTER THAT:
 // the EASY CICD testing
 // AFTER THAT:
 // adding reminders, orders, and tests for those
+// AFTER THAT:
+// the great polishing
+// making maps print sortedly
+// adding permissions that work! you already have rolls. and logins
+// AFTER THAT:
+// the great readme-en-ing. write a readme and update the github page
+// AFTER THAT:
+// the great adding the project to my portfolioening
+// lots of test data! for fun!
+// AFTER THAT:
+// the great job applyening, apply for jobs
+// DURING THAT:
+// the adding automated DB testing as well! cause that's a thing!
 
 func main() {
 	godotenv.Load()
