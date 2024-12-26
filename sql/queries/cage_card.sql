@@ -66,3 +66,21 @@ WHERE $1 = cc_id;
 UPDATE cage_cards
 SET activated_on = NULL
 WHERE $1 = cc_id;
+
+-- name: GetActiveCageCards :many
+SELECT cage_cards.cc_id, investigators.i_name AS investigator, protocols.p_number, strains.s_name, cage_cards.activated_on, cage_cards.deactivated_on
+FROM cage_cards
+LEFT JOIN investigators ON cage_cards.investigator_id = investigators.id
+LEFT JOIN protocols ON cage_cards.protocol_id = protocols.id
+LEFT JOIN strains ON cc_id.strain = strains.id
+WHERE cage_cards.activated_on IS NOT NULL AND cage_cards.deactivated_on IS NULL
+ORDER BY cage_cards.cc_id ASC;
+
+-- name: GetActiveTestCards :many
+SELECT cage_cards.cc_id, investigators.i_name, protocols.p_number, strains.s_name, cage_cards.activated_on, cage_cards.deactivated_on
+FROM cage_cards
+INNER JOIN investigators ON cage_cards.investigator_id = investigators.id
+INNER JOIN protocols ON cage_cards.protocol_id = protocols.id
+LEFT JOIN strains ON cage_cards.strain = strains.id
+WHERE cage_cards.activated_on IS NOT NULL and cage_cards.deactivated_on IS NULL
+ORDER BY cage_cards.cc_id ASC;

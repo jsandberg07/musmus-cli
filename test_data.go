@@ -312,6 +312,7 @@ func addTestCageCards(cfg *Config) error {
 		fmt.Println("Error getting protocol 2")
 		return err
 	}
+
 	ccStart := 100
 	ccEnd := 120
 	for i := ccStart; i < ccEnd; i++ {
@@ -365,20 +366,35 @@ func activateTestCageCards(cfg *Config) error {
 		return errors.New("Vague investigator name")
 	}
 
+	strain1, err := cfg.db.GetStrainByName(context.Background(), "CD-1")
+	if err != nil {
+		fmt.Println("Error gettting strain 1")
+		return err
+	}
+
+	/* just for when i want more varried test data
+	strain2, err := cfg.db.GetStrainByName(context.Background(), "000664")
+	if err != nil {
+		fmt.Println("Error getting strain 2")
+		return err
+	}
+	*/
+
 	cardsToActivate := []int{100, 102, 103, 104, 108, 109, 111, 121, 123, 134, 139}
 	for i, cardID := range cardsToActivate {
-		aCC := database.NewActivateCageCardParams{
+		aCC := database.TrueActivateCageCardParams{
 			CcID:        int32(cardID),
 			ActivatedOn: sql.NullTime{Valid: true, Time: lastWeek},
 			ActivatedBy: uuid.NullUUID{Valid: true, UUID: activatedBy[0].ID},
+			Strain:      uuid.NullUUID{Valid: true, UUID: strain1.ID},
 		}
-		err := cfg.db.NewActivateCageCard(context.Background(), aCC)
+		cc, err := cfg.db.TrueActivateCageCard(context.Background(), aCC)
 		if err != nil {
 			fmt.Printf("Error activating cage card %v -- %v", i, cardID)
 			return err
 		}
 		if verbose {
-			fmt.Printf("CC %v activated by %s\n", cardID, activatedBy[0].IName)
+			fmt.Printf("CC %v activated by %s\n", cc.CcID, activatedBy[0].ID)
 		}
 	}
 

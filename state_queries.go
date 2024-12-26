@@ -2,7 +2,7 @@ package main
 
 func getQueriesMap() map[string]Command {
 	// put your query Commands here
-	cmds := []Command{}
+	cmds := []Command{getCCQueriesCmd()}
 	commandMap := cmdMapHelper(cmds)
 
 	return commandMap
