@@ -55,6 +55,12 @@ func (cfg *Config) testData() error {
 		return err
 	}
 
+	// deactivate a few
+	err = deactivateTestCageCards(cfg)
+	if err != nil {
+		return err
+	}
+
 	// get active cage cards
 	err = getTestActiveCageCards(cfg)
 	if err != nil {
@@ -395,6 +401,39 @@ func activateTestCageCards(cfg *Config) error {
 		}
 		if verbose {
 			fmt.Printf("CC %v activated by %s\n", cc.CcID, activatedBy[0].ID)
+		}
+	}
+
+	return nil
+}
+
+func deactivateTestCageCards(cfg *Config) error {
+	fmt.Println("* Deactivating test cage cards")
+	yesterday := time.Now().AddDate(0, 0, -1)
+	deactivatedBy, err := cfg.db.GetInvestigatorByName(context.Background(), "Sonya Ball")
+	if err != nil {
+		fmt.Println("Error getting investigator for activation")
+		return err
+	}
+	if len(deactivatedBy) > 1 {
+		fmt.Println("Error getting investigator for activation")
+		return errors.New("Vague investigator name")
+	}
+
+	cardsToDeactivate := []int{108, 109, 111}
+	for i, cardID := range cardsToDeactivate {
+		dCC := database.DeactivateCageCardParams{
+			CcID:          int32(cardID),
+			DeactivatedOn: sql.NullTime{Valid: true, Time: yesterday},
+			DeactivatedBy: uuid.NullUUID{Valid: true, UUID: deactivatedBy[0].ID},
+		}
+		cc, err := cfg.db.DeactivateCageCard(context.Background(), dCC)
+		if err != nil {
+			fmt.Printf("Error deactivating cage card %v -- %v", i, cardID)
+			return err
+		}
+		if verbose {
+			fmt.Printf("CC %v activated by %s\n", cc.CcID, deactivatedBy[0].ID)
 		}
 	}
 

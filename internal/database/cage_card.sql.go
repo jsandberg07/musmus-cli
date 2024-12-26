@@ -100,55 +100,6 @@ func (q *Queries) GetActivationDate(ctx context.Context, ccID int32) (sql.NullTi
 	return activated_on, err
 }
 
-const getActiveCageCards = `-- name: GetActiveCageCards :many
-SELECT cage_cards.cc_id, investigators.i_name AS investigator, protocols.p_number, strains.s_name, cage_cards.activated_on, cage_cards.deactivated_on
-FROM cage_cards
-LEFT JOIN investigators ON cage_cards.investigator_id = investigators.id
-LEFT JOIN protocols ON cage_cards.protocol_id = protocols.id
-LEFT JOIN strains ON cc_id.strain = strains.id
-WHERE cage_cards.activated_on IS NOT NULL AND cage_cards.deactivated_on IS NULL
-ORDER BY cage_cards.cc_id ASC
-`
-
-type GetActiveCageCardsRow struct {
-	CcID          int32
-	Investigator  sql.NullString
-	PNumber       sql.NullString
-	SName         sql.NullString
-	ActivatedOn   sql.NullTime
-	DeactivatedOn sql.NullTime
-}
-
-func (q *Queries) GetActiveCageCards(ctx context.Context) ([]GetActiveCageCardsRow, error) {
-	rows, err := q.db.QueryContext(ctx, getActiveCageCards)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetActiveCageCardsRow
-	for rows.Next() {
-		var i GetActiveCageCardsRow
-		if err := rows.Scan(
-			&i.CcID,
-			&i.Investigator,
-			&i.PNumber,
-			&i.SName,
-			&i.ActivatedOn,
-			&i.DeactivatedOn,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getActiveTestCards = `-- name: GetActiveTestCards :many
 SELECT cage_cards.cc_id, investigators.i_name, protocols.p_number, strains.s_name, cage_cards.activated_on, cage_cards.deactivated_on
 FROM cage_cards
@@ -323,6 +274,61 @@ func (q *Queries) GetCageCardsByInvestigator(ctx context.Context, investigatorID
 			&i.Notes,
 			&i.ActivatedBy,
 			&i.DeactivatedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCardsDateRange = `-- name: GetCardsDateRange :many
+SELECT cage_cards.cc_id, investigators.i_name, protocols.p_number, strains.s_name, cage_cards.activated_on, cage_cards.deactivated_on
+FROM cage_cards
+INNER JOIN investigators ON cage_cards.investigator_id = investigators.id
+INNER JOIN protocols ON cage_cards.protocol_id = protocols.id
+LEFT JOIN strains ON cage_cards.strain = strains.id
+WHERE cage_cards.activated_on >= $1 AND cage_cards.deactivated_on <= $2
+ORDER BY cage_cards.cc_id ASC
+`
+
+type GetCardsDateRangeParams struct {
+	ActivatedOn   sql.NullTime
+	DeactivatedOn sql.NullTime
+}
+
+type GetCardsDateRangeRow struct {
+	CcID          int32
+	IName         string
+	PNumber       string
+	SName         sql.NullString
+	ActivatedOn   sql.NullTime
+	DeactivatedOn sql.NullTime
+}
+
+// used for getting all, active, or deactivated cages and no other params
+func (q *Queries) GetCardsDateRange(ctx context.Context, arg GetCardsDateRangeParams) ([]GetCardsDateRangeRow, error) {
+	rows, err := q.db.QueryContext(ctx, getCardsDateRange, arg.ActivatedOn, arg.DeactivatedOn)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetCardsDateRangeRow
+	for rows.Next() {
+		var i GetCardsDateRangeRow
+		if err := rows.Scan(
+			&i.CcID,
+			&i.IName,
+			&i.PNumber,
+			&i.SName,
+			&i.ActivatedOn,
+			&i.DeactivatedOn,
 		); err != nil {
 			return nil, err
 		}

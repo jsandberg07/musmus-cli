@@ -3,10 +3,12 @@ package main
 import (
 	"bufio"
 	"context"
+	"database/sql"
 	"encoding/csv"
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jsandberg07/clitest/internal/database"
@@ -24,30 +26,19 @@ func getCCQueriesCmd() Command {
 	return CCQueriesCmd
 }
 
-// dag how do i wanna do this
-// thinking is king innit?
-// maybe prompts
-// like quick ones >all active cards
-// or limit it like just by PI or ivnestigator. its a csv
-// easier to short than write and parse a bunch of unique queries
-// problem is there are so many not nulls that need to have a match
-// it would be easy if protocol could be null
-// or investigator could be null, then it could be optional that way
-// param structs
-// where its like investigator, protocol, activated on, deactivated on
-// then have a bunch of cases for which query to run
-// no no
-// investigator, protocol, PI are optional. you set and case those.
-// check if that protocol is under that PI and eliminate one query
-// dont do that for investigator, in case they are removed from that protocol
-// then you can do activated on, deactivated as optional like null or not null
-// depending on if you want active, all, deactivated
-// how to do for particular dates? fuck that, that's all narrow it down later on your own time
-// fine this is ok
+// 5 functions
+// PI
+// protocol
+// investigator
+// pi + investigator
+// protocol + investigator
 
-// can you parse greater than it dates? probably
-// uhh for now get ALL cage cards, then export to CSV in a folder with an UUID
-// then you can worry about parameters
+// then set start and end dates
+
+// bonus ones:
+// all active
+// ALL cage cards
+// these need the same function cause generics are tough
 
 func getCCQueriesFlags() map[string]Flag {
 	ccQueriesFlags := make(map[string]Flag)
@@ -60,6 +51,13 @@ func getCCQueriesFlags() map[string]Flag {
 		takesValue:  false,
 	}
 	ccQueriesFlags[activeFlag.symbol] = activeFlag
+
+	allFlag := Flag{
+		symbol:      "all",
+		description: "Exports all cage cards and exits",
+		takesValue:  false,
+	}
+	ccQueriesFlags[allFlag.symbol] = allFlag
 
 	helpFlag := Flag{
 		symbol:      "help",
@@ -123,7 +121,7 @@ func CCQueriesFunction(cfg *Config, args []Argument) error {
 
 			case "active":
 				fmt.Println("Getting active cages")
-				err := exportActive(cfg)
+				err := exportQuickCC(cfg)
 				if err != nil {
 					return err
 				}
@@ -147,12 +145,40 @@ func CCQueriesFunction(cfg *Config, args []Argument) error {
 	return nil
 }
 
+func exportQuickCC(cfg *Config) error {
+	start := time.Now()
+	end := time.Now()
+
+	dates := database.GetCardsDateRangeParams{
+		ActivatedOn:   sql.NullTime{Valid: true, Time: start},
+		DeactivatedOn: sql.NullTime{Valid: true, Time: end},
+	}
+
+	cages, err := cfg.db.GetCardsDateRange(context.Background(), dates)
+	if err != nil {
+		fmt.Println("Error getting active cages")
+		return err
+	}
+
+	if len(cages) == 0 {
+		fmt.Println("Oops no active cages found!")
+		return nil
+	}
+
+	fmt.Printf("// expected lines: %v\n", len(cages))
+
+	count, err := exportQuickData(&cages)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("// Exported lines: %v\n", count)
+	return nil
+
+}
+
+// rename this function, it is no longer a test
 func exportActive(cfg *Config) error {
-	// JOINS
-	// you want the cc#, protocol, activated and deactivated dates, investigator, strain, notes
-	// fk to protocol for number, fk to investigator for name, fk protocol to pi for name,
-	// need to readd PI name probably, is ambiguious currently
-	// or dont! just know. it's unlikely a lab would have more than 1 anyway.
 	activeCages, err := cfg.db.GetActiveTestCards(context.Background())
 	if err != nil {
 		fmt.Println("Error getting active cages")
@@ -174,6 +200,40 @@ func exportActive(cfg *Config) error {
 	fmt.Printf("// Exported lines: %v\n", count)
 	return nil
 
+}
+
+func exportQuickData(cages *[]database.GetCardsDateRangeRow) (int, error) {
+	filename := getExportFileName()
+	file, err := os.Create(filename)
+	if err != nil {
+		fmt.Println("Error creating csv file")
+		return 0, err
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	count := 0
+
+	// add top row
+	topRow := []string{"CC", "Investigator", "Protocol", "Strain", "Activated On", "Deactivated On"}
+	err = writer.Write(topRow)
+	if err != nil {
+		fmt.Println("Error writing top row to csv")
+		return 0, err
+	}
+
+	for _, cage := range *cages {
+		err := writer.Write(stringifyQuickCage(&cage))
+		if err != nil {
+			fmt.Printf("Error writing to csv: %s", err)
+			continue
+		}
+		count++
+	}
+
+	return count, nil
 }
 
 // all exported data is more or less the same, so this can probably be made generic
@@ -252,6 +312,29 @@ func stringifyCage(c *database.GetActiveTestCardsRow) []string {
 
 	return output
 
+}
+
+func stringifyQuickCage(c *database.GetCardsDateRangeRow) []string {
+
+	output := make([]string, 6)
+	output[0] = strconv.Itoa(int(c.CcID))
+
+	output[1] = c.IName
+
+	output[2] = c.PNumber
+
+	if c.SName.Valid {
+		output[3] = c.SName.String
+	}
+
+	if c.ActivatedOn.Valid {
+		output[4] = c.ActivatedOn.Time.String()
+	}
+	if c.DeactivatedOn.Valid {
+		output[5] = c.DeactivatedOn.Time.String()
+	}
+
+	return output
 }
 
 func getExportFileName() string {
