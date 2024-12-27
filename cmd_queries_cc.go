@@ -40,10 +40,64 @@ func getCCQueriesCmd() Command {
 // ALL cage cards
 // these need the same function cause generics are tough
 
+// so the problem is
+// it's easier to write individual sql functions than futz with finer things
+// but the returns have different types of structs
+// so i can modify the files
+// or turn them into a normalized form since they'll all have the same values actually
+// so we use the flags to set params
+// then we have a switch that calls the right function
+// we get the data, normalize it, and return THAT instead
+// then we can send it to the exporter, which ends up stringifying it
+// which is an extra step but a flexible step
+// so i need to clean up a bunch of beans type functions
+
 func getCCQueriesFlags() map[string]Flag {
 	ccQueriesFlags := make(map[string]Flag)
 
+	sFlag := Flag{
+		symbol:      "s",
+		description: "Sets start date for query.",
+		takesValue:  true,
+	}
+	ccQueriesFlags["-"+sFlag.symbol] = sFlag
+
+	eFlag := Flag{
+		symbol:      "e",
+		description: "Sets end date for query.",
+		takesValue:  true,
+	}
+	ccQueriesFlags["-"+eFlag.symbol] = eFlag
+
+	piFlag := Flag{
+		symbol:      "pi",
+		description: "Gets cards under set PI. Can either have PI or protocol.",
+		takesValue:  true,
+	}
+	ccQueriesFlags["-"+piFlag.symbol] = piFlag
+
+	prFlag := Flag{
+		symbol:      "pr",
+		description: "Gets cards under set protocol. Can either have PI or protocol",
+		takesValue:  true,
+	}
+	ccQueriesFlags["-"+prFlag.symbol] = prFlag
+
+	inFlag := Flag{
+		symbol:      "in",
+		description: "Gets cards under set investigator",
+		takesValue:  true,
+	}
+	ccQueriesFlags["-"+inFlag.symbol] = inFlag
+
 	// ect as needed or remove the "-"+ for longer ones
+
+	printFlag := Flag{
+		symbol:      "print",
+		description: "Prints current settings for query",
+		takesValue:  false,
+	}
+	ccQueriesFlags[printFlag.symbol] = printFlag
 
 	activeFlag := Flag{
 		symbol:      "active",
@@ -73,9 +127,19 @@ func getCCQueriesFlags() map[string]Flag {
 	}
 	ccQueriesFlags[exitFlag.symbol] = exitFlag
 
+	queryFlag := Flag{
+		symbol:      "query",
+		description: "Runs query with current settings",
+		takesValue:  false,
+	}
+	ccQueriesFlags[queryFlag.symbol] = queryFlag
+
 	return ccQueriesFlags
 
 }
+
+// you were working on adding tags, writing a few functions for getting the data
+// and a struct normalizer because i'll do that instead of changing the return values
 
 // look into removing the args thing, might have to stay
 func CCQueriesFunction(cfg *Config, args []Argument) error {
@@ -84,6 +148,9 @@ func CCQueriesFunction(cfg *Config, args []Argument) error {
 
 	// set defaults
 	exit := false
+	investigator := database.Investigator{}
+	pi := database.Investigator{}
+	protocol := database.Protocol{}
 
 	// the reader
 	reader := bufio.NewReader(os.Stdin)
@@ -115,6 +182,27 @@ func CCQueriesFunction(cfg *Config, args []Argument) error {
 
 		for _, arg := range args {
 			switch arg.flag {
+
+			case "pr":
+				pr, err := getProtocolByFlag(cfg, arg.value)
+				if err != nil {
+					return err
+				}
+				protocol = pr
+
+			case "pi":
+				p, err := getInvestigatorByFlag2(cfg, arg.value)
+				if err != nil {
+					return err
+				}
+				pi = p
+
+			case "in":
+				inv, err := getInvestigatorByFlag2(cfg, arg.value)
+				if err != nil {
+					return err
+				}
+				investigator = inv
 
 			case "help":
 				cmdHelp(flags)
