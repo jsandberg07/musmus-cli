@@ -83,5 +83,5 @@ FROM cage_cards
 INNER JOIN investigators ON cage_cards.investigator_id = investigators.id
 INNER JOIN protocols ON cage_cards.protocol_id = protocols.id
 LEFT JOIN strains ON cage_cards.strain = strains.id
-WHERE cage_cards.activated_on >= $1 AND cage_cards.deactivated_on <= $2
+WHERE (activated_on IS NOT NULL AND activated_on <= $1) AND (deactivated_on >= $2 OR deactivated_on IS NULL)
 ORDER BY cage_cards.cc_id ASC;

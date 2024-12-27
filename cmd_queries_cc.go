@@ -203,6 +203,12 @@ func exportActive(cfg *Config) error {
 }
 
 func exportQuickData(cages *[]database.GetCardsDateRangeRow) (int, error) {
+	err := createExportDirectory()
+	if err != nil {
+		return 0, err
+	}
+	fmt.Println("Do you see a directory?")
+
 	filename := getExportFileName()
 	file, err := os.Create(filename)
 	if err != nil {
@@ -238,6 +244,7 @@ func exportQuickData(cages *[]database.GetCardsDateRangeRow) (int, error) {
 
 // all exported data is more or less the same, so this can probably be made generic
 func exportData(cages *[]database.GetActiveTestCardsRow) (int, error) {
+
 	filename := getExportFileName()
 	file, err := os.Create(filename)
 	if err != nil {
@@ -337,7 +344,24 @@ func stringifyQuickCage(c *database.GetCardsDateRangeRow) []string {
 	return output
 }
 
+// make a constant or make it changable to have the file name be consistent / alterable
 func getExportFileName() string {
 	uuid := uuid.New().String()
-	return "zzz_" + uuid[0:8] + ".csv"
+	return "exports/" + "zzz_" + uuid[0:8] + ".csv"
+}
+
+func createExportDirectory() error {
+	err := os.Mkdir("exports", os.ModePerm)
+	if err != nil && err.Error() == "mkdir exports: file exists" {
+		// it already exists, just skip
+		return nil
+
+	}
+	if err != nil {
+		// any other error
+		fmt.Println("Error creating directory")
+		return err
+	}
+
+	return nil
 }
