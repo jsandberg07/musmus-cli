@@ -27,31 +27,35 @@ func getCCQueriesCmd() Command {
 }
 
 // 5 functions
-// PI
+// PI (skip)
 // protocol
 // investigator
-// pi + investigator
-// protocol + investigator
+// pi + investigator (skip)
+// protocol + investigator (skip this as well for now)
 
 // then set start and end dates
 
 // bonus ones:
 // all active
 // ALL cage cards
-// these need the same function cause generics are tough
 
-// so the problem is
-// it's easier to write individual sql functions than futz with finer things
-// but the returns have different types of structs
-// so i can modify the files
-// or turn them into a normalized form since they'll all have the same values actually
-// so we use the flags to set params
-// then we have a switch that calls the right function
-// we get the data, normalize it, and return THAT instead
-// then we can send it to the exporter, which ends up stringifying it
-// which is an extra step but a flexible step
-// so i need to clean up a bunch of beans type functions
+// write sql for each type of query
+// write the go for setting the tags
+// write the normalizer functions (have to because psql will probably reset them)
+// the data is all the same but the name is different
+// so return that, string that, export that
+// pass a function first class, normalize response, return, stringify, export
+// why do i have a dozen "true activate" "real activate" "honest activate" -_-
+// i have literally spend tons of time looking through each step BEFORE this
+// gotta plan the whole thing next time lol
 
+// FACT: i didn't make it so i can get them by PI because it created vague returns in postgres so skip it for now lmao
+// TODO: get the PI as well in the export
+// TODO: get the note in the export
+// TODO: reset the protoocl or investigator with like x or whatever (hope nobody is named X lmao)
+// TODO: make sure the dates get the correct data, since they're set at like midnigt or something
+
+// [s]tart date, [e]nd date, [pr]otocol, [in]vestigator, print, active, all, help, exit, query
 func getCCQueriesFlags() map[string]Flag {
 	ccQueriesFlags := make(map[string]Flag)
 
@@ -69,23 +73,16 @@ func getCCQueriesFlags() map[string]Flag {
 	}
 	ccQueriesFlags["-"+eFlag.symbol] = eFlag
 
-	piFlag := Flag{
-		symbol:      "pi",
-		description: "Gets cards under set PI. Can either have PI or protocol.",
-		takesValue:  true,
-	}
-	ccQueriesFlags["-"+piFlag.symbol] = piFlag
-
 	prFlag := Flag{
 		symbol:      "pr",
-		description: "Gets cards under set protocol. Can either have PI or protocol",
+		description: "Gets cards under set protocol. Can either have investigator or protocol",
 		takesValue:  true,
 	}
 	ccQueriesFlags["-"+prFlag.symbol] = prFlag
 
 	inFlag := Flag{
 		symbol:      "in",
-		description: "Gets cards under set investigator",
+		description: "Gets cards under set investigator. Can either have investigator or protocol",
 		takesValue:  true,
 	}
 	ccQueriesFlags["-"+inFlag.symbol] = inFlag
@@ -149,8 +146,20 @@ func CCQueriesFunction(cfg *Config, args []Argument) error {
 	// set defaults
 	exit := false
 	investigator := database.Investigator{}
-	pi := database.Investigator{}
 	protocol := database.Protocol{}
+
+	// because the queries are based on dates at midnight, use parseDate
+	now := time.Now().String()
+	startDate, err := parseDate(now)
+	if err != nil {
+		fmt.Println("Error getting default start")
+		return err
+	}
+	endDate, err := parseDate(now)
+	if err != nil {
+		fmt.Println("Error getting default start")
+		return err
+	}
 
 	// the reader
 	reader := bufio.NewReader(os.Stdin)
@@ -180,29 +189,41 @@ func CCQueriesFunction(cfg *Config, args []Argument) error {
 			continue
 		}
 
+		// [s]tart date, [e]nd date, [pr]otocol, [in]vestigator, print, active, all, help, exit, query
 		for _, arg := range args {
 			switch arg.flag {
 
-			case "pr":
+			case "-s":
+				date, err := parseDate(arg.value)
+				if err != nil {
+					fmt.Println(err)
+					break
+				}
+				startDate = date
+
+			case "-e":
+				date, err := parseDate(arg.value)
+				if err != nil {
+					fmt.Println(err)
+					break
+				}
+				endDate = date
+
+			case "-pr":
 				pr, err := getProtocolByFlag(cfg, arg.value)
 				if err != nil {
 					return err
 				}
 				protocol = pr
+				investigator = database.Investigator{}
 
-			case "pi":
-				p, err := getInvestigatorByFlag2(cfg, arg.value)
-				if err != nil {
-					return err
-				}
-				pi = p
-
-			case "in":
+			case "-in":
 				inv, err := getInvestigatorByFlag2(cfg, arg.value)
 				if err != nil {
 					return err
 				}
 				investigator = inv
+				protocol = database.Protocol{}
 
 			case "help":
 				cmdHelp(flags)
@@ -214,6 +235,10 @@ func CCQueriesFunction(cfg *Config, args []Argument) error {
 					return err
 				}
 				exit = true
+
+			case "all":
+
+			case "query":
 
 			case "exit":
 				fmt.Println("Exiting...")

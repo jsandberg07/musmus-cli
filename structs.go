@@ -59,6 +59,15 @@ type addAllotment struct {
 	total      int
 }
 
+type CageCardQuery int
+
+// maybe add inactive too
+const (
+	All CageCardQuery = iota
+	Active
+	Deactivated
+)
+
 /*
 Create a flag:
 symbol, description, and if it takes a value
