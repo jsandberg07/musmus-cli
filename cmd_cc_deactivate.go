@@ -163,6 +163,7 @@ func deactivateFunction(cfg *Config, args []Argument) error {
 				date = newDate
 				fmt.Printf("Date set: %v\n", date)
 
+			// TODO: -cc isnt working for some reason but im not testing it atm
 			case "-cc":
 				cc, err := strconv.Atoi(inputs[0])
 				if err != nil && !strings.Contains(err.Error(), "invalid syntax") {

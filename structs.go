@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -57,6 +58,15 @@ type ccError struct {
 type addAllotment struct {
 	protocolID uuid.UUID
 	total      int
+}
+
+type CageCardExport struct {
+	CcID          int32
+	IName         string
+	PNumber       string
+	SName         sql.NullString
+	ActivatedOn   sql.NullTime
+	DeactivatedOn sql.NullTime
 }
 
 /*

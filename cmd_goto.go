@@ -5,6 +5,7 @@ import "errors"
 // we settin state
 // B^)
 
+// separate out flags for consistency maybe
 func getSetStateCmd() Command {
 
 	gotoFlags := make(map[string]Flag)
@@ -51,6 +52,13 @@ func getSetStateCmd() Command {
 	}
 	gotoFlags["-"+stFlag.symbol] = stFlag
 
+	quFlag := Flag{
+		symbol:      "qu",
+		description: "Goes to the queries menu.",
+		takesValue:  false,
+	}
+	gotoFlags["-"+quFlag.symbol] = quFlag
+
 	gotoCmd := Command{
 		name:        "goto",
 		description: "Goes to another menu.",
@@ -82,6 +90,8 @@ func gotoCommand(cfg *Config, args []Argument) error {
 		cfg.nextState = getSettingsState()
 	case "-st":
 		cfg.nextState = getStrainsState()
+	case "-qu":
+		cfg.nextState = getQueriesState()
 	default:
 		return errors.New("whoops a fake flag slipped into gotoCommand")
 	}
