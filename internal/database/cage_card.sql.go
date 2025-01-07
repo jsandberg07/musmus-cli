@@ -392,14 +392,14 @@ INNER JOIN investigators ON cage_cards.investigator_id = investigators.id
 INNER JOIN protocols ON cage_cards.protocol_id = protocols.id
 LEFT JOIN strains ON cage_cards.strain = strains.id
 WHERE (activated_on IS NOT NULL AND activated_on <= $1) AND (deactivated_on >= $2 OR deactivated_on IS NULL)
-AND investigators.i_name = $3
+AND cage_cards.investigator_id = $3
 ORDER BY cage_cards.cc_id ASC
 `
 
 type GetCageCardsInvestigatorParams struct {
-	ActivatedOn   sql.NullTime
-	DeactivatedOn sql.NullTime
-	IName         string
+	ActivatedOn    sql.NullTime
+	DeactivatedOn  sql.NullTime
+	InvestigatorID uuid.UUID
 }
 
 type GetCageCardsInvestigatorRow struct {
@@ -412,7 +412,7 @@ type GetCageCardsInvestigatorRow struct {
 }
 
 func (q *Queries) GetCageCardsInvestigator(ctx context.Context, arg GetCageCardsInvestigatorParams) ([]GetCageCardsInvestigatorRow, error) {
-	rows, err := q.db.QueryContext(ctx, getCageCardsInvestigator, arg.ActivatedOn, arg.DeactivatedOn, arg.IName)
+	rows, err := q.db.QueryContext(ctx, getCageCardsInvestigator, arg.ActivatedOn, arg.DeactivatedOn, arg.InvestigatorID)
 	if err != nil {
 		return nil, err
 	}
@@ -448,14 +448,14 @@ INNER JOIN investigators ON cage_cards.investigator_id = investigators.id
 INNER JOIN protocols ON cage_cards.protocol_id = protocols.id
 LEFT JOIN strains ON cage_cards.strain = strains.id
 WHERE (activated_on IS NOT NULL AND activated_on <= $1) AND (deactivated_on >= $2 OR deactivated_on IS NULL)
-AND protocols.p_number = $3
+AND cage_cards.protocol_id = $3
 ORDER BY cage_cards.cc_id ASC
 `
 
 type GetCageCardsProtocolParams struct {
 	ActivatedOn   sql.NullTime
 	DeactivatedOn sql.NullTime
-	PNumber       string
+	ProtocolID    uuid.UUID
 }
 
 type GetCageCardsProtocolRow struct {
@@ -468,7 +468,7 @@ type GetCageCardsProtocolRow struct {
 }
 
 func (q *Queries) GetCageCardsProtocol(ctx context.Context, arg GetCageCardsProtocolParams) ([]GetCageCardsProtocolRow, error) {
-	rows, err := q.db.QueryContext(ctx, getCageCardsProtocol, arg.ActivatedOn, arg.DeactivatedOn, arg.PNumber)
+	rows, err := q.db.QueryContext(ctx, getCageCardsProtocol, arg.ActivatedOn, arg.DeactivatedOn, arg.ProtocolID)
 	if err != nil {
 		return nil, err
 	}

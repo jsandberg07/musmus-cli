@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -59,14 +60,14 @@ type addAllotment struct {
 	total      int
 }
 
-type CageCardQuery int
-
-// maybe add inactive too
-const (
-	All CageCardQuery = iota
-	Active
-	Deactivated
-)
+type CageCardExport struct {
+	CcID          int32
+	IName         string
+	PNumber       string
+	SName         sql.NullString
+	ActivatedOn   sql.NullTime
+	DeactivatedOn sql.NullTime
+}
 
 /*
 Create a flag:
