@@ -17,24 +17,28 @@ import (
 const verbose bool = false
 
 // CURRENTLY:
-// queries! now that you have data, let's actually be able to see it
-// after the success of like adding all these functions (kinda)
-// i know where the top of the mountain is. I'm above the tree line.
-// there's still much to do and that's scary but it won't take as long
-// 5k lines of code added want to work more consistently
-// FOR NOW literally just write to a file
-// mostly about getting cage cards
-// do active by date, active for investigator, active by protocol
-// and a custom query
-// to get a particular param, deactivated on a particular day, activated on a particular day
-// how do to that? i dont want 16 functions with each option on or not
-// gotta remember joins
-
-// NEXT:
 // the great refactoring
 // using like 'get cc from flag' instead of copy and pasting code
 // using check functions and prompts for what i actually want
 // greatly neatening up clode
+
+// do i start putting things in other packages? would literally be impossible lmao
+// but we can reduce the net number of files by menu, all the states are the same so start there
+// then start in the same order with the refactoring
+
+// position by prompt
+// position by flag
+
+// investigator by prompt
+// investigator by flag
+
+// protocol by prompt
+// protocol by flag
+
+// strain by prompt and flag i think i have
+
+// NEXT:
+
 // AFTER THAT:
 // the EASY CICD testing
 // AFTER THAT:
@@ -52,6 +56,9 @@ const verbose bool = false
 // the great job applyening, apply for jobs
 // DURING THAT:
 // the adding automated DB testing as well! cause that's a thing!
+// SOMEWHERE DURING THAT
+// i changed my mind and was cage cards to have go routines instead, so closer to cayuse process as you go
+// it's fast cause it's not html based
 
 func main() {
 	godotenv.Load()
