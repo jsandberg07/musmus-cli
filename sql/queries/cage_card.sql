@@ -82,7 +82,7 @@ FROM cage_cards
 INNER JOIN investigators ON cage_cards.investigator_id = investigators.id
 INNER JOIN protocols ON cage_cards.protocol_id = protocols.id
 LEFT JOIN strains ON cage_cards.strain = strains.id
-WHERE (activated_on IS NOT NULL AND activated_on <= $1) AND (deactivated_on >= $2 OR deactivated_on IS NULL)
+WHERE (activated_on IS NOT NULL AND activated_on >= $1) AND (deactivated_on <= $2 OR deactivated_on IS NULL)
 ORDER BY cage_cards.cc_id ASC;
 
 -- name: GetCageCardsProtocol :many
@@ -91,7 +91,7 @@ FROM cage_cards
 INNER JOIN investigators ON cage_cards.investigator_id = investigators.id
 INNER JOIN protocols ON cage_cards.protocol_id = protocols.id
 LEFT JOIN strains ON cage_cards.strain = strains.id
-WHERE (activated_on IS NOT NULL AND activated_on <= $1) AND (deactivated_on >= $2 OR deactivated_on IS NULL)
+WHERE (activated_on IS NOT NULL AND activated_on >= $1) AND (deactivated_on <= $2 OR deactivated_on IS NULL)
 AND cage_cards.protocol_id = $3
 ORDER BY cage_cards.cc_id ASC;
 
@@ -101,7 +101,7 @@ FROM cage_cards
 INNER JOIN investigators ON cage_cards.investigator_id = investigators.id
 INNER JOIN protocols ON cage_cards.protocol_id = protocols.id
 LEFT JOIN strains ON cage_cards.strain = strains.id
-WHERE (activated_on IS NOT NULL AND activated_on <= $1) AND (deactivated_on >= $2 OR deactivated_on IS NULL)
+WHERE (activated_on IS NOT NULL AND activated_on >= $1) AND (deactivated_on <= $2 OR deactivated_on IS NULL)
 AND cage_cards.investigator_id = $3
 ORDER BY cage_cards.cc_id ASC;
 
