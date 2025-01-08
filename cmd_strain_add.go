@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/jsandberg07/clitest/internal/database"
 )
@@ -158,41 +157,6 @@ func addStrainFunction(cfg *Config, args []Argument) error {
 	return nil
 }
 
-// idea for how i should have created more reusable functions for all the other data types
-// more generic get string with a prompt, instead of separate functions for everything
-// just pass in "get investigator name to edit" instead of new function just to say "to edit"
-// write the same program 3 times and you'll realize what you want you want to refactor
-func getStringPrompt(cfg *Config, prompt string, checkFunc func(*Config, string) error) (string, error) {
-	fmt.Println(prompt + " or exit to cancel")
-	reader := bufio.NewReader(os.Stdin)
-	for {
-		fmt.Print("> ")
-		text, err := reader.ReadString('\n')
-		if err != nil {
-			fmt.Printf("Error reading input string: %s", err)
-			os.Exit(1)
-		}
-		input := strings.TrimSpace(text)
-		if input == "" {
-			fmt.Println("No input found. Please try again.")
-			continue
-		}
-		if input == "exit" || input == "cancel" {
-			return "", nil
-		}
-
-		// then have check if unique or check if not unique after
-		err = checkFunc(cfg, input)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-
-		return input, nil
-
-	}
-}
-
 func checkIfStrainCodeUnique(cfg *Config, s string) error {
 	_, err := cfg.db.GetStrainByCode(context.Background(), s)
 	if err != nil && err.Error() != "sql: no rows in result set" {
@@ -208,11 +172,6 @@ func checkIfStrainCodeUnique(cfg *Config, s string) error {
 	// strain is unique
 	return nil
 
-}
-
-func checkFuncNil(cfg *Config, s string) error {
-	// look into optional 1st order func params
-	return nil
 }
 
 func printAddStrain(as *database.AddStrainParams) {

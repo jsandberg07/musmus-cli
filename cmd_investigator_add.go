@@ -59,22 +59,21 @@ func getAddInvestigatorFlags() map[string]Flag {
 // name, position, email, nickname, assume active
 // look into removing the args thing, might have to stay
 func addInvestigatorFunction(cfg *Config, args []Argument) error {
-	name, err := getNewInvestigatorName(cfg)
+	name, err := getStringPrompt(cfg, "Enter name of new investigator", checkIfInvestigatorNameUnique)
 	if err != nil {
 		return err
 	}
 	if name == "" {
-		// exit or cancel
 		fmt.Println("Exiting...")
 		return nil
 	}
 
-	position, err := getNewInvestigatorPosition(cfg)
+	position, err := getStructPrompt(cfg, "Enter position of new investigator", getPositionStruct)
 	if err != nil {
 		return err
 	}
-	if position.ID == uuid.Nil {
-		// nil id struct returned
+	nilPosition := database.Position{}
+	if position == nilPosition {
 		fmt.Println("Exiting...")
 		return nil
 	}
@@ -162,48 +161,6 @@ func addInvestigatorFunction(cfg *Config, args []Argument) error {
 	return nil
 }
 
-func getNewInvestigatorName(cfg *Config) (string, error) {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Println("Enter the name of the investigator, or exit to cancel")
-	for {
-		fmt.Print("> ")
-		text, err := reader.ReadString('\n')
-		if err != nil {
-			fmt.Printf("Error reading input string: %s", err)
-			os.Exit(1)
-		}
-		input := strings.TrimSpace(text)
-		if input == "" {
-			fmt.Println("No input found. Please try again.")
-			continue
-		}
-		if input == "exit" || input == "cancel" {
-			return "", nil
-		}
-
-		err = checkIfInvestigatorNameUnique(cfg, input)
-		if err != nil {
-			return "", err
-		}
-
-		return input, nil
-
-		/* commented out because i dry'd up some of the code and fingers crossed there's no problems
-		investigators, err := cfg.db.GetInvestigatorByName(context.Background(), input)
-		if err != nil && err.Error() != "sql: no rows in result set" {
-			// error that isnt related to no rows returned
-			fmt.Println("Error checking db for investigator")
-			return "", err
-		}
-		if len(investigators) != 0 {
-			fmt.Println("An investigator by that name is already in the system.\nConsider adding a nickname to both investigators.")
-		}
-		return input, nil
-		*/
-
-	}
-}
-
 func getNewInvestigatorPosition(cfg *Config) (database.Position, error) {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Enter the position of the new investigator, or exit to cancel")
@@ -286,3 +243,36 @@ func printNewInvestigator(ci *database.CreateInvestigatorParams, p *database.Pos
 		fmt.Printf("Nickname: %s\n", ci.Nickname.String)
 	}
 }
+
+/* removed in refactor
+
+func getNewInvestigatorName(cfg *Config) (string, error) {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Println("Enter the name of the investigator, or exit to cancel")
+	for {
+		fmt.Print("> ")
+		text, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Printf("Error reading input string: %s", err)
+			os.Exit(1)
+		}
+		input := strings.TrimSpace(text)
+		if input == "" {
+			fmt.Println("No input found. Please try again.")
+			continue
+		}
+		if input == "exit" || input == "cancel" {
+			return "", nil
+		}
+
+		err = checkIfInvestigatorNameUnique(cfg, input)
+		if err != nil {
+			return "", err
+		}
+
+		return input, nil
+
+
+	}
+}
+*/

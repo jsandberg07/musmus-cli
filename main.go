@@ -13,9 +13,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// change if you want a million things printed or not
-const verbose bool = false
-
 // CURRENTLY:
 // the great refactoring
 // using like 'get cc from flag' instead of copy and pasting code
@@ -36,6 +33,12 @@ const verbose bool = false
 // protocol by flag
 
 // strain by prompt and flag i think i have
+// i am extremely unclever when it comes to programming
+// so when i am clever, it's always designs that a stressed version of me could use
+// something i can copy+paste (within reason) and get working quickly
+// thanks past me for looking out for busy me
+
+// remove args param in command functions lemoo
 
 // NEXT:
 
@@ -59,6 +62,9 @@ const verbose bool = false
 // SOMEWHERE DURING THAT
 // i changed my mind and was cage cards to have go routines instead, so closer to cayuse process as you go
 // it's fast cause it's not html based
+
+// change if you want a million things printed or not
+const verbose bool = false
 
 func main() {
 	godotenv.Load()

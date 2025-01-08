@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/jsandberg07/clitest/internal/database"
 )
@@ -207,40 +206,6 @@ func editStrainFunction(cfg *Config, args []Argument) error {
 	}
 
 	return nil
-}
-
-// ESSENTIALLY a wrapper that just asks for a prompt to exit or not. Error of main function can probably be
-// removed!
-func getStructPrompt[T any](cfg *Config, prompt string, getFunc func(*Config, string) (T, error)) (T, error) {
-	fmt.Println(prompt + " or exit to cancel")
-	reader := bufio.NewReader(os.Stdin)
-	for {
-		fmt.Print("> ")
-		text, err := reader.ReadString('\n')
-		if err != nil {
-			fmt.Printf("Error reading input string: %s", err)
-			os.Exit(1)
-		}
-		input := strings.TrimSpace(text)
-		if input == "" {
-			fmt.Println("No input found. Please try again.")
-			continue
-		}
-		if input == "exit" || input == "cancel" {
-			var nilT T
-			return nilT, nil
-		}
-
-		// then have check if unique or check if not unique after
-		output, err := getFunc(cfg, input)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-
-		return output, nil
-
-	}
 }
 
 func getStrainStruct(cfg *Config, input string) (database.Strain, error) {

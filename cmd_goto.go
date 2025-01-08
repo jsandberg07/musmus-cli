@@ -2,9 +2,6 @@ package main
 
 import "errors"
 
-// we settin state
-// B^)
-
 // separate out flags for consistency maybe
 func getSetStateCmd() Command {
 
