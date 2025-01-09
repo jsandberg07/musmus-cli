@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -16,6 +17,7 @@ import (
 
 // prints prompt, takes an input from the user, then runs it through the check function for uniqueness or
 // if valid entry in the database. Will repeat if checkFunc returns an error. Can probably remove error return
+// TODO: return a specific error that informs the function to exit instead of checking for nil
 func getStringPrompt(cfg *Config, prompt string, checkFunc func(*Config, string) error) (string, error) {
 	fmt.Println(prompt + " or exit to cancel")
 	reader := bufio.NewReader(os.Stdin)
@@ -47,6 +49,39 @@ func getStringPrompt(cfg *Config, prompt string, checkFunc func(*Config, string)
 	}
 }
 
+// quite possibly used one place but an alternative to making the prompts generic ie insaner than necessary
+// TODO: return a specific error that informs the function to exit
+func getIntPrompt(prompt string) (int, error) {
+	fmt.Println(prompt + " or exit to cancel")
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		fmt.Print("> ")
+		text, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Printf("Error reading input string: %s", err)
+			os.Exit(1)
+		}
+		input := strings.TrimSpace(text)
+		if input == "" {
+			fmt.Println("No input found. Please try again.")
+			continue
+		}
+		if input == "exit" || input == "cancel" {
+			// -1 instead of the 0 value for an int because checking to exit
+			return -1, nil
+		}
+
+		output, err := strconv.Atoi(input)
+		if err != nil {
+			// TODO: what's the specific error for putting letters in an atoi?
+			fmt.Println(err)
+			continue
+		}
+
+		return output, nil
+	}
+}
+
 // pass into getPrompt functions when no checks need to be done
 func checkFuncNil(cfg *Config, s string) error {
 	// look into optional 1st order func params
@@ -56,6 +91,7 @@ func checkFuncNil(cfg *Config, s string) error {
 // prints prompt, takes an input from the user, then runs check function to fetch a struct from the db.
 // get func is something like getXXXStruct(). Returns an empty struct of T if "exit" or "cancel" entered
 // Uses generics! It's cool! I did not want 10 different functions to return 5 different structs!
+// TODO: return a specific error that informs the function to exit instead of checking for nil
 func getStructPrompt[T any](cfg *Config, prompt string, getFunc func(*Config, string) (T, error)) (T, error) {
 	fmt.Println(prompt + " or exit to cancel")
 	reader := bufio.NewReader(os.Stdin)

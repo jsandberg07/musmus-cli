@@ -119,11 +119,11 @@ func addInvestigatorToProtocolFunction(cfg *Config, args []Argument) error {
 			switch arg.flag {
 			case "-a":
 				if investigator.ID == uuid.Nil {
-					fmt.Println("Missing investigator to remove")
+					fmt.Println("Missing investigator to add")
 					break
 				}
 				if protocol.ID == uuid.Nil {
-					fmt.Println("Missing protocol to remove investigator from")
+					fmt.Println("Missing protocol to add investigator ")
 					break
 				}
 				aipParams := database.AddInvestigatorToProtocolParams{
