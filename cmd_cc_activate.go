@@ -46,10 +46,6 @@ import (
 // IDEA: actually have the cards get processed with a go routine as they come in
 // would look cooler, and threaded would mean they dont lag like cayuse
 
-func fart() {
-	fmt.Println("Fart")
-}
-
 func getCCActivationCmd() Command {
 	activateFlags := make(map[string]Flag)
 	ccActivationCmd := Command{
@@ -199,10 +195,10 @@ func activateFunction(cfg *Config, args []Argument) error {
 				cardsToProcess = append(cardsToProcess, tAccp)
 				fmt.Printf("%v card added\n", cc)
 
-				if keepNote == false {
+				if !keepNote {
 					notes = ""
 				}
-				if keepStrain == false {
+				if !keepStrain {
 					strain.ID = uuid.Nil
 				}
 				continue
@@ -241,10 +237,10 @@ func activateFunction(cfg *Config, args []Argument) error {
 				cardsToProcess = append(cardsToProcess, tAccp)
 				fmt.Printf("%v card added\n", cc)
 
-				if keepNote == false {
+				if !keepNote {
 					notes = ""
 				}
-				if keepStrain == false {
+				if !keepStrain {
 					strain.ID = uuid.Nil
 				}
 
@@ -315,10 +311,7 @@ func activateFunction(cfg *Config, args []Argument) error {
 			case "help":
 				fmt.Println("Notes and strains can be added for individual cards, or set for many")
 				fmt.Println("Then you can either add only cage cards, or mark a cage card for activation with -cc")
-				err := cmdHelp(flags)
-				if err != nil {
-					fmt.Println(err)
-				}
+				cmdHelp(flags)
 
 			case "print":
 				printCurrentActivationParams(&date, &allotment, &strain, &notes)
@@ -350,7 +343,7 @@ func activateFunction(cfg *Config, args []Argument) error {
 // something to test
 func processCageCards(cfg *Config, cctp []database.TrueActivateCageCardParams) error {
 	if len(cctp) == 0 {
-		return errors.New("Oops! No cards!")
+		return errors.New("oops no cards")
 	}
 	activationErrors := []ccError{}
 	totalActivated := 0

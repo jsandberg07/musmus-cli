@@ -306,7 +306,7 @@ func addTestCageCards(cfg *Config) error {
 	}
 	if len(invest) > 1 {
 		fmt.Println("Error getting investigator for cage card")
-		return errors.New("Vague investigator name")
+		return errors.New("vague investigator name")
 	}
 	prot1, err := cfg.db.GetProtocolByNumber(context.Background(), "12-24-32")
 	if err != nil {
@@ -369,7 +369,7 @@ func activateTestCageCards(cfg *Config) error {
 	}
 	if len(activatedBy) > 1 {
 		fmt.Println("Error getting investigator for activation")
-		return errors.New("Vague investigator name")
+		return errors.New("vague investigator name")
 	}
 
 	strain1, err := cfg.db.GetStrainByName(context.Background(), "CD-1")
@@ -386,10 +386,10 @@ func activateTestCageCards(cfg *Config) error {
 	}
 	*/
 
-	cardsToActivate := []int{100, 102, 103, 104, 108, 109, 111, 121, 123, 134, 139}
+	cardsToActivate := []int32{100, 102, 103, 104, 108, 109, 111, 121, 123, 134, 139}
 	for i, cardID := range cardsToActivate {
 		aCC := database.TrueActivateCageCardParams{
-			CcID:        int32(cardID),
+			CcID:        cardID,
 			ActivatedOn: sql.NullTime{Valid: true, Time: lastWeek},
 			ActivatedBy: uuid.NullUUID{Valid: true, UUID: activatedBy[0].ID},
 			Strain:      uuid.NullUUID{Valid: true, UUID: strain1.ID},
@@ -417,13 +417,13 @@ func deactivateTestCageCards(cfg *Config) error {
 	}
 	if len(deactivatedBy) > 1 {
 		fmt.Println("Error getting investigator for activation")
-		return errors.New("Vague investigator name")
+		return errors.New("vague investigator name")
 	}
 
-	cardsToDeactivate := []int{108, 109, 111}
+	cardsToDeactivate := []int32{108, 109, 111}
 	for i, cardID := range cardsToDeactivate {
 		dCC := database.DeactivateCageCardParams{
-			CcID:          int32(cardID),
+			CcID:          cardID,
 			DeactivatedOn: sql.NullTime{Valid: true, Time: yesterday},
 			DeactivatedBy: uuid.NullUUID{Valid: true, UUID: deactivatedBy[0].ID},
 		}

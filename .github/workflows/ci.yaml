@@ -1,0 +1,63 @@
+name: ci
+
+on:
+    pull_request:
+        branches: [main]
+
+jobs:
+    tests:
+        name: Tests
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v4
+
+            - name: Set up Go
+              uses: actions/setup-go@v5
+              with:
+                go-version: "1.23.0"
+
+            - name: Echo Go version
+              run: go version
+
+            - name: Run Tests
+              run: go test ./... -cover
+
+
+    style:
+        name: Style
+        runs-on: ubuntu-latest
+        
+        steps:
+          - name: Check out code
+            uses: actions/checkout@v4
+
+          - name: Set up Go
+            uses: actions/setup-go@v5
+            with:
+              go-version: "1.23.0"
+
+          - name: Check formatting
+            run: test -z $(go fmt ./...)
+          
+          - name: Install staticcheck
+            run: go install honnef.co/go/tools/cmd/staticcheck@latest
+
+          - name: Run staticcheck
+            run: staticcheck ./...
+
+
+
+# to add a badge
+# https://github.com/<OWNER>/<REPOSITORY>/actions/workflows/<WORKFLOW_FILE>/badge.svg
+# in README.MD
+# ![alt text goes here](IMAGE_URL)
+
+#        - name: Check out code
+#          uses: actions/checkout@v4
+#
+#        - name: Set Up Go
+#          uses: actions/setup-go@v5
+#          with:
+#            go-version: "1.23.0"

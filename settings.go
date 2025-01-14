@@ -33,8 +33,8 @@ func (cfg *Config) loadSettings() error {
 	}
 
 	if len(settings) > 1 {
-		return errors.New("Too many rows of settings found. Should only ever be 1")
+		return errors.New("too many rows of settings found. Should only ever be 1")
 	}
 
-	return errors.New("Shouldn't see this error while loading settings")
+	return errors.New("shouldn't see this error while loading settings")
 }

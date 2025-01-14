@@ -14,31 +14,9 @@ import (
 )
 
 // CURRENTLY:
-// the great refactoring
-// using like 'get cc from flag' instead of copy and pasting code
-// using check functions and prompts for what i actually want
-// greatly neatening up clode
-
-// do i start putting things in other packages? would literally be impossible lmao
-// but we can reduce the net number of files by menu, all the states are the same so start there
-// then start in the same order with the refactoring
-
-// position by prompt
-// position by flag
-
-// investigator by prompt
-// investigator by flag
-
-// protocol by prompt
-// protocol by flag
-
-// strain by prompt and flag i think i have
-// i am extremely unclever when it comes to programming
-// so when i am clever, it's always designs that a stressed version of me could use
-// something i can copy+paste (within reason) and get working quickly
-// thanks past me for looking out for busy me
-
 // remove args param in command functions lemoo
+// the CI/CD update. use the ones from boot dev. Will literally give you a list of problems to fix.
+// and make way for not breaking the next part
 
 // NEXT:
 
@@ -112,7 +90,7 @@ func main() {
 	cfg.printLogin()
 	fmt.Println("\n* Welcome to Musmus!")
 
-	for true {
+	for {
 		// check if new state
 		if cfg.nextState != nil {
 			cfg.currentState = cfg.nextState

@@ -6,16 +6,13 @@ import (
 	"os"
 )
 
-func literallyJustHere() {
-	fmt.Println("Hey :^3")
-}
-
 // creating a template for implementing commands
 // reminders:
 // include the help and exit flags
 // add getXXXcmd to the function's state
 //
 
+/* removed to pass static check, this will all go eventually and probably could go now!
 func getXXXCmd() Command {
 	XXXFlags := make(map[string]Flag)
 	XXXCmd := Command{
@@ -27,6 +24,7 @@ func getXXXCmd() Command {
 
 	return XXXCmd
 }
+*/
 
 func getXXXFlags() map[string]Flag {
 	XXXFlags := make(map[string]Flag)

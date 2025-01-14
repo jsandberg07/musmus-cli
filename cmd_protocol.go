@@ -226,14 +226,14 @@ func printAddProtocol(cp database.CreateProtocolParams, pi database.Investigator
 func getPIStruct(cfg *Config, input string) (database.Investigator, error) {
 	investigators, err := cfg.db.GetInvestigatorByName(context.Background(), input)
 	if err != nil && err.Error() == "sql: no rows in result set" {
-		return database.Investigator{}, errors.New("Investigator not found. Please try again.")
+		return database.Investigator{}, errors.New("investigator not found. Please try again")
 	}
 	// TODO: does returning many even throw the "no rows in result set" error?
 	if len(investigators) == 0 {
-		return database.Investigator{}, errors.New("Investigator not found. Please try again.")
+		return database.Investigator{}, errors.New("investigator not found. Please try again")
 	}
 	if len(investigators) > 1 {
-		return database.Investigator{}, errors.New("Vague investigator name. Please try again.")
+		return database.Investigator{}, errors.New("vague investigator name. Please try again")
 	}
 	if err != nil {
 		// any other error
@@ -259,7 +259,7 @@ func checkProtocolUniqueFunc(cfg *Config, input string) error {
 
 	// not unique
 	fmt.Printf("Protocol with same number: %s\n", protocol.Title)
-	return errors.New("A protocol with that number already exists. Please try again.")
+	return errors.New("a protocol with that number already exists. Please try again")
 
 }
 
@@ -407,7 +407,7 @@ func editProtocolFunction(cfg *Config, args []Argument) error {
 		}
 
 		// do weird behavior here
-		if reviewed.ChangesMade == true {
+		if reviewed.ChangesMade {
 			reviewed.Printed = false
 		}
 
@@ -561,7 +561,7 @@ func checkProtocolExists(cfg *Config, input string) (database.Protocol, error) {
 	protocol, err := cfg.db.GetProtocolByNumber(context.Background(), input)
 	if err != nil && err.Error() == "sql: no rows in result set" {
 		// not found
-		return database.Protocol{}, errors.New("No protocol with that number found. Please try again.")
+		return database.Protocol{}, errors.New("no protocol with that number found. Please try again")
 	}
 	if err != nil {
 		// any other error

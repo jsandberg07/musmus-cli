@@ -242,7 +242,7 @@ func getCCToDeactivate(cc int, date *time.Time, deactivatedBy *database.Investig
 // ie activating checks to see if it's already active, deact checks to see if it isnt active
 func deactivateCageCards(cfg *Config, ctd []database.DeactivateCageCardParams) error {
 	if len(ctd) == 0 {
-		return errors.New("Oops! No cards!")
+		return errors.New("oops! No cards")
 	}
 	deactivationErrors := []ccError{}
 	totalDeactivated := 0
@@ -302,7 +302,7 @@ func checkDeactivateError(cfg *Config, cc *database.DeactivateCageCardParams) cc
 		return tcce
 	}
 
-	if td.Valid == false {
+	if !td.Valid {
 		tcce := ccError{
 			CCid: int(cc.CcID),
 			Err:  "CC is not currently active",

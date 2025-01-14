@@ -166,7 +166,7 @@ func checkIfStrainCodeUnique(cfg *Config, s string) error {
 	}
 	if err == nil {
 		// strain found, meaning input is not unique
-		return errors.New("Strain by that ID already exists. Please try again.")
+		return errors.New("strain by that ID already exists. Please try again")
 	}
 
 	// strain is unique
@@ -266,12 +266,8 @@ func editStrainFunction(cfg *Config, args []Argument) error {
 
 	// set defaults
 	exit := false
-	usParams := database.UpdateStrainParams{
-		ID:         strain.ID,
-		SName:      strain.SName,
-		Vendor:     strain.Vendor,
-		VendorCode: strain.VendorCode,
-	}
+
+	usParams := database.UpdateStrainParams(strain)
 
 	reviewed := Reviewed{
 		Printed:     false,
@@ -339,7 +335,7 @@ func editStrainFunction(cfg *Config, args []Argument) error {
 				cmdHelp(flags)
 
 			case "save":
-				if reviewed.Printed == false {
+				if reviewed.Printed {
 					fmt.Println("Updating strain with the following info:")
 					printUpdateStrain(&usParams)
 				}
@@ -376,7 +372,7 @@ func editStrainFunction(cfg *Config, args []Argument) error {
 func getStrainStruct(cfg *Config, input string) (database.Strain, error) {
 	strain, err := cfg.db.GetStrainByName(context.Background(), input)
 	if err != nil && err.Error() == "sql: no rows in result set" {
-		return database.Strain{}, errors.New("Strain not found. Please try again.")
+		return database.Strain{}, errors.New("strain not found. Please try again")
 	}
 	if err != nil && err.Error() != "sql: no rows in result set" {
 		// any other error
