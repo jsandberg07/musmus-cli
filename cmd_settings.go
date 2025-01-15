@@ -68,7 +68,7 @@ func getChangeSettingsFlags() map[string]Flag {
 // look into removing the args thing, might have to stay
 func changeSettingsFunction(cfg *Config, args []Argument) error {
 	// get flags
-	flags := getPositionFlags()
+	flags := getChangeSettingsFlags()
 
 	// set defaults
 	exit := false
@@ -150,7 +150,6 @@ func changeSettingsFunction(cfg *Config, args []Argument) error {
 	return nil
 }
 
-func printSettings(s *database.Setting) error {
+func printSettings(s *database.Setting) {
 	fmt.Printf("* Only activate self: %v", s.OnlyActivateSelf)
-	return nil
 }

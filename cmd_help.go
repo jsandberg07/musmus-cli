@@ -7,7 +7,7 @@ import "fmt"
 // TODO: unordered. add a numeric or enum prio to Flag struct.
 // Sort the keys, then iterate through that
 // does sort.Ints() work on enums?
-func cmdHelp(flags map[string]Flag) error {
+func cmdHelp(flags map[string]Flag) {
 	for _, flag := range flags {
 		fmt.Printf("* %s\n", flag.symbol)
 		fmt.Print(flag.description)
@@ -16,5 +16,4 @@ func cmdHelp(flags map[string]Flag) error {
 		}
 		fmt.Println()
 	}
-	return nil
 }

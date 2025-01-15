@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/jsandberg07/clitest/internal/database"
 )
 
@@ -53,11 +52,6 @@ type Reviewed struct {
 type ccError struct {
 	CCid int
 	Err  string
-}
-
-type addAllotment struct {
-	protocolID uuid.UUID
-	total      int
 }
 
 type CageCardExport struct {

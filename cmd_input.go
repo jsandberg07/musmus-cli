@@ -33,7 +33,7 @@ func parseArguments(flags map[string]Flag, parameters []string) ([]Argument, err
 	// flags -p, command like things do not so figure out how to do that
 	// flags should also take a value for now so exploit that
 	if len(parameters) == 0 {
-		return nil, errors.New("Nothing entered. Please try again.")
+		return nil, errors.New("nothing entered. Please try again")
 	}
 
 	// split breaks on spaces, for when entering a value with a space like first last names
@@ -76,9 +76,7 @@ func parseArguments(flags map[string]Flag, parameters []string) ([]Argument, err
 	// can't use range because it works via value and not reference, wont copy changes
 	if underscore {
 		for i := 0; i < len(arguments); i++ {
-			if strings.Contains(arguments[i].value, "_") {
-				arguments[i].value = strings.Replace(arguments[i].value, "_", " ", -1)
-			}
+			arguments[i].value = strings.Replace(arguments[i].value, "_", " ", -1)
 		}
 	}
 

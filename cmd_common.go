@@ -26,7 +26,7 @@ func getBackCmd() Command {
 }
 func backCommand(cfg *Config, args []Argument) error {
 	if len(args) != 0 {
-		return errors.New("Back takes no params. Just takes you back to the main menu.")
+		return errors.New("back takes no params. Just takes you back to the main menu")
 	}
 
 	cfg.nextState = getMainState()

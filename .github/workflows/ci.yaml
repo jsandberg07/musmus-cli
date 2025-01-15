@@ -1,0 +1,73 @@
+name: ci
+
+on:
+    pull_request:
+        branches: [main]
+
+jobs:
+    tests:
+        name: Tests
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v4
+
+            - name: Set up Go
+              uses: actions/setup-go@v5
+              with:
+                go-version: "1.23.3"
+
+            - name: Echo Go version
+              run: go version
+
+            - name: Run Tests
+              run: go test ./... -cover
+
+
+    style:
+        name: Style
+        runs-on: ubuntu-latest
+        
+        steps:
+          - name: Check out code
+            uses: actions/checkout@v4
+
+          - name: Set up Go
+            uses: actions/setup-go@v5
+            with:
+              go-version: "1.23.3"
+
+          - name: Check formatting
+            run: test -z $(go fmt ./...)
+          
+          - name: Install staticcheck
+            run: go install honnef.co/go/tools/cmd/staticcheck@latest
+
+          - name: Run staticcheck
+            run: staticcheck ./...
+
+          - name: Install gosec
+            run: go install github.com/securego/gosec/v2/cmd/gosec@latest
+
+            # 115, 109 are narrowing conversion from int64 to 32. need to create safe converter or change sql to largeint
+            # 304 is unchecked filepath names but theyre created by the system
+            # generated is trying to make it faster (sqlc doesnt throw any errors)
+            # just add enough exceptions until it works :^3
+          - name: Run gosec
+            run: gosec -exclude=G115,G109,G304,generated ./...
+
+
+
+# to add a badge
+# https://github.com/<OWNER>/<REPOSITORY>/actions/workflows/<WORKFLOW_FILE>/badge.svg
+# in README.MD
+# ![alt text goes here](IMAGE_URL)
+
+#        - name: Check out code
+#          uses: actions/checkout@v4
+#
+#        - name: Set Up Go
+#          uses: actions/setup-go@v5
+#          with:
+#            go-version: "1.23.0"

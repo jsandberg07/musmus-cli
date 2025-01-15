@@ -159,7 +159,7 @@ func editInvestigatorFunction(cfg *Config, args []Argument) error {
 		}
 
 		// do weird behavior here
-		if reviewed.ChangesMade == true {
+		if reviewed.ChangesMade {
 			reviewed.Printed = false
 		}
 
@@ -291,14 +291,14 @@ func checkIfInvestigatorNameUnique(cfg *Config, name string) error {
 func getInvestigatorStruct(cfg *Config, input string) (database.Investigator, error) {
 	investigators, err := cfg.db.GetInvestigatorByName(context.Background(), input)
 	if err != nil && err.Error() == "sql: no rows in result set" {
-		return database.Investigator{}, errors.New("Investigator not found. Please try again.")
+		return database.Investigator{}, errors.New("investigator not found. Please try again")
 	}
 	// TODO: does returning many even throw the "no rows in result set" error?
 	if len(investigators) == 0 {
-		return database.Investigator{}, errors.New("Investigator not found. Please try again.")
+		return database.Investigator{}, errors.New("investigator not found. Please try again")
 	}
 	if len(investigators) > 1 {
-		return database.Investigator{}, errors.New("Vague investigator name. Please try again.")
+		return database.Investigator{}, errors.New("vague investigator name. Please try again")
 	}
 	if err != nil {
 		// any other error
@@ -439,10 +439,8 @@ func addInvestigatorFunction(cfg *Config, args []Argument) error {
 				fmt.Println("Exiting without saving...")
 				exit = true
 			case "help":
-				err := cmdHelp(flags)
-				if err != nil {
-					fmt.Printf("Error printing help: %s\n", err)
-				}
+				cmdHelp(flags)
+
 			default:
 				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
 			}
@@ -455,40 +453,6 @@ func addInvestigatorFunction(cfg *Config, args []Argument) error {
 	}
 
 	return nil
-}
-
-func getNewInvestigatorPosition(cfg *Config) (database.Position, error) {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Println("Enter the position of the new investigator, or exit to cancel")
-	for {
-		fmt.Print("> ")
-		text, err := reader.ReadString('\n')
-		if err != nil {
-			fmt.Printf("Error reading input string: %s", err)
-			os.Exit(1)
-		}
-		input := strings.TrimSpace(text)
-		if input == "" {
-			fmt.Println("No input found. Please try again.")
-			continue
-		}
-		if input == "exit" || input == "cancel" {
-			return database.Position{ID: uuid.Nil}, nil
-		}
-
-		position, err := cfg.db.GetPositionByTitle(context.Background(), input)
-		if err != nil && err.Error() == "sql: no rows in result set" {
-			fmt.Println("Position by that title not found. Please try again")
-			continue
-		}
-		if err != nil {
-			fmt.Println("Error getting position from database")
-			return database.Position{ID: uuid.Nil}, err
-		}
-
-		return position, nil
-
-	}
 }
 
 func getNewInvestigatorExtraInfo(ciParams *database.CreateInvestigatorParams) error {
@@ -615,4 +579,40 @@ func getInvestigatorByName(cfg *Config) (database.Investigator, error) {
 
 
 
+*/
+
+/* removed by refactor???
+func getNewInvestigatorPosition(cfg *Config) (database.Position, error) {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Println("Enter the position of the new investigator, or exit to cancel")
+	for {
+		fmt.Print("> ")
+		text, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Printf("Error reading input string: %s", err)
+			os.Exit(1)
+		}
+		input := strings.TrimSpace(text)
+		if input == "" {
+			fmt.Println("No input found. Please try again.")
+			continue
+		}
+		if input == "exit" || input == "cancel" {
+			return database.Position{ID: uuid.Nil}, nil
+		}
+
+		position, err := cfg.db.GetPositionByTitle(context.Background(), input)
+		if err != nil && err.Error() == "sql: no rows in result set" {
+			fmt.Println("Position by that title not found. Please try again")
+			continue
+		}
+		if err != nil {
+			fmt.Println("Error getting position from database")
+			return database.Position{ID: uuid.Nil}, err
+		}
+
+		return position, nil
+
+	}
+}
 */

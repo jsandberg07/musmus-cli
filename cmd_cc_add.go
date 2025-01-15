@@ -281,7 +281,7 @@ func getInvestigatorByFlag2(cfg *Config, input string) (database.Investigator, e
 func getProtocolStruct(cfg *Config, input string) (database.Protocol, error) {
 	protocol, err := cfg.db.GetProtocolByNumber(context.Background(), input)
 	if err != nil && err.Error() == "sql: no rows in result set" {
-		return database.Protocol{}, errors.New("Protocol not found. Please try again.")
+		return database.Protocol{}, errors.New("protocol not found. please try again")
 	}
 	if err != nil && err.Error() != "sql: no rows in result set" {
 		// any other error

@@ -154,7 +154,7 @@ func inactivateFunction(cfg *Config, args []Argument) error {
 
 func inactivateCageCards(cfg *Config, cti []int) error {
 	if len(cti) == 0 {
-		return errors.New("Oops! No cards!")
+		return errors.New("oops! No cards")
 	}
 	inactivationErrors := []ccError{}
 	totalInactivated := 0
@@ -213,7 +213,7 @@ func checkInactivateError(cfg *Config, cc int) ccError {
 		return tcce
 	}
 
-	if ad.Valid == false {
+	if !ad.Valid {
 		// not already active
 		tcce := ccError{
 			CCid: int(cc),

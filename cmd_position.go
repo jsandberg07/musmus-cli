@@ -160,7 +160,7 @@ func addPositionFunction(cfg *Config, args []Argument) error {
 		}
 
 		// do weird behavior here
-		if reviewed.ChangesMade == true {
+		if reviewed.ChangesMade {
 			reviewed.Printed = false
 		}
 
@@ -203,10 +203,8 @@ func addPositionFunction(cfg *Config, args []Argument) error {
 				fmt.Printf("New title for new position set: %s\n", cpParams.Title)
 
 			case "help":
-				err := cmdHelp(flags)
-				if err != nil {
-					fmt.Println(err)
-				}
+				cmdHelp(flags)
+
 			case "print":
 				fmt.Println("Printing...")
 				err := printCreatePermissions(&cpParams)
@@ -217,7 +215,7 @@ func addPositionFunction(cfg *Config, args []Argument) error {
 				reviewed.Printed = true
 			case "save":
 				fmt.Println("Saving and exiting...")
-				if reviewed.Printed == false {
+				if !reviewed.Printed {
 					fmt.Println("Creating a role with these permissions:")
 					err := printCreatePermissions(&cpParams)
 					if err != nil {
@@ -262,7 +260,7 @@ func checkIfPositionTitleUnique(cfg *Config, input string) error {
 		fmt.Printf("Error checking database for title: %s\n", err)
 		os.Exit(1)
 	}
-	return errors.New("Position titles must be unique. Please try again.")
+	return errors.New("position titles must be unique. Please try again")
 }
 
 func printCreatePermissions(cp *database.CreatePositionParams) error {
@@ -391,7 +389,7 @@ func editPositionFunction(cfg *Config, args []Argument) error {
 		}
 
 		// do weird behavior here
-		if reviewed.ChangesMade == true {
+		if reviewed.ChangesMade {
 			reviewed.Printed = false
 		}
 
@@ -434,10 +432,7 @@ func editPositionFunction(cfg *Config, args []Argument) error {
 				fmt.Printf("Position title set: %s\n", upParams.Title)
 
 			case "help":
-				err := cmdHelp(flags)
-				if err != nil {
-					fmt.Println(err)
-				}
+				cmdHelp(flags)
 
 			case "print":
 				fmt.Println("Printing...")
@@ -450,7 +445,7 @@ func editPositionFunction(cfg *Config, args []Argument) error {
 
 			case "save":
 				fmt.Println("Saving and exiting...")
-				if reviewed.Printed == false {
+				if !reviewed.Printed {
 					fmt.Println("Creating a role with these permissions:")
 					err := printUpdatePermissions(&upParams)
 					if err != nil {
@@ -546,7 +541,7 @@ func printUpdatePermissions(cp *database.UpdatePositionParams) error {
 func getPositionStruct(cfg *Config, input string) (database.Position, error) {
 	position, err := cfg.db.GetPositionByTitle(context.Background(), input)
 	if err != nil && err.Error() == "sql: no rows in result set" {
-		return database.Position{}, errors.New("Position not found. Please try again.")
+		return database.Position{}, errors.New("position not found. Please try again")
 	}
 	if err != nil {
 		// any other error
