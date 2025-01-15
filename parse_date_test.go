@@ -11,7 +11,7 @@ type parsingTest struct {
 	shouldErr bool
 }
 
-func TestParseTime(t *testing.T) {
+func TestParseDate(t *testing.T) {
 	tests := []parsingTest{
 		{
 			input:     "11/18/24",

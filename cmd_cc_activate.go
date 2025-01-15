@@ -385,30 +385,6 @@ func processCageCards(cfg *Config, cctp []database.TrueActivateCageCardParams) e
 	return nil
 }
 
-// because who knows what dates people are going to enter
-// TODO: make sure there isnt fuckery like "this card technically wasn't this day beacuase the time was off"
-// set everything to be active at like midnight, queries at midnight and see if it works otherwise +1 second lmao
-
-func parseDate(input string) (time.Time, error) {
-	// create an array of the formats (with 0s, without, 4 digit year, 2 digit year)
-	// go through parse works and then return
-	var date time.Time
-	var err error
-	timeFormats := []string{"1/2/06", "1/2/2006", "01/02/06", "01/02/2006"}
-	for _, format := range timeFormats {
-		date, err = time.Parse(format, input)
-		if err == nil {
-			break
-		}
-	}
-	if err != nil {
-		fmt.Println("Error parsing date.")
-		return time.Time{}, err
-	}
-
-	return date, nil
-}
-
 // at what point do you start passing single digit ints by reference?
 func printCurrentActivationParams(date *time.Time, allotment *int, strain *database.Strain, note *string) {
 	fmt.Println("Current settings for cards being added to activation queue:")
