@@ -319,11 +319,11 @@ func addTestCageCards(cfg *Config) error {
 		return err
 	}
 
-	ccStart := 100
-	ccEnd := 120
+	ccStart := int32(100)
+	ccEnd := int32(120)
 	for i := ccStart; i < ccEnd; i++ {
 		aCC := database.AddCageCardParams{
-			CcID:           int32(i),
+			CcID:           i,
 			InvestigatorID: invest[0].ID,
 			ProtocolID:     prot1.ID,
 		}
@@ -341,7 +341,7 @@ func addTestCageCards(cfg *Config) error {
 	ccEnd = 140
 	for i := ccStart; i < ccEnd; i++ {
 		aCC := database.AddCageCardParams{
-			CcID:           int32(i),
+			CcID:           i,
 			InvestigatorID: invest[0].ID,
 			ProtocolID:     prot2.ID,
 		}

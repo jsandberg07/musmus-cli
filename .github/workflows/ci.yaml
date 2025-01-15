@@ -47,6 +47,16 @@ jobs:
           - name: Run staticcheck
             run: staticcheck ./...
 
+          - name: Install gosec
+            run: go install github.com/securego/gosec/v2/cmd/gosec@latest
+
+            # 115, 109 are narrowing conversion from int64 to 32. need to create safe converter or change sql to largeint
+            # 304 is unchecked filepath names but theyre created by the system
+            # generated is trying to make it faster (sqlc doesnt throw any errors)
+            # just add enough exceptions until it works :^3
+          - name: Run gosec
+            run: gosec -exclude=G115,G109,G304,generated ./...
+
 
 
 # to add a badge

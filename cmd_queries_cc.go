@@ -607,7 +607,8 @@ func getExportFileName() string {
 }
 
 func createExportDirectory() error {
-	err := os.Mkdir("exports", os.ModePerm)
+	// err := os.Mkdir("exports", os.ModePerm)
+	err := os.Mkdir("exports", 0750)
 	if err != nil && err.Error() == "mkdir exports: file exists" {
 		// it already exists, just skip
 		return nil

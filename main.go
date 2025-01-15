@@ -45,7 +45,11 @@ import (
 const verbose bool = false
 
 func main() {
-	godotenv.Load()
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Printf("Could not load env file: %s\n", err)
+		os.Exit(1)
+	}
 	dbURL := os.Getenv("DB_URL")
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {

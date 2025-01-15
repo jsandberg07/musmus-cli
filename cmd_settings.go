@@ -150,7 +150,6 @@ func changeSettingsFunction(cfg *Config, args []Argument) error {
 	return nil
 }
 
-func printSettings(s *database.Setting) error {
+func printSettings(s *database.Setting) {
 	fmt.Printf("* Only activate self: %v", s.OnlyActivateSelf)
-	return nil
 }
