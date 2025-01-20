@@ -13,28 +13,25 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// CURRENTLY:
-// remove args param in command functions lemoo
-// writing tests for functions
-// read these:
+// COME BACK TO IT:
+// writing tests. spin up a fake db and do tests there. everything is too tight
+// parsing works and that's like the one thing that isn't tied to a db
 // https://dave.cheney.net/2019/05/07/prefer-table-driven-tests
 // https://circleci.com/blog/unit-testing-vs-integration-testing/
 // use cmp, or reflect. I guess cmp is better. you can get the difference between tho values
-// go has built in conversion for identical structs! use it instead of normalizing!
-// x := t1; y := t2(x); works!
-// see what things you can actually break down and parse there might not be a lot currently (bad)
-// will end up being reliant on spinning up a test db for the bulk of the testing feels like
 
-// dont forget to run your tests before merging!
-// Next:
-// Cc activation is weak, make it a go routine that just does it as it goes. it's fast enough im sure and not http based. you're literally typing by hand. it's fake remember?
+// wasted an hour to realize i can't remove []Arguments from functions. so maybe not a waste. It's tied to goto -cc ect.
+// "Problem" is reuse of types, but it's a small problem. Goto is probably gonna be the most used function (tied with back and exit)
 
-// After NEXT:
-// adding reminders, orders, and tests for those
-
+// CURRENTLY:
+// reminders, orders
+// run tests before merging!
 // reminders have a CC#, can be set to automatically add to CC activation, or an order. do E something or other, or a reminder for ~21 days from now, or whatever
 // reminders show up for a person or for everybody
 // see reminders with dates for today, next week, export. no past stuff. once it's done, have it be done (dont delete it anyway)
+
+// Next:
+// Cc activation is weak, make it a go routine that just does it as it goes. it's fast enough im sure and not http based. you're literally typing by hand. it's fake remember?
 
 // AFTER THAT:
 // the great polishing
