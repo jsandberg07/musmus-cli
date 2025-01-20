@@ -38,6 +38,16 @@ type Investigator struct {
 	Active   bool
 }
 
+type Order struct {
+	ID             uuid.UUID
+	OrderNumber    string
+	ExpectedDate   time.Time
+	InvestigatorID uuid.UUID
+	StrainID       uuid.UUID
+	Note           sql.NullString
+	Received       bool
+}
+
 type Position struct {
 	ID                uuid.UUID
 	Title             string
@@ -59,6 +69,14 @@ type Protocol struct {
 	ExpirationDate      time.Time
 	IsActive            bool
 	PreviousProtocol    uuid.NullUUID
+}
+
+type Reminder struct {
+	ID             uuid.UUID
+	RDate          time.Time
+	RCcID          int32
+	InvestigatorID uuid.UUID
+	Note           string
 }
 
 type Setting struct {

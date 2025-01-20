@@ -1,0 +1,46 @@
+scratch pad
+i have spent an hour and a half deciding what to do kek
+better than spending an hour and a half just making mistakes
+
+reminders
+- id 
+- date 
+- investigator (id) 
+- cage card (id) 
+- note
+- reminder state
+- add, delete commands (screw edit, too hard to get from db)
+- dont delete them, but clean them up when starting the cli like older than a week (eventually)
+
+orders
+- id
+- number / confirmation (also unique)
+- date 
+- check SEPARATE from reminders and be like "expected orders"
+- strain
+- vendor (fuhgetabahtit)
+- note
+- investigator 
+- need an orders state
+- need a create edit recieve orders commands
+- recieve would prompt for cage card #s for a range
+- then add and activate in the db with the note, investigator, that date
+- order number added to ccs
+- query for a particular order too
+
+queries 
+- get "all" reminders, for a date range, or for a particular investigator
+- get all orders or for an investigator
+
+
+processings ccs
+go routine with a channel listening for cc's
+enter a number, it gets params added, put into a channel, processed
+print message or print error
+better for memory, just as fast
+add an undo or "pop"
+adding reminder like E17 or whatever
+
+add query for getting cage cards by a number range
+do rough reminders that still have like the ids and whatever
+then one that is formatted with name and joins and ect cause you can't think apparently
