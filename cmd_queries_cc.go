@@ -307,7 +307,7 @@ func CCQueryActive(cfg *Config) error {
 		return nil
 	}
 
-	exp := NormalizeActive(&ccs)
+	exp := NormalizeCCExport(&ccs)
 
 	count, err := exportData(&exp)
 	if err != nil {
@@ -318,31 +318,6 @@ func CCQueryActive(cfg *Config) error {
 	return nil
 
 }
-
-func NormalizeActive(ccs *[]database.GetCageCardsActiveRow) []CageCardExport {
-	xps := []CageCardExport{}
-	for _, cc := range *ccs {
-		txp := CageCardExport{
-			CcID:          cc.CcID,
-			IName:         cc.IName,
-			PNumber:       cc.PNumber,
-			SName:         cc.SName,
-			ActivatedOn:   cc.ActivatedOn,
-			DeactivatedOn: cc.DeactivatedOn,
-		}
-
-		xps = append(xps, txp)
-	}
-	return xps
-}
-
-// normalize
-// psql generates structs with different names, even if theyre the same
-// rather than mess with generated files that might reset each time theyre run
-// just have normalize functions that change the returned stucts into a regular type
-// also cant be a member function (is that the term if its not oop) since it works on an array
-
-// TODO: candidate for refactoring into one big hideous super function that just branches
 
 func CCQueryAll(cfg *Config) error {
 	ccs, err := cfg.db.GetCageCardsAll(context.Background())
@@ -355,7 +330,7 @@ func CCQueryAll(cfg *Config) error {
 		return nil
 	}
 
-	exp := NormalizeAll(&ccs)
+	exp := NormalizeCCExport(&ccs)
 
 	count, err := exportData(&exp)
 	if err != nil {
@@ -364,23 +339,6 @@ func CCQueryAll(cfg *Config) error {
 
 	fmt.Printf("// Exported lines: %v\n", count)
 	return nil
-}
-
-func NormalizeAll(ccs *[]database.GetCageCardsAllRow) []CageCardExport {
-	xps := []CageCardExport{}
-	for _, cc := range *ccs {
-		txp := CageCardExport{
-			CcID:          cc.CcID,
-			IName:         cc.IName,
-			PNumber:       cc.PNumber,
-			SName:         cc.SName,
-			ActivatedOn:   cc.ActivatedOn,
-			DeactivatedOn: cc.DeactivatedOn,
-		}
-
-		xps = append(xps, txp)
-	}
-	return xps
 }
 
 func CCQueryDateRange(cfg *Config, start, end time.Time) error {
@@ -398,7 +356,7 @@ func CCQueryDateRange(cfg *Config, start, end time.Time) error {
 		return nil
 	}
 
-	exp := NormalizeDateRange(&ccs)
+	exp := NormalizeCCExport(&ccs)
 
 	count, err := exportData(&exp)
 	if err != nil {
@@ -407,23 +365,6 @@ func CCQueryDateRange(cfg *Config, start, end time.Time) error {
 
 	fmt.Printf("// Exported lines: %v\n", count)
 	return nil
-}
-
-func NormalizeDateRange(ccs *[]database.GetCardsDateRangeRow) []CageCardExport {
-	xps := []CageCardExport{}
-	for _, cc := range *ccs {
-		txp := CageCardExport{
-			CcID:          cc.CcID,
-			IName:         cc.IName,
-			PNumber:       cc.PNumber,
-			SName:         cc.SName,
-			ActivatedOn:   cc.ActivatedOn,
-			DeactivatedOn: cc.DeactivatedOn,
-		}
-
-		xps = append(xps, txp)
-	}
-	return xps
 }
 
 func CCQueryInvestigator(cfg *Config, start, end time.Time, inv *database.Investigator) error {
@@ -443,7 +384,7 @@ func CCQueryInvestigator(cfg *Config, start, end time.Time, inv *database.Invest
 		return nil
 	}
 
-	exp := NormalizeInvestigator(&ccs)
+	exp := NormalizeCCExport(&ccs)
 
 	count, err := exportData(&exp)
 	if err != nil {
@@ -455,21 +396,19 @@ func CCQueryInvestigator(cfg *Config, start, end time.Time, inv *database.Invest
 
 }
 
-func NormalizeInvestigator(ccs *[]database.GetCageCardsInvestigatorRow) []CageCardExport {
-	xps := []CageCardExport{}
-	for _, cc := range *ccs {
-		txp := CageCardExport{
-			CcID:          cc.CcID,
-			IName:         cc.IName,
-			PNumber:       cc.PNumber,
-			SName:         cc.SName,
-			ActivatedOn:   cc.ActivatedOn,
-			DeactivatedOn: cc.DeactivatedOn,
-		}
-
-		xps = append(xps, txp)
+// Output rows are consistent between types, but sqlc generates new struct for each query.
+// Changes them into a format that can be turned into a string to be exported. No clue what happens if the structs aren't identical!
+// Don't return error, just check if value is 0 after
+func NormalizeCCExport[T database.GetCageCardsInvestigatorRow | database.GetCageCardsAllRow | database.GetCageCardsActiveRow | database.GetCardsDateRangeRow | database.GetCageCardsProtocolRow](ccs *[]T) []CageCardExport {
+	if len(*ccs) == 0 {
+		return []CageCardExport{}
 	}
-	return xps
+	output := make([]CageCardExport, len(*ccs))
+	for i, cc := range *ccs {
+		ts := CageCardExport(cc)
+		output[i] = ts
+	}
+	return output
 }
 
 func CCQueryProtocol(cfg *Config, start, end time.Time, pro *database.Protocol) error {
@@ -489,7 +428,7 @@ func CCQueryProtocol(cfg *Config, start, end time.Time, pro *database.Protocol) 
 		return nil
 	}
 
-	exp := NormalizeProtocol(&ccs)
+	exp := NormalizeCCExport(&ccs)
 
 	count, err := exportData(&exp)
 	if err != nil {
@@ -499,23 +438,6 @@ func CCQueryProtocol(cfg *Config, start, end time.Time, pro *database.Protocol) 
 	fmt.Printf("// Exported lines: %v\n", count)
 	return nil
 
-}
-
-func NormalizeProtocol(ccs *[]database.GetCageCardsProtocolRow) []CageCardExport {
-	xps := []CageCardExport{}
-	for _, cc := range *ccs {
-		txp := CageCardExport{
-			CcID:          cc.CcID,
-			IName:         cc.IName,
-			PNumber:       cc.PNumber,
-			SName:         cc.SName,
-			ActivatedOn:   cc.ActivatedOn,
-			DeactivatedOn: cc.DeactivatedOn,
-		}
-
-		xps = append(xps, txp)
-	}
-	return xps
 }
 
 func exportData(cages *[]CageCardExport) (int, error) {
@@ -578,24 +500,6 @@ func stringifyCage(c *CageCardExport) []string {
 		output[5] = c.DeactivatedOn.Time.String()
 	}
 
-	/* going step by step to make sure the sql works so adding a table at a time
-	if c.Investigator.Valid {
-		output[1] = c.Investigator.String
-	}
-	if c.PNumber.Valid {
-		output[2] = c.PNumber.String
-	}
-	if c.SName.Valid {
-		output[3] = c.SName.String
-	}
-	if c.ActivatedOn.Valid {
-		output[4] = c.ActivatedOn.Time.String()
-	}
-	if c.DeactivatedOn.Valid {
-		output[5] = c.DeactivatedOn.Time.String()
-	}
-	*/
-
 	return output
 
 }
@@ -603,7 +507,7 @@ func stringifyCage(c *CageCardExport) []string {
 // make a constant or make it changable to have the file name be consistent / alterable
 func getExportFileName() string {
 	uuid := uuid.New().String()
-	return "exports/" + "zzz_" + uuid[0:8] + ".csv"
+	return "exports/" + uuid[0:8] + ".csv"
 }
 
 func createExportDirectory() error {
@@ -622,137 +526,3 @@ func createExportDirectory() error {
 
 	return nil
 }
-
-/* this block
-is a reminder
-of your huberis
-and all work
-below it is
-real but also
-fake */
-
-/* because these are all test functions and ive copied what i needed
-
-func exportQuickCC(cfg *Config) error {
-	start := time.Now()
-	end := time.Now()
-
-	dates := database.GetCardsDateRangeParams{
-		ActivatedOn:   sql.NullTime{Valid: true, Time: start},
-		DeactivatedOn: sql.NullTime{Valid: true, Time: end},
-	}
-
-	cages, err := cfg.db.GetCardsDateRange(context.Background(), dates)
-	if err != nil {
-		fmt.Println("Error getting active cages")
-		return err
-	}
-
-	if len(cages) == 0 {
-		fmt.Println("Oops no active cages found!")
-		return nil
-	}
-
-	fmt.Printf("// expected lines: %v\n", len(cages))
-
-	count, err := exportQuickData(&cages)
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("// Exported lines: %v\n", count)
-	return nil
-
-}
-
-// rename this function, it is no longer a test
-func exportActive(cfg *Config) error {
-	activeCages, err := cfg.db.GetActiveTestCards(context.Background())
-	if err != nil {
-		fmt.Println("Error getting active cages")
-		return err
-	}
-
-	if len(activeCages) == 0 {
-		fmt.Println("Oops no active cages found!")
-		return nil
-	}
-
-	fmt.Printf("// expected lines: %v\n", len(activeCages))
-
-	count, err := exportData(&activeCages)
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("// Exported lines: %v\n", count)
-	return nil
-
-}
-
-func exportQuickData(cages *[]database.GetCardsDateRangeRow) (int, error) {
-	err := createExportDirectory()
-	if err != nil {
-		return 0, err
-	}
-	fmt.Println("Do you see a directory?")
-
-	filename := getExportFileName()
-	file, err := os.Create(filename)
-	if err != nil {
-		fmt.Println("Error creating csv file")
-		return 0, err
-	}
-	defer file.Close()
-
-	writer := csv.NewWriter(file)
-	defer writer.Flush()
-
-	count := 0
-
-	// add top row
-	topRow := []string{"CC", "Investigator", "Protocol", "Strain", "Activated On", "Deactivated On"}
-	err = writer.Write(topRow)
-	if err != nil {
-		fmt.Println("Error writing top row to csv")
-		return 0, err
-	}
-
-	for _, cage := range *cages {
-		err := writer.Write(stringifyQuickCage(&cage))
-		if err != nil {
-			fmt.Printf("Error writing to csv: %s", err)
-			continue
-		}
-		count++
-	}
-
-	return count, nil
-}
-
-// all exported data is more or less the same, so this can probably be made generic
-
-func stringifyQuickCage(c *database.GetCardsDateRangeRow) []string {
-
-	output := make([]string, 6)
-	output[0] = strconv.Itoa(int(c.CcID))
-
-	output[1] = c.IName
-
-	output[2] = c.PNumber
-
-	if c.SName.Valid {
-		output[3] = c.SName.String
-	}
-
-	if c.ActivatedOn.Valid {
-		output[4] = c.ActivatedOn.Time.String()
-	}
-	if c.DeactivatedOn.Valid {
-		output[5] = c.DeactivatedOn.Time.String()
-	}
-
-	return output
-}
-
-*/

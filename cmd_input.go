@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 )
 
 // NOT expecting a command name
@@ -81,4 +82,24 @@ func parseArguments(flags map[string]Flag, parameters []string) ([]Argument, err
 	}
 
 	return arguments, nil
+}
+
+func parseDate(input string) (time.Time, error) {
+	// create an array of the formats (with 0s, without, 4 digit year, 2 digit year)
+	// go through parse works and then return
+	var date time.Time
+	var err error
+	timeFormats := []string{"1/2/06", "1/2/2006", "01/02/06", "01/02/2006"}
+	for _, format := range timeFormats {
+		date, err = time.Parse(format, input)
+		if err == nil {
+			break
+		}
+	}
+	if err != nil {
+		fmt.Println("Error parsing date.")
+		return time.Time{}, err
+	}
+
+	return date, nil
 }

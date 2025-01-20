@@ -15,15 +15,27 @@ import (
 
 // CURRENTLY:
 // remove args param in command functions lemoo
-// the CI/CD update. use the ones from boot dev. Will literally give you a list of problems to fix.
-// and make way for not breaking the next part
+// writing tests for functions
+// read these:
+// https://dave.cheney.net/2019/05/07/prefer-table-driven-tests
+// https://circleci.com/blog/unit-testing-vs-integration-testing/
+// use cmp, or reflect. I guess cmp is better. you can get the difference between tho values
+// go has built in conversion for identical structs! use it instead of normalizing!
+// x := t1; y := t2(x); works!
+// see what things you can actually break down and parse there might not be a lot currently (bad)
+// will end up being reliant on spinning up a test db for the bulk of the testing feels like
 
-// NEXT:
+// dont forget to run your tests before merging!
+// Next:
+// Cc activation is weak, make it a go routine that just does it as it goes. it's fast enough im sure and not http based. you're literally typing by hand. it's fake remember?
 
-// AFTER THAT:
-// the EASY CICD testing
-// AFTER THAT:
+// After NEXT:
 // adding reminders, orders, and tests for those
+
+// reminders have a CC#, can be set to automatically add to CC activation, or an order. do E something or other, or a reminder for ~21 days from now, or whatever
+// reminders show up for a person or for everybody
+// see reminders with dates for today, next week, export. no past stuff. once it's done, have it be done (dont delete it anyway)
+
 // AFTER THAT:
 // the great polishing
 // making maps print sortedly
@@ -40,6 +52,8 @@ import (
 // SOMEWHERE DURING THAT
 // i changed my mind and was cage cards to have go routines instead, so closer to cayuse process as you go
 // it's fast cause it's not html based
+// ADDITIONALLY:
+// a RESTful server version! throw out all your cli code and keep the sql! no more parsing! just json!
 
 // change if you want a million things printed or not
 const verbose bool = false
