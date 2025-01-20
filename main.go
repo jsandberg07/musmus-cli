@@ -37,6 +37,7 @@ import (
 // the great polishing
 // making maps print sortedly
 // adding permissions that work! you already have rolls. and logins
+// DRY up the state function, you don't need a separate function for each one. use a string and switch to return a state
 // AFTER THAT:
 // the great readme-en-ing. write a readme and update the github page
 // AFTER THAT:

@@ -11,6 +11,7 @@ reminders
 - reminder state
 - add, delete commands (screw edit, too hard to get from db)
 - dont delete them, but clean them up when starting the cli like older than a week (eventually)
+- maybe also do "hey here's whats coming up tomorrow" too
 
 orders
 - id

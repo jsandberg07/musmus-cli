@@ -103,6 +103,8 @@ func getMainState() *State {
 	return &mainState
 }
 
+// TODO: gotta be some way to condense this into one function. Theyre literally copy and paste
+// input a string, use a switch to get a map, set the cli message, return &state
 func getInvestigatorsMap() map[string]Command {
 	cmds := []Command{getAddInvestigatorCmd(), getEditInvestigatorCmd()}
 	commandsMap := cmdMapHelper(cmds)
@@ -224,4 +226,38 @@ func getStrainsState() *State {
 	}
 
 	return &strainState
+}
+
+func getRemindersMap() map[string]Command {
+	cmds := []Command{getAddReminderCmd(), getDeleteReminderCmd()}
+	commandMap := cmdMapHelper(cmds)
+
+	return commandMap
+}
+func getRemindersState() *State {
+	remindersMap := getRemindersMap()
+
+	remindersState := State{
+		currentCommands: remindersMap,
+		cliMessage:      "reminders",
+	}
+
+	return &remindersState
+}
+
+func getOrdersMap() map[string]Command {
+	cmds := []Command{getAddOrdersCmd(), getEditOrdersCmd(), getReceiveOrdersCmd()}
+	commandMap := cmdMapHelper(cmds)
+
+	return commandMap
+}
+func getOrdersState() *State {
+	ordersMap := getOrdersMap()
+
+	ordersState := State{
+		currentCommands: ordersMap,
+		cliMessage:      "orders",
+	}
+
+	return &ordersState
 }

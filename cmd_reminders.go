@@ -6,44 +6,37 @@ import (
 	"os"
 )
 
-// creating a template for implementing commands
-// reminders:
-// include the help and exit flags
-// add getXXXcmd to the function's state
-//
-
-func getXXXCmd() Command {
-	XXXFlags := make(map[string]Flag)
-	XXXCmd := Command{
-		name:        "XXX",
-		description: "Used for XXX",
-		function:    XXXFunction,
-		flags:       XXXFlags,
+func getAddReminderCmd() Command {
+	addReminderFlags := make(map[string]Flag)
+	addReminderCmd := Command{
+		name:        "add",
+		description: "Used for adding reminders",
+		function:    addReminderFunction,
+		flags:       addReminderFlags,
 	}
 
-	return XXXCmd
+	return addReminderCmd
 }
 
-func getXXXFlags() map[string]Flag {
-	XXXFlags := make(map[string]Flag)
+func getAddReminderFlags() map[string]Flag {
+	addReminderFlags := make(map[string]Flag)
 	XFlag := Flag{
 		symbol:      "X",
 		description: "Sets X",
 		takesValue:  false,
 	}
-	XXXFlags["-"+XFlag.symbol] = XFlag
+	addReminderFlags["-"+XFlag.symbol] = XFlag
 
 	// ect as needed or remove the "-"+ for longer ones
 
-	fmt.Println("If you see this, you accidentally left the template flag function in")
-	return XXXFlags
+	return addReminderFlags
 
 }
 
 // look into removing the args thing, might have to stay
-func XXXFunction(cfg *Config, args []Argument) error {
+func addReminderFunction(cfg *Config, args []Argument) error {
 	// get flags
-	flags := getXXXFlags()
+	flags := getAddReminderFlags()
 
 	// set defaults
 	exit := false
