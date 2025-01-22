@@ -12,6 +12,9 @@ reminders
 - add, delete commands (screw edit, too hard to get from db)
 - dont delete them, but clean them up when starting the cli like older than a week (eventually)
 - maybe also do "hey here's whats coming up tomorrow" too
+- delete can be like "here are all the ones for that day, enter a number to delete it" and then use the index
+- not the same but who cares it will literally never be used
+- if a cage card is deactivated, delete the reminder, alert user
 
 orders
 - id

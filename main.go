@@ -22,6 +22,12 @@ import (
 
 // wasted an hour to realize i can't remove []Arguments from functions. so maybe not a waste. It's tied to goto -cc ect.
 // "Problem" is reuse of types, but it's a small problem. Goto is probably gonna be the most used function (tied with back and exit)
+// addendum: remove the goto function and replace it with regular functions. it's the only one that uses the []Arguments ie why you cant remove it
+
+// australia
+// china #9
+// china #11
+// do it
 
 // CURRENTLY:
 // reminders, orders

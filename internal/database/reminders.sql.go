@@ -8,7 +8,50 @@ package database
 import (
 	"context"
 	"time"
+
+	"github.com/google/uuid"
 )
+
+const addReminder = `-- name: AddReminder :one
+INSERT INTO reminders(id, r_date, r_cc_id, investigator_id, note)
+VALUES (gen_random_uuid(), $1, $2, $3, $4)
+RETURNING id, r_date, r_cc_id, investigator_id, note
+`
+
+type AddReminderParams struct {
+	RDate          time.Time
+	RCcID          int32
+	InvestigatorID uuid.UUID
+	Note           string
+}
+
+func (q *Queries) AddReminder(ctx context.Context, arg AddReminderParams) (Reminder, error) {
+	row := q.db.QueryRowContext(ctx, addReminder,
+		arg.RDate,
+		arg.RCcID,
+		arg.InvestigatorID,
+		arg.Note,
+	)
+	var i Reminder
+	err := row.Scan(
+		&i.ID,
+		&i.RDate,
+		&i.RCcID,
+		&i.InvestigatorID,
+		&i.Note,
+	)
+	return i, err
+}
+
+const deleteReminder = `-- name: DeleteReminder :exec
+DELETE FROM reminders
+WHERE $1 = id
+`
+
+func (q *Queries) DeleteReminder(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteReminder, id)
+	return err
+}
 
 const getAllReminders = `-- name: GetAllReminders :many
 SELECT id, r_date, r_cc_id, investigator_id, note FROM reminders
