@@ -141,11 +141,11 @@ func (q *Queries) GetOrderByID(ctx context.Context, id uuid.UUID) (Order, error)
 
 const getOrderByNumber = `-- name: GetOrderByNumber :one
 SELECT id, order_number, expected_date, investigator_id, strain_id, note, received FROM orders
-WHERE order_number = #1
+WHERE order_number = $1
 `
 
-func (q *Queries) GetOrderByNumber(ctx context.Context) (Order, error) {
-	row := q.db.QueryRowContext(ctx, getOrderByNumber)
+func (q *Queries) GetOrderByNumber(ctx context.Context, orderNumber string) (Order, error) {
+	row := q.db.QueryRowContext(ctx, getOrderByNumber, orderNumber)
 	var i Order
 	err := row.Scan(
 		&i.ID,

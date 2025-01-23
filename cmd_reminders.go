@@ -268,57 +268,57 @@ func getDeleteReminderCmd() Command {
 	return deleteReminderCmd
 }
 
-// working on this
 // get all the reminders for a certain date.
 // list them in whatever order, then enter 0 to delete or # to delete that one
 func deleteReminderFunction(cfg *Config, args []Argument) error {
-	// breaking the mold, this function uses no flags
-	// flags := getXXXFlags()
 
-	// set defaults
-	exit := false
+	var reminders []database.Reminder
 
-	// the reader
-	reader := bufio.NewReader(os.Stdin)
-
-	// da loop
 	for {
-		fmt.Print("> ")
-		text, err := reader.ReadString('\n')
+		date, err := getDatePrompt("Enter date of reminder to delete")
 		if err != nil {
-			fmt.Printf("Error reading input string: %s", err)
-			os.Exit(1)
+			return err
+		}
+		nilDate := time.Time{}
+		if date == nilDate {
+			fmt.Println("exiting...")
+			return nil
 		}
 
-		inputs, err := readSubcommandInput(text)
-		if err != nil {
-			fmt.Println(err)
-			continue
+		reminders, err := cfg.db.GetTodayReminders(context.Background(), date)
+		if err != nil && err.Error() != "sql: no rows in result set" {
+			// any other error
+			return err
 		}
 
-		// do weird behavior here
-
-		// but normal loop now
-		args, err := parseArguments(flags, inputs)
-		if err != nil {
-			fmt.Println(err)
-			continue
+		if len(reminders) == 0 {
+			fmt.Println("No reminders found for that date")
+			return nil
 		}
-
-		for _, arg := range args {
-			switch arg.flag {
-			case "-X":
-				exit = true
-			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
-			}
-		}
-
-		if exit {
-			break
-		}
-
+		break
 	}
 
-	return nil
+	for {
+		num, err := getIntPrompt("Enter a number to delete the corresponding reminder")
+		if err != nil {
+			return err
+		}
+		if num == -1 {
+			fmt.Println("exiting...")
+			return nil
+		}
+
+		err = cfg.db.DeleteReminder(context.Background(), reminders[num+1].ID)
+		if err != nil {
+			return err
+		}
+		fmt.Println("Reminder deleted")
+		return nil
+	}
+}
+
+func printRemindersList(reminders *[]database.Reminder) {
+	for i, r := range *reminders {
+		fmt.Printf("* %v: %v -- %s --", i+1, r.RCcID, r.Note)
+	}
 }

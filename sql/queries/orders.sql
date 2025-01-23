@@ -31,4 +31,4 @@ WHERE id = $1;
 
 -- name: GetOrderByNumber :one
 SELECT * FROM orders
-WHERE order_number = #1;
+WHERE order_number = $1;

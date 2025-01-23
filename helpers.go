@@ -49,7 +49,8 @@ func getStringPrompt(cfg *Config, prompt string, checkFunc func(*Config, string)
 	}
 }
 
-// quite possibly used one place but an alternative to making the prompts generic ie insaner than necessary
+// quite possibly used one place but an alternative to making the prompts generic ie insaner than necessary.
+// returns -1 on exit.
 // TODO: return a specific error that informs the function to exit
 func getIntPrompt(prompt string) (int, error) {
 	fmt.Println(prompt + " or exit to cancel")
