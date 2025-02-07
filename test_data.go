@@ -361,7 +361,7 @@ func addTestCageCards(cfg *Config) error {
 
 func activateTestCageCards(cfg *Config) error {
 	fmt.Println("* Activating test cage cards")
-	lastWeek := time.Now().AddDate(0, 0, -7)
+	lastWeek := normalizeDate(time.Now().AddDate(0, 0, -7))
 	activatedBy, err := cfg.db.GetInvestigatorByName(context.Background(), "Sonya Ball")
 	if err != nil {
 		fmt.Println("Error getting investigator for activation")
@@ -409,7 +409,7 @@ func activateTestCageCards(cfg *Config) error {
 
 func deactivateTestCageCards(cfg *Config) error {
 	fmt.Println("* Deactivating test cage cards")
-	yesterday := time.Now().AddDate(0, 0, -1)
+	yesterday := normalizeDate(time.Now().AddDate(0, 0, -1))
 	deactivatedBy, err := cfg.db.GetInvestigatorByName(context.Background(), "Sonya Ball")
 	if err != nil {
 		fmt.Println("Error getting investigator for activation")

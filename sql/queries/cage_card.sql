@@ -9,6 +9,10 @@ SELECT * FROM cage_cards
 WHERE activated_on IS NOT NULL AND deactivated_on IS NULL
 ORDER BY cc_id ASC;
 
+-- name: GetCageCardsRange :many
+SELECT * FROM cage_cards
+WHERE cc_id >= $1 AND cc_id <= $2;
+
 -- name: GetAllCageCards :many
 SELECT * FROM cage_cards
 ORDER BY cc_id ASC;
@@ -122,3 +126,8 @@ INNER JOIN investigators ON cage_cards.investigator_id = investigators.id
 INNER JOIN protocols ON cage_cards.protocol_id = protocols.id
 LEFT JOIN strains ON cage_cards.strain = strains.id
 ORDER BY cage_cards.cc_id ASC;
+
+-- name: ReceiveCageCard :one
+INSERT INTO cage_cards(cc_id, protocol_id, activated_on, investigator_id, strain, notes, activated_by)
+VALUES($1, $2, $3, $4, $5, $6, $7)
+RETURNING *;

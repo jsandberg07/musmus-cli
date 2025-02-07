@@ -103,3 +103,10 @@ func parseDate(input string) (time.Time, error) {
 
 	return date, nil
 }
+
+// Returns midnight of input
+// TODO: what time are my current stamps in?
+func normalizeDate(t time.Time) time.Time {
+	midnight := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC)
+	return midnight
+}

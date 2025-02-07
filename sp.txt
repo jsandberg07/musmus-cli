@@ -48,3 +48,12 @@ adding reminder like E17 or whatever
 add query for getting cage cards by a number range
 do rough reminders that still have like the ids and whatever
 then one that is formatted with name and joins and ect cause you can't think apparently
+
+finish adding orders
+add an optional order number column to cage cards
+update all cage card functions to return an order number if necessary
+get cage cards by order number
+test these things
+then check your main for stuff to do
+it's wendesday morning, 2 days into your vacation and you jsut finished 2 boot dev courses kek
+i think you can finish this. after brunch tho. 

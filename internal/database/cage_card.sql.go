@@ -15,7 +15,7 @@ import (
 const addCageCard = `-- name: AddCageCard :one
 INSERT INTO cage_cards(cc_id, protocol_id, investigator_id)
 VALUES ($1, $2, $3)
-RETURNING cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by
+RETURNING cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by, order_id
 `
 
 type AddCageCardParams struct {
@@ -37,6 +37,7 @@ func (q *Queries) AddCageCard(ctx context.Context, arg AddCageCardParams) (CageC
 		&i.Notes,
 		&i.ActivatedBy,
 		&i.DeactivatedBy,
+		&i.OrderID,
 	)
 	return i, err
 }
@@ -62,7 +63,7 @@ UPDATE cage_cards
 SET deactivated_on = $2,
     deactivated_by = $3
 WHERE cc_id = $1
-RETURNING cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by
+RETURNING cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by, order_id
 `
 
 type DeactivateCageCardParams struct {
@@ -84,6 +85,7 @@ func (q *Queries) DeactivateCageCard(ctx context.Context, arg DeactivateCageCard
 		&i.Notes,
 		&i.ActivatedBy,
 		&i.DeactivatedBy,
+		&i.OrderID,
 	)
 	return i, err
 }
@@ -150,7 +152,7 @@ func (q *Queries) GetActiveTestCards(ctx context.Context) ([]GetActiveTestCardsR
 }
 
 const getAllActiveCageCards = `-- name: GetAllActiveCageCards :many
-SELECT cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by FROM cage_cards
+SELECT cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by, order_id FROM cage_cards
 WHERE activated_on IS NOT NULL AND deactivated_on IS NULL
 ORDER BY cc_id ASC
 `
@@ -174,6 +176,7 @@ func (q *Queries) GetAllActiveCageCards(ctx context.Context) ([]CageCard, error)
 			&i.Notes,
 			&i.ActivatedBy,
 			&i.DeactivatedBy,
+			&i.OrderID,
 		); err != nil {
 			return nil, err
 		}
@@ -189,7 +192,7 @@ func (q *Queries) GetAllActiveCageCards(ctx context.Context) ([]CageCard, error)
 }
 
 const getAllCageCards = `-- name: GetAllCageCards :many
-SELECT cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by FROM cage_cards
+SELECT cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by, order_id FROM cage_cards
 ORDER BY cc_id ASC
 `
 
@@ -212,6 +215,7 @@ func (q *Queries) GetAllCageCards(ctx context.Context) ([]CageCard, error) {
 			&i.Notes,
 			&i.ActivatedBy,
 			&i.DeactivatedBy,
+			&i.OrderID,
 		); err != nil {
 			return nil, err
 		}
@@ -227,7 +231,7 @@ func (q *Queries) GetAllCageCards(ctx context.Context) ([]CageCard, error) {
 }
 
 const getCageCardByID = `-- name: GetCageCardByID :one
-SELECT cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by FROM cage_cards
+SELECT cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by, order_id FROM cage_cards
 WHERE $1 = cc_id
 `
 
@@ -244,6 +248,7 @@ func (q *Queries) GetCageCardByID(ctx context.Context, ccID int32) (CageCard, er
 		&i.Notes,
 		&i.ActivatedBy,
 		&i.DeactivatedBy,
+		&i.OrderID,
 	)
 	return i, err
 }
@@ -346,7 +351,7 @@ func (q *Queries) GetCageCardsAll(ctx context.Context) ([]GetCageCardsAllRow, er
 }
 
 const getCageCardsByInvestigator = `-- name: GetCageCardsByInvestigator :many
-SELECT cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by FROM cage_cards
+SELECT cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by, order_id FROM cage_cards
 WHERE $1 = investigator_id
 AND activated_on IS NOT NULL AND deactivated_on IS NULL
 ORDER BY cc_id ASC
@@ -371,6 +376,7 @@ func (q *Queries) GetCageCardsByInvestigator(ctx context.Context, investigatorID
 			&i.Notes,
 			&i.ActivatedBy,
 			&i.DeactivatedBy,
+			&i.OrderID,
 		); err != nil {
 			return nil, err
 		}
@@ -497,6 +503,50 @@ func (q *Queries) GetCageCardsProtocol(ctx context.Context, arg GetCageCardsProt
 	return items, nil
 }
 
+const getCageCardsRange = `-- name: GetCageCardsRange :many
+SELECT cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by, order_id FROM cage_cards
+WHERE cc_id >= $1 AND cc_id <= $2
+`
+
+type GetCageCardsRangeParams struct {
+	CcID   int32
+	CcID_2 int32
+}
+
+func (q *Queries) GetCageCardsRange(ctx context.Context, arg GetCageCardsRangeParams) ([]CageCard, error) {
+	rows, err := q.db.QueryContext(ctx, getCageCardsRange, arg.CcID, arg.CcID_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CageCard
+	for rows.Next() {
+		var i CageCard
+		if err := rows.Scan(
+			&i.CcID,
+			&i.ProtocolID,
+			&i.ActivatedOn,
+			&i.DeactivatedOn,
+			&i.InvestigatorID,
+			&i.Strain,
+			&i.Notes,
+			&i.ActivatedBy,
+			&i.DeactivatedBy,
+			&i.OrderID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCardsDateRange = `-- name: GetCardsDateRange :many
 SELECT cage_cards.cc_id, investigators.i_name, protocols.p_number, strains.s_name, cage_cards.activated_on, cage_cards.deactivated_on
 FROM cage_cards
@@ -603,6 +653,48 @@ func (q *Queries) ReactivateCageCard(ctx context.Context, ccID int32) error {
 	return err
 }
 
+const receiveCageCard = `-- name: ReceiveCageCard :one
+INSERT INTO cage_cards(cc_id, protocol_id, activated_on, investigator_id, strain, notes, activated_by)
+VALUES($1, $2, $3, $4, $5, $6, $7)
+RETURNING cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by, order_id
+`
+
+type ReceiveCageCardParams struct {
+	CcID           int32
+	ProtocolID     uuid.UUID
+	ActivatedOn    sql.NullTime
+	InvestigatorID uuid.UUID
+	Strain         uuid.NullUUID
+	Notes          sql.NullString
+	ActivatedBy    uuid.NullUUID
+}
+
+func (q *Queries) ReceiveCageCard(ctx context.Context, arg ReceiveCageCardParams) (CageCard, error) {
+	row := q.db.QueryRowContext(ctx, receiveCageCard,
+		arg.CcID,
+		arg.ProtocolID,
+		arg.ActivatedOn,
+		arg.InvestigatorID,
+		arg.Strain,
+		arg.Notes,
+		arg.ActivatedBy,
+	)
+	var i CageCard
+	err := row.Scan(
+		&i.CcID,
+		&i.ProtocolID,
+		&i.ActivatedOn,
+		&i.DeactivatedOn,
+		&i.InvestigatorID,
+		&i.Strain,
+		&i.Notes,
+		&i.ActivatedBy,
+		&i.DeactivatedBy,
+		&i.OrderID,
+	)
+	return i, err
+}
+
 const trueActivateCageCard = `-- name: TrueActivateCageCard :one
 UPDATE cage_cards
 SET activated_on = $2,
@@ -610,7 +702,7 @@ SET activated_on = $2,
     strain = $4,
     notes = $5
 WHERE cc_id = $1
-RETURNING cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by
+RETURNING cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by, order_id
 `
 
 type TrueActivateCageCardParams struct {
@@ -640,6 +732,7 @@ func (q *Queries) TrueActivateCageCard(ctx context.Context, arg TrueActivateCage
 		&i.Notes,
 		&i.ActivatedBy,
 		&i.DeactivatedBy,
+		&i.OrderID,
 	)
 	return i, err
 }

@@ -246,7 +246,7 @@ func getRemindersState() *State {
 }
 
 func getOrdersMap() map[string]Command {
-	cmds := []Command{getAddOrdersCmd(), getEditOrdersCmd(), getReceiveOrdersCmd()}
+	cmds := []Command{getAddOrderCmd(), getEditOrderCmd(), getReceiveOrderCmd()}
 	commandMap := cmdMapHelper(cmds)
 
 	return commandMap

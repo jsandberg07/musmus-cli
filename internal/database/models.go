@@ -27,6 +27,7 @@ type CageCard struct {
 	Notes          sql.NullString
 	ActivatedBy    uuid.NullUUID
 	DeactivatedBy  uuid.NullUUID
+	OrderID        uuid.NullUUID
 }
 
 type Investigator struct {
@@ -42,6 +43,7 @@ type Order struct {
 	ID             uuid.UUID
 	OrderNumber    string
 	ExpectedDate   time.Time
+	ProtocolID     uuid.UUID
 	InvestigatorID uuid.UUID
 	StrainID       uuid.UUID
 	Note           sql.NullString

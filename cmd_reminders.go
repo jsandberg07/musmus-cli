@@ -177,10 +177,10 @@ func addReminderFunction(cfg *Config, args []Argument) error {
 }
 
 func printAddReminder(r *database.AddReminderParams, i *database.Investigator) {
-	fmt.Printf("Date: \n", r.RDate)
-	fmt.Printf("Cage Card: \n", r.RCcID)
-	fmt.Printf("Investigator: \n", i.IName)
-	fmt.Printf("Note: \n", r.Note)
+	fmt.Printf("Date: %v\n", r.RDate)
+	fmt.Printf("Cage Card: %v\n", r.RCcID)
+	fmt.Printf("Investigator: %v\n", i.IName)
+	fmt.Printf("Note: %v\n", r.Note)
 }
 
 func getDatePrompt(prompt string) (time.Time, error) {
@@ -285,7 +285,8 @@ func deleteReminderFunction(cfg *Config, args []Argument) error {
 			return nil
 		}
 
-		reminders, err := cfg.db.GetTodayReminders(context.Background(), date)
+		// has to be = instead of := because it'll nil slice the outer scope
+		reminders, err = cfg.db.GetTodayReminders(context.Background(), date)
 		if err != nil && err.Error() != "sql: no rows in result set" {
 			// any other error
 			return err

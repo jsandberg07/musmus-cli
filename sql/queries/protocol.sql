@@ -2,6 +2,10 @@
 SELECT * FROM protocols
 ORDER BY p_number DESC;
 
+-- name: GetProtocolByID :one
+SELECT * FROM protocols
+WHERE $1 = id;
+
 -- name: GetProtocolByNumber :one
 SELECT * FROM protocols
 WHERE $1 = p_number;

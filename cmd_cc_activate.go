@@ -155,7 +155,7 @@ func activateFunction(cfg *Config, args []Argument) error {
 	// set defaults for the command
 	exit := false
 	cardsToProcess := []database.TrueActivateCageCardParams{}
-	date := time.Now()
+	date := normalizeDate(time.Now())
 	allotment := 0
 	strain := database.Strain{ID: uuid.Nil}
 	keepStrain := false
@@ -399,6 +399,8 @@ func printCurrentActivationParams(date *time.Time, allotment *int, strain *datab
 }
 
 // works with both code and name
+// TODO: figure out why im checking for x as an input OH TO CANCEL THE STRAIN OUT SOMEHWERE I THINK
+// TODO: handle blanking out the strain before trying to parse from a flag
 func getStrainByFlag(cfg *Config, input string) (database.Strain, error) {
 	if input == "x" || input == "X" {
 		return database.Strain{ID: uuid.Nil}, nil

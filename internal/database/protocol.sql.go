@@ -68,6 +68,28 @@ func (q *Queries) CreateProtocol(ctx context.Context, arg CreateProtocolParams) 
 	return i, err
 }
 
+const getProtocolByID = `-- name: GetProtocolByID :one
+SELECT id, p_number, primary_investigator, title, allocated, balance, expiration_date, is_active, previous_protocol FROM protocols
+WHERE $1 = id
+`
+
+func (q *Queries) GetProtocolByID(ctx context.Context, id uuid.UUID) (Protocol, error) {
+	row := q.db.QueryRowContext(ctx, getProtocolByID, id)
+	var i Protocol
+	err := row.Scan(
+		&i.ID,
+		&i.PNumber,
+		&i.PrimaryInvestigator,
+		&i.Title,
+		&i.Allocated,
+		&i.Balance,
+		&i.ExpirationDate,
+		&i.IsActive,
+		&i.PreviousProtocol,
+	)
+	return i, err
+}
+
 const getProtocolByNumber = `-- name: GetProtocolByNumber :one
 SELECT id, p_number, primary_investigator, title, allocated, balance, expiration_date, is_active, previous_protocol FROM protocols
 WHERE $1 = p_number
