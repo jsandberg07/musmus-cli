@@ -184,7 +184,7 @@ func printAddReminder(r *database.AddReminderParams, i *database.Investigator) {
 }
 
 func getDatePrompt(prompt string) (time.Time, error) {
-	fmt.Println(prompt + "or exit to cancel")
+	fmt.Println(prompt + " or exit to cancel")
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Print("> ")
@@ -274,52 +274,50 @@ func deleteReminderFunction(cfg *Config, args []Argument) error {
 
 	var reminders []database.Reminder
 
-	for {
-		date, err := getDatePrompt("Enter date of reminder to delete")
-		if err != nil {
-			return err
-		}
-		nilDate := time.Time{}
-		if date == nilDate {
-			fmt.Println("exiting...")
-			return nil
-		}
-
-		// has to be = instead of := because it'll nil slice the outer scope
-		reminders, err = cfg.db.GetTodayReminders(context.Background(), date)
-		if err != nil && err.Error() != "sql: no rows in result set" {
-			// any other error
-			return err
-		}
-
-		if len(reminders) == 0 {
-			fmt.Println("No reminders found for that date")
-			return nil
-		}
-		break
+	date, err := getDatePrompt("Enter date of reminder to delete")
+	if err != nil {
+		return err
 	}
-
-	for {
-		num, err := getIntPrompt("Enter a number to delete the corresponding reminder")
-		if err != nil {
-			return err
-		}
-		if num == -1 {
-			fmt.Println("exiting...")
-			return nil
-		}
-
-		err = cfg.db.DeleteReminder(context.Background(), reminders[num+1].ID)
-		if err != nil {
-			return err
-		}
-		fmt.Println("Reminder deleted")
+	nilDate := time.Time{}
+	if date == nilDate {
+		fmt.Println("exiting...")
 		return nil
 	}
+	date = normalizeDate(date)
+
+	reminders, err = cfg.db.GetTodayReminders(context.Background(), date)
+	if err != nil && err.Error() != "sql: no rows in result set" {
+		// any other error
+		return err
+	}
+
+	if len(reminders) == 0 {
+		fmt.Println("No reminders found for that date. Exiting...")
+		return nil
+	}
+
+	printRemindersList(&reminders)
+
+	num, err := getIntPrompt("Enter a number to delete the corresponding reminder")
+	if err != nil {
+		return err
+	}
+	if num == -1 {
+		fmt.Println("exiting...")
+		return nil
+	}
+
+	err = cfg.db.DeleteReminder(context.Background(), reminders[num-1].ID)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Reminder deleted")
+	return nil
+
 }
 
 func printRemindersList(reminders *[]database.Reminder) {
 	for i, r := range *reminders {
-		fmt.Printf("* %v: %v -- %s --", i+1, r.RCcID, r.Note)
+		fmt.Printf("* %v: %v -- %s\n", i+1, r.RCcID, r.Note)
 	}
 }

@@ -726,7 +726,7 @@ func receiveOrder(cfg *Config, start, end int, o *database.Order) error {
 	// mark order as received
 	order, err := cfg.db.MarkOrderReceived(context.Background(), o.ID)
 	if err != nil {
-		fmt.Println("Couldn't mark order as received\n")
+		fmt.Println("Couldn't mark order as received")
 		return err
 	}
 	if verbose {
