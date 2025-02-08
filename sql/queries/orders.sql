@@ -5,6 +5,12 @@ SELECT * FROM orders;
 SELECT * FROM orders
 WHERE received = false;
 
+-- name: GetUserExpectedOrders :many
+SELECT * FROM orders
+WHERE received = false
+AND expected_date <= $1
+AND investigator_id = $2;
+
 -- name: CreateNewOrder :one
 INSERT INTO orders(id, order_number, expected_date, protocol_id, investigator_id, strain_id, note, received)
 VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, false)

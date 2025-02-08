@@ -112,6 +112,21 @@ func main() {
 	cfg.printLogin()
 	fmt.Println("\n* Welcome to Musmus!")
 
+	err = getTodaysReminders(&cfg)
+	if err != nil {
+		fmt.Println("Error getting today's reminders")
+		fmt.Println(err)
+	}
+
+	err = getTodaysOrders(&cfg)
+	if err != nil {
+		fmt.Println("Error getting today's orders")
+		fmt.Println(err)
+	}
+
+	// spacing :^3
+	fmt.Println("")
+
 	for {
 		// check if new state
 		if cfg.nextState != nil {

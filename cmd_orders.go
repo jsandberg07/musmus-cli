@@ -738,3 +738,29 @@ func receiveOrder(cfg *Config, start, end int, o *database.Order) error {
 
 // "duplicate key value violates unique constraint"
 // already exists
+func getTodaysOrders(cfg *Config) error {
+	gueoParams := database.GetUserExpectedOrdersParams{
+		ExpectedDate:   normalizeDate(time.Now()),
+		InvestigatorID: cfg.loggedInInvestigator.ID,
+	}
+	orders, err := cfg.db.GetUserExpectedOrders(context.Background(), gueoParams)
+	if err != nil {
+		return err
+	}
+	if len(orders) == 0 {
+		fmt.Println("No orders expected today")
+		return nil
+	}
+
+	fmt.Println("Orders expected today: ")
+	for i, order := range orders {
+		if order.Note.Valid {
+			fmt.Printf("* %v -- %s -- %s\n", i+1, order.OrderNumber, order.Note.String)
+		} else {
+			fmt.Printf("* %v -- %s\n", i+1, order.OrderNumber)
+		}
+
+	}
+
+	return nil
+}

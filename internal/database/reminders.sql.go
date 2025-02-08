@@ -86,6 +86,40 @@ func (q *Queries) GetAllReminders(ctx context.Context) ([]Reminder, error) {
 	return items, nil
 }
 
+const getAllTodayReminders = `-- name: GetAllTodayReminders :many
+SELECT id, r_date, r_cc_id, investigator_id, note FROM reminders
+WHERE r_date = $1
+`
+
+func (q *Queries) GetAllTodayReminders(ctx context.Context, rDate time.Time) ([]Reminder, error) {
+	rows, err := q.db.QueryContext(ctx, getAllTodayReminders, rDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Reminder
+	for rows.Next() {
+		var i Reminder
+		if err := rows.Scan(
+			&i.ID,
+			&i.RDate,
+			&i.RCcID,
+			&i.InvestigatorID,
+			&i.Note,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getRemindersDateRange = `-- name: GetRemindersDateRange :many
 SELECT id, r_date, r_cc_id, investigator_id, note FROM reminders
 WHERE (r_date BETWEEN $1 AND $2)
@@ -125,13 +159,18 @@ func (q *Queries) GetRemindersDateRange(ctx context.Context, arg GetRemindersDat
 	return items, nil
 }
 
-const getTodayReminders = `-- name: GetTodayReminders :many
+const getUserTodayReminders = `-- name: GetUserTodayReminders :many
 SELECT id, r_date, r_cc_id, investigator_id, note FROM reminders
-WHERE r_date = $1
+WHERE r_date = $1 AND investigator_id = $2
 `
 
-func (q *Queries) GetTodayReminders(ctx context.Context, rDate time.Time) ([]Reminder, error) {
-	rows, err := q.db.QueryContext(ctx, getTodayReminders, rDate)
+type GetUserTodayRemindersParams struct {
+	RDate          time.Time
+	InvestigatorID uuid.UUID
+}
+
+func (q *Queries) GetUserTodayReminders(ctx context.Context, arg GetUserTodayRemindersParams) ([]Reminder, error) {
+	rows, err := q.db.QueryContext(ctx, getUserTodayReminders, arg.RDate, arg.InvestigatorID)
 	if err != nil {
 		return nil, err
 	}

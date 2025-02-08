@@ -1,16 +1,12 @@
 package main
 
-import (
-	"bufio"
-	"fmt"
-	"os"
-)
-
 // creating a template for implementing commands
 // reminders:
 // include the help and exit flags
 // add getXXXcmd to the function's state
 //
+
+/* commented out because staticcheck hates it. copy and paste a skeleton for new commands
 
 func getXXXCmd() Command {
 	XXXFlags := make(map[string]Flag)
@@ -92,3 +88,5 @@ func XXXFunction(cfg *Config, args []Argument) error {
 
 	return nil
 }
+
+*/

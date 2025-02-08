@@ -285,7 +285,7 @@ func deleteReminderFunction(cfg *Config, args []Argument) error {
 	}
 	date = normalizeDate(date)
 
-	reminders, err = cfg.db.GetTodayReminders(context.Background(), date)
+	reminders, err = cfg.db.GetAllTodayReminders(context.Background(), date)
 	if err != nil && err.Error() != "sql: no rows in result set" {
 		// any other error
 		return err
@@ -320,4 +320,29 @@ func printRemindersList(reminders *[]database.Reminder) {
 	for i, r := range *reminders {
 		fmt.Printf("* %v: %v -- %s\n", i+1, r.RCcID, r.Note)
 	}
+}
+
+// print reminders for currently logged in user on startup
+func getTodaysReminders(cfg *Config) error {
+	gurParams := database.GetUserTodayRemindersParams{
+		RDate:          normalizeDate(time.Now()),
+		InvestigatorID: cfg.loggedInInvestigator.ID,
+	}
+	// TODO: remember that 0 results wont throw an sql error
+	reminders, err := cfg.db.GetUserTodayReminders(context.Background(), gurParams)
+	if err != nil {
+		return err
+	}
+
+	if len(reminders) == 0 {
+		fmt.Println("No reminders found!")
+		return nil
+	}
+
+	fmt.Println("Reminders for today: ")
+	for i, reminder := range reminders {
+		fmt.Printf("* %v CC: %v -- %s\n", i+1, reminder.RCcID, reminder.Note)
+	}
+
+	return nil
 }

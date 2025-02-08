@@ -245,6 +245,50 @@ func (q *Queries) GetOrderExpectedToday(ctx context.Context, expectedDate time.T
 	return items, nil
 }
 
+const getUserExpectedOrders = `-- name: GetUserExpectedOrders :many
+SELECT id, order_number, expected_date, protocol_id, investigator_id, strain_id, note, received FROM orders
+WHERE received = false
+AND expected_date <= $1
+AND investigator_id = $2
+`
+
+type GetUserExpectedOrdersParams struct {
+	ExpectedDate   time.Time
+	InvestigatorID uuid.UUID
+}
+
+func (q *Queries) GetUserExpectedOrders(ctx context.Context, arg GetUserExpectedOrdersParams) ([]Order, error) {
+	rows, err := q.db.QueryContext(ctx, getUserExpectedOrders, arg.ExpectedDate, arg.InvestigatorID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Order
+	for rows.Next() {
+		var i Order
+		if err := rows.Scan(
+			&i.ID,
+			&i.OrderNumber,
+			&i.ExpectedDate,
+			&i.ProtocolID,
+			&i.InvestigatorID,
+			&i.StrainID,
+			&i.Note,
+			&i.Received,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const markOrderReceived = `-- name: MarkOrderReceived :one
 UPDATE orders
 SET received = true

@@ -1,6 +1,10 @@
--- name: GetTodayReminders :many
+-- name: GetAllTodayReminders :many
 SELECT * FROM reminders
 WHERE r_date = $1;
+
+-- name: GetUserTodayReminders :many
+SELECT * FROM reminders
+WHERE r_date = $1 AND investigator_id = $2;
 
 -- name: GetAllReminders :many
 SELECT * FROM reminders;
