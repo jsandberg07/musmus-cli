@@ -595,6 +595,8 @@ func receiveOrderFunction(cfg *Config, args []Argument) error {
 		start = temp
 	}
 
+	fmt.Println("Enter 'receive' to continue receiving, or help to see other commands")
+
 	// da loop
 	for {
 		fmt.Print("> ")
@@ -646,6 +648,15 @@ func receiveOrderFunction(cfg *Config, args []Argument) error {
 				if err != nil {
 					fmt.Println("Error receiving order")
 					return err
+				}
+
+				or, err := cfg.db.MarkOrderReceived(context.Background(), order.ID)
+				if err != nil {
+					fmt.Println("Error marking order received")
+					return err
+				}
+				if verbose {
+					fmt.Println(or)
 				}
 
 				exit = true
@@ -703,6 +714,7 @@ func receiveOrder(cfg *Config, start, end int, o *database.Order) error {
 		Strain:         uuid.NullUUID{Valid: true, UUID: o.StrainID},
 		Notes:          o.Note,
 		ActivatedBy:    uuid.NullUUID{Valid: true, UUID: cfg.loggedInInvestigator.ID},
+		OrderID:        uuid.NullUUID{Valid: true, UUID: o.ID},
 	}
 
 	ccActivated := 0
@@ -763,4 +775,22 @@ func getTodaysOrders(cfg *Config) error {
 	}
 
 	return nil
+}
+
+func getOrderByFlag(cfg *Config, input string) (database.Order, error) {
+	order, err := cfg.db.GetOrderByNumber(context.Background(), input)
+	if err != nil && err.Error() == "sql: no rows in result set" {
+		// no order found
+		fmt.Println("No order by that number found. Please try again.")
+		return database.Order{}, nil
+	}
+	if err != nil {
+		// any other error
+		fmt.Println("Error getting order from DB.")
+		return database.Order{}, err
+	}
+
+	// found and ok
+	return order, nil
+
 }

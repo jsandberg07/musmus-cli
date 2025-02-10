@@ -61,6 +61,7 @@ type CageCardExport struct {
 	SName         sql.NullString
 	ActivatedOn   sql.NullTime
 	DeactivatedOn sql.NullTime
+	OrderNumber   sql.NullString
 }
 
 /*
