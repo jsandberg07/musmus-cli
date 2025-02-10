@@ -9,42 +9,20 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/jsandberg07/clitest/internal/database"
 )
 
-// IDEA: struct that contains an array of dates, and creates a cage card activation param with dates with a reference to that date
-// then a true param is created with the value, pass to a go routine and activated
-// a memory saving measure, help with a LOT of cards but really a few dates and IDs aren't anything major but it would be cool
-// would also work for investigator
+// 1. add a new reminder field. add a X days after with the note (hint: make sure the note is required)
+// 2. do "linear" activation. set params as you like that persist, when you enter a number immedietly start to activate it. return an error if there is one.
+// 3. update the print too
+// 4. do we even add animals to the protocol?
+// 5. fuck yeah let's do like 4 db calls with each one
+// 6. DONT thread them, they have to be linear also
 
-// TODO: set reminders with a flag. either by like E17 for a date or just a date
-// TODO: actually add an allotment and way to handle it, what to do if an activation errors
-// cause it's not passed in with the activation struct
-// an allotment stuct that is the cc, allot, pro, then removes ccs with errors, then sums them
-// maybe
-// or i just add a number of animals field to the CC activation and never use it for anything else
-// yeah keep it as a reference just add it....... later
-
-// TODO: update the sql for activation, need more fields
-// actually making the activate cards uhh contact the db
-// handling cards that are already active, previously deactivated and other misc errors
-// changing date and adding to activation
-// adding strain to activation
-// adding notes to activation
-// add a flag for cards, so you can add a note at the same time
-// a print for what the current settings are
-// capital S and N for keep notes and strains for multiple cages
-// automatically add the "activated by"
-// handling allotment / updating protocol (be fast and have structs with the prot uudis + total)
-
-// then more of the same for deactivation ect
-// cards that haven't been activated
-
-// IDEA: actually have the cards get processed with a go routine as they come in
-// would look cooler, and threaded would mean they dont lag like cayuse
+// add reminders
+// how hard could it be
 
 func getCCActivationCmd() Command {
 	activateFlags := make(map[string]Flag)
@@ -98,14 +76,28 @@ func getActivationFlags() map[string]Flag {
 
 	SFlag := Flag{
 		symbol:      "S",
-		description: "Sets the strain for all cage cards added until changes. Enter 'x' to clear",
+		description: "Sets the strain for all cage cards added until changed. Enter 'x' to clear",
 		takesValue:  true,
 	}
 	activateFlags["-"+SFlag.symbol] = SFlag
 
+	rFlag := Flag{
+		symbol:      "r",
+		description: "Will add a reminder input days after activation date. \nRequires a note for the reminder. Enter 'x' to clear",
+		takesValue:  true,
+	}
+	activateFlags["-"+rFlag.symbol] = rFlag
+
+	RFlag := Flag{
+		symbol:      "R",
+		description: "Will add a reminder input days after activation date to all cages until changes. \nRequires a note for the reminder. Enter 'x' to clear",
+		takesValue:  true,
+	}
+	activateFlags["-"+RFlag.symbol] = RFlag
+
 	ccFlag := Flag{
 		symbol:      "cc",
-		description: "Adds a cage card to the queue to be activated",
+		description: "Add multiple cage cards at once. Will be activated in order it is entered (including other flags)",
 		takesValue:  true,
 	}
 	activateFlags["-"+ccFlag.symbol] = ccFlag
@@ -117,19 +109,23 @@ func getActivationFlags() map[string]Flag {
 	}
 	activateFlags[printFlag.symbol] = printFlag
 
+	/* removed because CCs are no longer stored in a queue first
 	processFlag := Flag{
 		symbol:      "process",
 		description: "Processes cage cards that have been entered then exits",
 		takesValue:  false,
 	}
 	activateFlags[processFlag.symbol] = processFlag
+	*/
 
+	/* removed because CCs are no longer stored in a queue first
 	popFlag := Flag{
 		symbol:      "pop",
 		description: "Deletes the most recently scanned cage card",
 		takesValue:  false,
 	}
 	activateFlags[popFlag.symbol] = popFlag
+	*/
 
 	helpFlag := Flag{
 		symbol:      "help",
@@ -148,19 +144,15 @@ func getActivationFlags() map[string]Flag {
 	return activateFlags
 }
 
+// TODO: maybe add the keepXs in a struct. And reminders. Just for organization
 func activateFunction(cfg *Config, args []Argument) error {
 
 	flags := getActivationFlags()
 
 	// set defaults for the command
 	exit := false
-	cardsToProcess := []database.TrueActivateCageCardParams{}
-	date := time.Now()
-	allotment := 0
-	strain := database.Strain{ID: uuid.Nil}
-	keepStrain := false
-	notes := ""
-	keepNote := false
+	ccParams := CageCardActivationParams{}
+	ccParams.init()
 
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Cage card activation.")
@@ -181,7 +173,7 @@ func activateFunction(cfg *Config, args []Argument) error {
 
 		// try to run as a number, and add it to the list of cards to activate using the current values
 		if len(inputs) == 1 {
-			cc, err := strconv.Atoi(inputs[0])
+			ccID, err := strconv.Atoi(inputs[0])
 			if err != nil && !strings.Contains(err.Error(), "invalid syntax") {
 				// an error occured and it was not from passing a word in to atoi
 				fmt.Println("Error convering input to cage card number")
@@ -190,20 +182,15 @@ func activateFunction(cfg *Config, args []Argument) error {
 			}
 
 			// a misread on cc means the value 0 init
-			if cc != 0 {
-				tAccp := getCCToActivate(cc, &date, &strain, cfg.loggedInInvestigator, &notes)
-				cardsToProcess = append(cardsToProcess, tAccp)
-				fmt.Printf("%v card added\n", cc)
-
-				if !keepNote {
-					notes = ""
+			if ccID != 0 {
+				ccParams.ccID = ccID
+				err := activationWrapper(cfg, &ccParams)
+				if err != nil {
+					fmt.Println(err)
 				}
-				if !keepStrain {
-					strain.ID = uuid.Nil
-				}
+				// don't need to visit the switch, one input is assumed to be a cc#
 				continue
 			}
-
 		}
 
 		// otherwise set values based on what was passed in, or process things
@@ -216,32 +203,31 @@ func activateFunction(cfg *Config, args []Argument) error {
 		for _, arg := range args {
 			switch arg.flag {
 			case "-d":
+
 				newDate, err := parseDate(arg.value)
 				if err != nil {
 					fmt.Println(err)
 					break
 				}
-				date = newDate
-				fmt.Printf("Date set: %v\n", date)
+				ccParams.date = newDate
+				fmt.Printf("Date set: %v\n", ccParams.date)
 
 			case "-cc":
-				cc, err := strconv.Atoi(arg.value)
+				ccID, err := strconv.Atoi(arg.value)
 				if err != nil && !strings.Contains(err.Error(), "invalid syntax") {
 					// an error occured and it was not from passing a word in to atoi
 					fmt.Println("Error convering input to cage card number")
 					fmt.Println(err)
 					continue
 				}
-
-				tAccp := getCCToActivate(cc, &date, &strain, cfg.loggedInInvestigator, &notes)
-				cardsToProcess = append(cardsToProcess, tAccp)
-				fmt.Printf("%v card added\n", cc)
-
-				if !keepNote {
-					notes = ""
+				if err != nil {
+					fmt.Println("Invalid entry. Please enter an integer for cage card")
+					continue
 				}
-				if !keepStrain {
-					strain.ID = uuid.Nil
+				ccParams.ccID = ccID
+				err = activationWrapper(cfg, &ccParams)
+				if err != nil {
+					fmt.Println(err)
 				}
 
 			case "-a":
@@ -252,61 +238,100 @@ func activateFunction(cfg *Config, args []Argument) error {
 					fmt.Println(err)
 					continue
 				}
+				if err != nil {
+					fmt.Println("Invalid entry. Please enter an integer for allotment")
+					continue
+				}
 				if num < 0 {
-					allotment = 0
+					ccParams.allotment = 0
 				} else {
-					allotment = num
+					ccParams.allotment = num
 				}
 
 			case "-s":
-				s, err := getStrainByFlag(cfg, arg.value)
-				if err != nil {
-					return err
-				}
-				strain = s
-				keepStrain = false
-
+				fallthrough
 			case "-S":
+				if arg.value == "x" || arg.value == "X" {
+					fmt.Println("Strain reset")
+					ccParams.strain = database.Strain{ID: uuid.Nil}
+					ccParams.keepStrain = false
+					continue
+				}
 				s, err := getStrainByFlag(cfg, arg.value)
-				if err != nil {
-					return err
-				}
-				strain = s
-				keepStrain = true
-
-			case "-n":
-				if arg.value == "x" || arg.value == "X" {
-					notes = ""
-				} else {
-					notes = arg.value
-				}
-				keepNote = false
-
-			case "-N":
-				if arg.value == "x" || arg.value == "X" {
-					notes = ""
-				} else {
-					notes = arg.value
-				}
-				keepNote = true
-
-			case "process":
-				fmt.Println("Processing...")
-				err := processCageCards(cfg, cardsToProcess)
 				if err != nil {
 					fmt.Println(err)
+					continue
 				}
-				exit = true
+				fmt.Println("Strain set")
+				ccParams.strain = s
+				if arg.flag == "-s" {
+					ccParams.keepStrain = false
+				} else {
+					ccParams.keepStrain = true
+				}
 
-			case "pop":
-				length := len(cardsToProcess)
-				if length == 0 {
-					fmt.Println("No cards have been entered")
-					break
+			case "-n":
+				fallthrough
+			case "-N":
+				if arg.value == "x" || arg.value == "X" {
+					fmt.Println("Note reset")
+					ccParams.note = ""
+					ccParams.keepNote = false
+					continue
+				} else {
+					fmt.Println("Note set")
+					ccParams.note = arg.value
 				}
-				popped := cardsToProcess[length-1]
-				fmt.Printf("Popped %v\n", popped.CcID)
-				cardsToProcess = cardsToProcess[0 : length-1]
+				if arg.flag == "-n" {
+					ccParams.keepNote = false
+				} else {
+					ccParams.keepNote = true
+				}
+
+			case "-r":
+				fallthrough
+			case "-R":
+				if arg.value == "x" || arg.value == "X" {
+					fmt.Println("Reminder cleared")
+					ccParams.daysReminder = 0
+					ccParams.keepReminder = false
+					continue
+				}
+				num, err := strconv.Atoi(arg.value)
+				if err != nil {
+					fmt.Println("Error getting days for reminder. Please try again")
+					fmt.Println(err)
+				}
+				ccParams.daysReminder = num
+				fmt.Printf("Reminder will be set %v days from activation\n", ccParams.daysReminder)
+
+				if arg.flag == "-r" {
+					ccParams.keepReminder = false
+				} else {
+					ccParams.keepReminder = true
+				}
+
+				/* removed because cage cards are no longer stored in a queue
+				case "process":
+					fmt.Println("Processing...")
+					err := processCageCards(cfg, cardsToProcess)
+					if err != nil {
+						fmt.Println(err)
+					}
+					exit = true
+				*/
+
+				/* removed because cage cards are no longer stored in a queue
+				case "pop":
+					length := len(cardsToProcess)
+					if length == 0 {
+						fmt.Println("No cards have been entered")
+						break
+					}
+					popped := cardsToProcess[length-1]
+					fmt.Printf("Popped %v\n", popped.CcID)
+					cardsToProcess = cardsToProcess[0 : length-1]
+				*/
 
 			case "help":
 				fmt.Println("Notes and strains can be added for individual cards, or set for many")
@@ -314,10 +339,13 @@ func activateFunction(cfg *Config, args []Argument) error {
 				cmdHelp(flags)
 
 			case "print":
-				printCurrentActivationParams(&date, &allotment, &strain, &notes)
+				err := printCurrentActivationParams(cfg, &ccParams)
+				if err != nil {
+					fmt.Println(err)
+				}
 
 			case "exit":
-				fmt.Println("Exiting without processing")
+				fmt.Println("Exiting...")
 				exit = true
 
 			default:
@@ -334,133 +362,101 @@ func activateFunction(cfg *Config, args []Argument) error {
 
 }
 
-// if it isn't there, "sql: no rows in result set"
-// if card is already active, throw a fit about that too
+// TODO: candidate for checking the strain outside and passing it.
+func printCurrentActivationParams(cfg *Config, s *CageCardActivationParams) error {
+	fmt.Println("Current settings for cage cards being activated:")
+	fmt.Printf("* Date - %v\n", s.date)
+	fmt.Printf("* Allotment - %v\n", s.allotment)
 
-// if you dont have time to do it right now, what makes you think you'll have time to do it later?
-// TODO: check the whole array for duplicate #s. deleting slices is tricky business, maybe appends around it
-// especially if indexing in a loop and shifting numbers
-// something to test
-func processCageCards(cfg *Config, cctp []database.TrueActivateCageCardParams) error {
-	if len(cctp) == 0 {
-		return errors.New("oops no cards")
-	}
-	activationErrors := []ccError{}
-	totalActivated := 0
-
-	for _, cc := range cctp {
-
-		ccErr := checkActivateError(cfg, &cc)
-		// hacky way to see if a nil struct was returned, meaning no error
-		if ccErr.CCid != 0 {
-			activationErrors = append(activationErrors, ccErr)
-			continue
-		}
-
-		acc, err := cfg.db.TrueActivateCageCard(context.Background(), cc)
+	if s.strain.ID != uuid.Nil {
+		strain, err := cfg.db.GetStrainByID(context.Background(), s.strain.ID)
 		if err != nil {
-			// any other error
-			tcce := ccError{
-				CCid: int(acc.CcID),
-				Err:  err.Error(),
-			}
-			activationErrors = append(activationErrors, tcce)
-			continue
+			fmt.Println("Could not get strain name from DB")
+			return err
 		}
-
-		if verbose {
-			fmt.Println(acc)
-		}
-
-		totalActivated++
+		fmt.Printf("* Strain - %v -- Sticky -- %v\n", strain.SName, s.keepStrain)
 	}
 
-	fmt.Printf("%v cards activated\n", totalActivated)
-	if len(activationErrors) > 0 {
-		fmt.Println("Errors activating these cage cards:")
-		for _, cce := range activationErrors {
-			fmt.Printf("%v -- %s\n", cce.CCid, cce.Err)
-		}
+	if s.note != "" {
+		fmt.Printf("* Note - %s -- Sticky -- %v\n", s.note, s.keepNote)
 	}
+
+	if s.daysReminder != 0 {
+		fmt.Printf("* Reminder - %v days after activation -- Sticky -- %v\n", s.daysReminder, s.keepReminder)
+	}
+
 	return nil
+
 }
 
-// at what point do you start passing single digit ints by reference?
-func printCurrentActivationParams(date *time.Time, allotment *int, strain *database.Strain, note *string) {
-	fmt.Println("Current settings for cards being added to activation queue:")
-	fmt.Printf("Date: %v\n", date)
-	fmt.Printf("Number of animals: %v\n", *allotment)
-	if strain.ID != uuid.Nil {
-		fmt.Printf("Strain: %v\n", strain.SName)
+// TODO: naming things is hard. Decide if any errors like reminder or balance undoes CC activation
+func activationWrapper(cfg *Config, s *CageCardActivationParams) error {
+	activateParams := getCCToActivate(s, cfg.loggedInInvestigator)
+	activatedCC, err := activateCageCard(cfg, &activateParams)
+	if err != nil {
+		return err
 	}
-	if *note != "" {
-		fmt.Printf("Notes: %s\n", *note)
+	fmt.Printf("%v activated!\n", activatedCC.CcID)
+	if verbose {
+		fmt.Println(activatedCC)
 	}
+
+	s.keepCheck()
+
+	// add animals to allotment
+	if s.allotment != 0 {
+		err := addBalanceToProtocol(cfg, s.allotment, &activatedCC)
+		if err != nil {
+			fmt.Println("Could not add balance to protocol")
+			fmt.Println(err)
+		}
+	}
+
+	// check if reminder should be created
+	if s.daysReminder != 0 {
+		if !activatedCC.Notes.Valid {
+			fmt.Println("Can't create a reminder without a note")
+			return nil
+		}
+		err := ccActivationReminder(cfg, s.daysReminder, &activatedCC)
+		if err != nil {
+			fmt.Println("Could not create reminder")
+			fmt.Println(err)
+		}
+	}
+
+	return nil
+
 }
 
-// works with both code and name
-func getStrainByFlag(cfg *Config, input string) (database.Strain, error) {
-	if input == "x" || input == "X" {
-		return database.Strain{ID: uuid.Nil}, nil
+// TODO: naming things is hard
+func getCCToActivate(s *CageCardActivationParams, i *database.Investigator) database.TrueActivateCageCardParams {
+
+	tdate := sql.NullTime{
+		Valid: true,
+		Time:  s.date,
 	}
-	strain, err := cfg.db.GetStrainByName(context.Background(), input)
-
-	if err != nil && err.Error() != "sql: no rows in result set" {
-		// any other error with DB
-		fmt.Println("Error getting strain from DB")
-		return database.Strain{ID: uuid.Nil}, err
-	}
-
-	if err == nil {
-		// strain found by name
-		return strain, nil
-	}
-
-	// look for it by code
-	strain, err = cfg.db.GetStrainByCode(context.Background(), input)
-	if err != nil && err.Error() != "sql: no rows in result set" {
-		// any other error with DB
-		fmt.Println("Error getting strain from DB")
-		return database.Strain{ID: uuid.Nil}, err
-	}
-	if err != nil && err.Error() == "sql: no rows in result set" {
-		fmt.Println("Strain not found by name or number. Please try again.")
-		return database.Strain{ID: uuid.Nil}, nil
-	}
-
-	// strain found by code
-	return strain, nil
-}
-
-// probably a candidate for using channels and a go routine to feed this into another function
-func getCCToActivate(cc int,
-	date *time.Time,
-	strain *database.Strain,
-	activatedBy *database.Investigator,
-	notes *string) database.TrueActivateCageCardParams {
-
-	tdate := sql.NullTime{Valid: true, Time: *date}
 
 	var tstrain uuid.NullUUID
-	if strain.ID == uuid.Nil {
+	if s.strain.ID == uuid.Nil {
 		tstrain.Valid = false
 	} else {
 		tstrain.Valid = true
-		tstrain.UUID = strain.ID
+		tstrain.UUID = s.strain.ID
 	}
 
 	var tnote sql.NullString
-	if *notes == "" {
+	if s.note == "" {
 		tnote.Valid = false
 	} else {
 		tnote.Valid = true
-		tnote.String = *notes
+		tnote.String = s.note
 	}
 
-	tactivatedBy := uuid.NullUUID{Valid: true, UUID: activatedBy.ID}
+	tactivatedBy := uuid.NullUUID{Valid: true, UUID: i.ID}
 
 	taccp := database.TrueActivateCageCardParams{
-		CcID:        int32(cc),
+		CcID:        int32(s.ccID),
 		ActivatedOn: tdate,
 		Strain:      tstrain,
 		ActivatedBy: tactivatedBy,
@@ -469,6 +465,45 @@ func getCCToActivate(cc int,
 	return taccp
 }
 
+func activateCageCard(cfg *Config, cc *database.TrueActivateCageCardParams) (database.CageCard, error) {
+	tCard, err := cfg.db.GetCageCardByID(context.Background(), int32(cc.CcID))
+	// check if added to db
+	if err != nil && err.Error() == "sql: no rows in result set" {
+		return database.CageCard{}, errors.New("cage card ID has not been added to the DB. Needs to be added first")
+	}
+
+	// db error
+	if err != nil {
+		fmt.Println("Error retrieving cage card details")
+		return database.CageCard{}, err
+	}
+
+	// check if previously activated
+	if tCard.ActivatedOn.Valid {
+		// check if previously deactivated
+		if tCard.DeactivatedOn.Valid {
+			msg := fmt.Sprintf("cage card was previously deactivated %v", tCard.DeactivatedOn.Time)
+			return database.CageCard{}, errors.New(msg)
+		} else {
+			msg := fmt.Sprintf("cage card was previously activated %v", tCard.ActivatedOn.Time)
+			return database.CageCard{}, errors.New(msg)
+		}
+	}
+
+	// activate
+	activatedCard, err := cfg.db.TrueActivateCageCard(context.Background(), *cc)
+	// update cc db error
+	if err != nil {
+		fmt.Println("Error activating cage card")
+		return database.CageCard{}, err
+	}
+
+	// activated
+	return activatedCard, nil
+
+}
+
+/* no longer prints all the CC errors in one big chunk at the end so no longer needed
 func checkActivateError(cfg *Config, cc *database.TrueActivateCageCardParams) ccError {
 	// check if already active
 	td, err := cfg.db.GetActivationDate(context.Background(), cc.CcID)
@@ -526,3 +561,50 @@ func checkActivateError(cfg *Config, cc *database.TrueActivateCageCardParams) cc
 	// everything ok
 	return ccError{}
 }
+*/
+
+/* removed because no longer making a queue to activate cage cards
+func processCageCards(cfg *Config, cctp []database.TrueActivateCageCardParams) error {
+	if len(cctp) == 0 {
+		return errors.New("oops no cards")
+	}
+	activationErrors := []ccError{}
+	totalActivated := 0
+
+	for _, cc := range cctp {
+
+		ccErr := checkActivateError(cfg, &cc)
+		// hacky way to see if a nil struct was returned, meaning no error
+		if ccErr.CCid != 0 {
+			activationErrors = append(activationErrors, ccErr)
+			continue
+		}
+
+		acc, err := cfg.db.TrueActivateCageCard(context.Background(), cc)
+		if err != nil {
+			// any other error
+			tcce := ccError{
+				CCid: int(acc.CcID),
+				Err:  err.Error(),
+			}
+			activationErrors = append(activationErrors, tcce)
+			continue
+		}
+
+		if verbose {
+			fmt.Println(acc)
+		}
+
+		totalActivated++
+	}
+
+	fmt.Printf("%v cards activated\n", totalActivated)
+	if len(activationErrors) > 0 {
+		fmt.Println("Errors activating these cage cards:")
+		for _, cce := range activationErrors {
+			fmt.Printf("%v -- %s\n", cce.CCid, cce.Err)
+		}
+	}
+	return nil
+}
+*/

@@ -55,6 +55,9 @@ func getCCQueriesCmd() Command {
 // TODO: reset the protoocl or investigator with like x or whatever (hope nobody is named X lmao)
 // TODO: make sure the dates get the correct data, since they're set at like midnigt or something
 
+// so we need to print the order number too, last thing for today i guess and then make a plan for tomorrow
+//
+
 // [s]tart date, [e]nd date, [pr]otocol, [in]vestigator, print, active, all, help, exit, query
 func getCCQueriesFlags() map[string]Flag {
 	ccQueriesFlags := make(map[string]Flag)
@@ -75,17 +78,24 @@ func getCCQueriesFlags() map[string]Flag {
 
 	prFlag := Flag{
 		symbol:      "pr",
-		description: "Gets cards under set protocol. Can either have investigator or protocol",
+		description: "Gets cards under set protocol.",
 		takesValue:  true,
 	}
 	ccQueriesFlags["-"+prFlag.symbol] = prFlag
 
 	inFlag := Flag{
 		symbol:      "in",
-		description: "Gets cards under set investigator. Can either have investigator or protocol",
+		description: "Gets cards under set investigator.",
 		takesValue:  true,
 	}
 	ccQueriesFlags["-"+inFlag.symbol] = inFlag
+
+	orFlag := Flag{
+		symbol:      "or",
+		description: "Gets cards that were added under set order",
+		takesValue:  true,
+	}
+	ccQueriesFlags["-"+orFlag.symbol] = orFlag
 
 	// ect as needed or remove the "-"+ for longer ones
 
@@ -139,6 +149,8 @@ func getCCQueriesFlags() map[string]Flag {
 // and a struct normalizer because i'll do that instead of changing the return values
 
 // look into removing the args thing, might have to stay
+// TODO: create a struct with an enum that remembers the query type, nulls the current values when you set a new one,
+// is easy to pass, run a switch on it
 func CCQueriesFunction(cfg *Config, args []Argument) error {
 	// get flags
 	flags := getCCQueriesFlags()
@@ -147,10 +159,11 @@ func CCQueriesFunction(cfg *Config, args []Argument) error {
 	exit := false
 	investigator := database.Investigator{}
 	protocol := database.Protocol{}
+	order := database.Order{}
 
 	// might be a problem since data is stored at midnight, might have to do some rounding
-	startDate := time.Now()
-	endDate := time.Now()
+	startDate := normalizeDate(time.Now())
+	endDate := normalizeDate(time.Now())
 
 	// the reader
 	reader := bufio.NewReader(os.Stdin)
@@ -182,6 +195,7 @@ func CCQueriesFunction(cfg *Config, args []Argument) error {
 		}
 
 		// [s]tart date, [e]nd date, [pr]otocol, [in]vestigator, print, active, all, help, exit, query
+		// add an [or] for order
 		for _, arg := range args {
 			switch arg.flag {
 
@@ -206,16 +220,47 @@ func CCQueriesFunction(cfg *Config, args []Argument) error {
 				if err != nil {
 					return err
 				}
+				nilProtocol := database.Protocol{}
+				if pr == nilProtocol {
+					break
+				}
+
 				protocol = pr
 				investigator = database.Investigator{}
+				order = database.Order{}
 
 			case "-in":
 				inv, err := getInvestigatorByFlag2(cfg, arg.value)
 				if err != nil {
 					return err
 				}
+				nilInvestigator := database.Investigator{}
+				if inv == nilInvestigator {
+					break
+				}
+
 				investigator = inv
 				protocol = database.Protocol{}
+				order = database.Order{}
+
+			case "-or":
+				or, err := getOrderByFlag(cfg, arg.value)
+				if err != nil {
+					return err
+				}
+				nilOrder := database.Order{}
+				if or == nilOrder {
+					break
+				}
+
+				if !or.Received {
+					fmt.Println("Order has not been recieved so no cage cards are associated with it")
+					break
+				}
+
+				investigator = database.Investigator{}
+				protocol = database.Protocol{}
+				order = or
 
 			case "help":
 				cmdHelp(flags)
@@ -236,9 +281,11 @@ func CCQueriesFunction(cfg *Config, args []Argument) error {
 				}
 				exit = true
 
+				// TODO: replace this with a switch, struct that stores the values (and can be reset), and a function call
 			case "query":
 				nilInvestigator := database.Investigator{}
 				nilProtocol := database.Protocol{}
+				nilOrder := database.Order{}
 				if investigator == nilInvestigator && protocol == nilProtocol {
 					fmt.Println("Getting cards active during date range")
 					err := CCQueryDateRange(cfg, startDate, endDate)
@@ -260,6 +307,15 @@ func CCQueriesFunction(cfg *Config, args []Argument) error {
 				if protocol != nilProtocol {
 					fmt.Println("Getting cards active during date range for protocol")
 					err := CCQueryProtocol(cfg, startDate, endDate, &protocol)
+					if err != nil {
+						return err
+					}
+					break
+				}
+
+				if order != nilOrder {
+					fmt.Println("Getting cage cards for order")
+					err := CCQueryOrder(cfg, &order)
 					if err != nil {
 						return err
 					}
@@ -396,10 +452,34 @@ func CCQueryInvestigator(cfg *Config, start, end time.Time, inv *database.Invest
 
 }
 
+// TODO: these are all similar. When you have a switch, these will get condensed into 1 function surely
+func CCQueryOrder(cfg *Config, o *database.Order) error {
+	ccs, err := cfg.db.GetCageCardsOrder(context.Background(), uuid.NullUUID{Valid: true, UUID: o.ID})
+	if err != nil {
+		return err
+	}
+
+	if len(ccs) == 0 {
+		fmt.Println("No cage cards found!")
+		return nil
+	}
+
+	// TODO: adding a column to this is a bad experience. Modifying like 5 structs via sql functions.
+	exp := NormalizeCCExport(&ccs)
+
+	count, err := exportData(&exp)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("// Exported lines: %v\n", count)
+	return nil
+}
+
 // Output rows are consistent between types, but sqlc generates new struct for each query.
 // Changes them into a format that can be turned into a string to be exported. No clue what happens if the structs aren't identical!
 // Don't return error, just check if value is 0 after
-func NormalizeCCExport[T database.GetCageCardsInvestigatorRow | database.GetCageCardsAllRow | database.GetCageCardsActiveRow | database.GetCardsDateRangeRow | database.GetCageCardsProtocolRow](ccs *[]T) []CageCardExport {
+func NormalizeCCExport[T database.GetCageCardsInvestigatorRow | database.GetCageCardsAllRow | database.GetCageCardsActiveRow | database.GetCardsDateRangeRow | database.GetCageCardsProtocolRow | database.GetCageCardsOrderRow](ccs *[]T) []CageCardExport {
 	if len(*ccs) == 0 {
 		return []CageCardExport{}
 	}
@@ -460,7 +540,7 @@ func exportData(cages *[]CageCardExport) (int, error) {
 	count := 0
 
 	// add top row
-	topRow := []string{"CC", "Investigator", "Protocol", "Strain", "Activated On", "Deactivated On"}
+	topRow := []string{"CC", "Investigator", "Protocol", "Strain", "Activated On", "Deactivated On", "Order Number"}
 	err = writer.Write(topRow)
 	if err != nil {
 		fmt.Println("Error writing top row to csv")
@@ -482,7 +562,7 @@ func exportData(cages *[]CageCardExport) (int, error) {
 // TODO: format the dates so theyre just like a day and not a stinkin millisecond
 func stringifyCage(c *CageCardExport) []string {
 
-	output := make([]string, 6)
+	output := make([]string, 7)
 	output[0] = strconv.Itoa(int(c.CcID))
 
 	output[1] = c.IName
@@ -498,6 +578,9 @@ func stringifyCage(c *CageCardExport) []string {
 	}
 	if c.DeactivatedOn.Valid {
 		output[5] = c.DeactivatedOn.Time.String()
+	}
+	if c.OrderNumber.Valid {
+		output[6] = c.OrderNumber.String
 	}
 
 	return output

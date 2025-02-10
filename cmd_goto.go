@@ -56,6 +56,20 @@ func getSetStateCmd() Command {
 	}
 	gotoFlags["-"+quFlag.symbol] = quFlag
 
+	orFlag := Flag{
+		symbol:      "or",
+		description: "Goes to the orders menu.",
+		takesValue:  false,
+	}
+	gotoFlags["-"+orFlag.symbol] = orFlag
+
+	rmFlag := Flag{
+		symbol:      "rm",
+		description: "Goes to the reminders menu.",
+		takesValue:  false,
+	}
+	gotoFlags["-"+rmFlag.symbol] = rmFlag
+
 	gotoCmd := Command{
 		name:        "goto",
 		description: "Goes to another menu.",
@@ -89,6 +103,10 @@ func gotoCommand(cfg *Config, args []Argument) error {
 		cfg.nextState = getStrainsState()
 	case "-qu":
 		cfg.nextState = getQueriesState()
+	case "-or":
+		cfg.nextState = getOrdersState()
+	case "-rm":
+		cfg.nextState = getRemindersState()
 	default:
 		return errors.New("whoops a fake flag slipped into gotoCommand")
 	}

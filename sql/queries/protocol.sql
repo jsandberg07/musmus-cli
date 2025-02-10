@@ -2,13 +2,17 @@
 SELECT * FROM protocols
 ORDER BY p_number DESC;
 
+-- name: GetProtocolByID :one
+SELECT * FROM protocols
+WHERE $1 = id;
+
 -- name: GetProtocolByNumber :one
 SELECT * FROM protocols
 WHERE $1 = p_number;
 
 -- name: AddBalance :exec
 UPDATE protocols SET balance = (balance + $2)
-WHERE $1 = p_number;
+WHERE $1 = id;
 
 -- name: UpdateAllocated :exec
 UPDATE protocols SET allocated = $2

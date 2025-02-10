@@ -13,33 +13,40 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// CURRENTLY:
-// remove args param in command functions lemoo
-// writing tests for functions
-// read these:
+// COME BACK TO IT:
+// writing tests. spin up a fake db and do tests there. everything is too tight
+// parsing works and that's like the one thing that isn't tied to a db
 // https://dave.cheney.net/2019/05/07/prefer-table-driven-tests
 // https://circleci.com/blog/unit-testing-vs-integration-testing/
 // use cmp, or reflect. I guess cmp is better. you can get the difference between tho values
-// go has built in conversion for identical structs! use it instead of normalizing!
-// x := t1; y := t2(x); works!
-// see what things you can actually break down and parse there might not be a lot currently (bad)
-// will end up being reliant on spinning up a test db for the bulk of the testing feels like
 
-// dont forget to run your tests before merging!
-// Next:
-// Cc activation is weak, make it a go routine that just does it as it goes. it's fast enough im sure and not http based. you're literally typing by hand. it's fake remember?
+// wasted an hour to realize i can't remove []Arguments from functions. so maybe not a waste. It's tied to goto -cc ect.
+// "Problem" is reuse of types, but it's a small problem. Goto is probably gonna be the most used function (tied with back and exit)
+// addendum: remove the goto function and replace it with regular functions. it's the only one that uses the []Arguments ie why you cant remove it
 
-// After NEXT:
-// adding reminders, orders, and tests for those
+// australia
+// china #9
+// china #11
+// do it
 
+// CURRENTLY:
+// reminders, orders
+// run tests before merging!
 // reminders have a CC#, can be set to automatically add to CC activation, or an order. do E something or other, or a reminder for ~21 days from now, or whatever
 // reminders show up for a person or for everybody
 // see reminders with dates for today, next week, export. no past stuff. once it's done, have it be done (dont delete it anyway)
+
+// fix CC activation
+// add the ability to automatically create reminders when entering breeding for next day or E something for E days + 1 or just reminder days then note something like that
+
+// Next:
+// Cc activation is weak, make it a go routine that just does it as it goes. it's fast enough im sure and not http based. you're literally typing by hand. it's fake remember?
 
 // AFTER THAT:
 // the great polishing
 // making maps print sortedly
 // adding permissions that work! you already have rolls. and logins
+// DRY up the state function, you don't need a separate function for each one. use a string and switch to return a state
 // AFTER THAT:
 // the great readme-en-ing. write a readme and update the github page
 // AFTER THAT:
@@ -107,6 +114,21 @@ func main() {
 	}
 	cfg.printLogin()
 	fmt.Println("\n* Welcome to Musmus!")
+
+	err = getTodaysReminders(&cfg)
+	if err != nil {
+		fmt.Println("Error getting today's reminders")
+		fmt.Println(err)
+	}
+
+	err = getTodaysOrders(&cfg)
+	if err != nil {
+		fmt.Println("Error getting today's orders")
+		fmt.Println(err)
+	}
+
+	// spacing :^3
+	fmt.Println("")
 
 	for {
 		// check if new state

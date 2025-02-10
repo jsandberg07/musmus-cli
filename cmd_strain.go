@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/google/uuid"
 	"github.com/jsandberg07/clitest/internal/database"
 )
 
@@ -387,4 +388,37 @@ func printUpdateStrain(us *database.UpdateStrainParams) {
 	fmt.Printf("Name: %s\n", us.SName)
 	fmt.Printf("Vendor: %s\n", us.Vendor)
 	fmt.Printf("Code: %s\n", us.VendorCode)
+}
+
+// works with both code and name
+// TODO: figure out why im checking for x as an input OH TO CANCEL THE STRAIN OUT SOMEHWERE I THINK
+// TODO: handle blanking out the strain before trying to parse from a flag
+func getStrainByFlag(cfg *Config, input string) (database.Strain, error) {
+	strain, err := cfg.db.GetStrainByName(context.Background(), input)
+
+	if err != nil && err.Error() != "sql: no rows in result set" {
+		// any other error with DB
+		fmt.Println("Error getting strain from DB")
+		return database.Strain{ID: uuid.Nil}, err
+	}
+
+	if err == nil {
+		// strain found by name
+		return strain, nil
+	}
+
+	// look for it by code
+	strain, err = cfg.db.GetStrainByCode(context.Background(), input)
+	if err != nil && err.Error() != "sql: no rows in result set" {
+		// any other error with DB
+		fmt.Println("Error getting strain from DB")
+		return database.Strain{ID: uuid.Nil}, err
+	}
+	if err != nil && err.Error() == "sql: no rows in result set" {
+		fmt.Println("Strain not found by name or number. Please try again.")
+		return database.Strain{ID: uuid.Nil}, nil
+	}
+
+	// strain found by code
+	return strain, nil
 }

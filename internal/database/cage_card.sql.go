@@ -15,7 +15,7 @@ import (
 const addCageCard = `-- name: AddCageCard :one
 INSERT INTO cage_cards(cc_id, protocol_id, investigator_id)
 VALUES ($1, $2, $3)
-RETURNING cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by
+RETURNING cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by, order_id
 `
 
 type AddCageCardParams struct {
@@ -37,6 +37,7 @@ func (q *Queries) AddCageCard(ctx context.Context, arg AddCageCardParams) (CageC
 		&i.Notes,
 		&i.ActivatedBy,
 		&i.DeactivatedBy,
+		&i.OrderID,
 	)
 	return i, err
 }
@@ -62,7 +63,7 @@ UPDATE cage_cards
 SET deactivated_on = $2,
     deactivated_by = $3
 WHERE cc_id = $1
-RETURNING cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by
+RETURNING cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by, order_id
 `
 
 type DeactivateCageCardParams struct {
@@ -84,6 +85,7 @@ func (q *Queries) DeactivateCageCard(ctx context.Context, arg DeactivateCageCard
 		&i.Notes,
 		&i.ActivatedBy,
 		&i.DeactivatedBy,
+		&i.OrderID,
 	)
 	return i, err
 }
@@ -119,6 +121,7 @@ type GetActiveTestCardsRow struct {
 	DeactivatedOn sql.NullTime
 }
 
+// the possibly unused pile
 func (q *Queries) GetActiveTestCards(ctx context.Context) ([]GetActiveTestCardsRow, error) {
 	rows, err := q.db.QueryContext(ctx, getActiveTestCards)
 	if err != nil {
@@ -150,7 +153,7 @@ func (q *Queries) GetActiveTestCards(ctx context.Context) ([]GetActiveTestCardsR
 }
 
 const getAllActiveCageCards = `-- name: GetAllActiveCageCards :many
-SELECT cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by FROM cage_cards
+SELECT cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by, order_id FROM cage_cards
 WHERE activated_on IS NOT NULL AND deactivated_on IS NULL
 ORDER BY cc_id ASC
 `
@@ -174,6 +177,7 @@ func (q *Queries) GetAllActiveCageCards(ctx context.Context) ([]CageCard, error)
 			&i.Notes,
 			&i.ActivatedBy,
 			&i.DeactivatedBy,
+			&i.OrderID,
 		); err != nil {
 			return nil, err
 		}
@@ -189,7 +193,7 @@ func (q *Queries) GetAllActiveCageCards(ctx context.Context) ([]CageCard, error)
 }
 
 const getAllCageCards = `-- name: GetAllCageCards :many
-SELECT cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by FROM cage_cards
+SELECT cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by, order_id FROM cage_cards
 ORDER BY cc_id ASC
 `
 
@@ -212,6 +216,7 @@ func (q *Queries) GetAllCageCards(ctx context.Context) ([]CageCard, error) {
 			&i.Notes,
 			&i.ActivatedBy,
 			&i.DeactivatedBy,
+			&i.OrderID,
 		); err != nil {
 			return nil, err
 		}
@@ -227,7 +232,7 @@ func (q *Queries) GetAllCageCards(ctx context.Context) ([]CageCard, error) {
 }
 
 const getCageCardByID = `-- name: GetCageCardByID :one
-SELECT cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by FROM cage_cards
+SELECT cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by, order_id FROM cage_cards
 WHERE $1 = cc_id
 `
 
@@ -244,109 +249,13 @@ func (q *Queries) GetCageCardByID(ctx context.Context, ccID int32) (CageCard, er
 		&i.Notes,
 		&i.ActivatedBy,
 		&i.DeactivatedBy,
+		&i.OrderID,
 	)
 	return i, err
 }
 
-const getCageCardsActive = `-- name: GetCageCardsActive :many
-SELECT cage_cards.cc_id, investigators.i_name, protocols.p_number, strains.s_name, cage_cards.activated_on, cage_cards.deactivated_on
-FROM cage_cards
-INNER JOIN investigators ON cage_cards.investigator_id = investigators.id
-INNER JOIN protocols ON cage_cards.protocol_id = protocols.id
-LEFT JOIN strains ON cage_cards.strain = strains.id
-WHERE cage_cards.activated_on IS NOT NULL and cage_cards.deactivated_on IS NULL
-ORDER BY cage_cards.cc_id ASC
-`
-
-type GetCageCardsActiveRow struct {
-	CcID          int32
-	IName         string
-	PNumber       string
-	SName         sql.NullString
-	ActivatedOn   sql.NullTime
-	DeactivatedOn sql.NullTime
-}
-
-func (q *Queries) GetCageCardsActive(ctx context.Context) ([]GetCageCardsActiveRow, error) {
-	rows, err := q.db.QueryContext(ctx, getCageCardsActive)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetCageCardsActiveRow
-	for rows.Next() {
-		var i GetCageCardsActiveRow
-		if err := rows.Scan(
-			&i.CcID,
-			&i.IName,
-			&i.PNumber,
-			&i.SName,
-			&i.ActivatedOn,
-			&i.DeactivatedOn,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getCageCardsAll = `-- name: GetCageCardsAll :many
-SELECT cage_cards.cc_id, investigators.i_name, protocols.p_number, strains.s_name, cage_cards.activated_on, cage_cards.deactivated_on
-FROM cage_cards
-INNER JOIN investigators ON cage_cards.investigator_id = investigators.id
-INNER JOIN protocols ON cage_cards.protocol_id = protocols.id
-LEFT JOIN strains ON cage_cards.strain = strains.id
-ORDER BY cage_cards.cc_id ASC
-`
-
-type GetCageCardsAllRow struct {
-	CcID          int32
-	IName         string
-	PNumber       string
-	SName         sql.NullString
-	ActivatedOn   sql.NullTime
-	DeactivatedOn sql.NullTime
-}
-
-func (q *Queries) GetCageCardsAll(ctx context.Context) ([]GetCageCardsAllRow, error) {
-	rows, err := q.db.QueryContext(ctx, getCageCardsAll)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetCageCardsAllRow
-	for rows.Next() {
-		var i GetCageCardsAllRow
-		if err := rows.Scan(
-			&i.CcID,
-			&i.IName,
-			&i.PNumber,
-			&i.SName,
-			&i.ActivatedOn,
-			&i.DeactivatedOn,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getCageCardsByInvestigator = `-- name: GetCageCardsByInvestigator :many
-SELECT cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by FROM cage_cards
+SELECT cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by, order_id FROM cage_cards
 WHERE $1 = investigator_id
 AND activated_on IS NOT NULL AND deactivated_on IS NULL
 ORDER BY cc_id ASC
@@ -371,6 +280,7 @@ func (q *Queries) GetCageCardsByInvestigator(ctx context.Context, investigatorID
 			&i.Notes,
 			&i.ActivatedBy,
 			&i.DeactivatedBy,
+			&i.OrderID,
 		); err != nil {
 			return nil, err
 		}
@@ -385,158 +295,36 @@ func (q *Queries) GetCageCardsByInvestigator(ctx context.Context, investigatorID
 	return items, nil
 }
 
-const getCageCardsInvestigator = `-- name: GetCageCardsInvestigator :many
-SELECT cage_cards.cc_id, investigators.i_name, protocols.p_number, strains.s_name, cage_cards.activated_on, cage_cards.deactivated_on
-FROM cage_cards
-INNER JOIN investigators ON cage_cards.investigator_id = investigators.id
-INNER JOIN protocols ON cage_cards.protocol_id = protocols.id
-LEFT JOIN strains ON cage_cards.strain = strains.id
-WHERE (activated_on IS NOT NULL AND activated_on >= $1) AND (deactivated_on <= $2 OR deactivated_on IS NULL)
-AND cage_cards.investigator_id = $3
-ORDER BY cage_cards.cc_id ASC
+const getCageCardsRange = `-- name: GetCageCardsRange :many
+SELECT cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by, order_id FROM cage_cards
+WHERE cc_id >= $1 AND cc_id <= $2
 `
 
-type GetCageCardsInvestigatorParams struct {
-	ActivatedOn    sql.NullTime
-	DeactivatedOn  sql.NullTime
-	InvestigatorID uuid.UUID
+type GetCageCardsRangeParams struct {
+	CcID   int32
+	CcID_2 int32
 }
 
-type GetCageCardsInvestigatorRow struct {
-	CcID          int32
-	IName         string
-	PNumber       string
-	SName         sql.NullString
-	ActivatedOn   sql.NullTime
-	DeactivatedOn sql.NullTime
-}
-
-func (q *Queries) GetCageCardsInvestigator(ctx context.Context, arg GetCageCardsInvestigatorParams) ([]GetCageCardsInvestigatorRow, error) {
-	rows, err := q.db.QueryContext(ctx, getCageCardsInvestigator, arg.ActivatedOn, arg.DeactivatedOn, arg.InvestigatorID)
+func (q *Queries) GetCageCardsRange(ctx context.Context, arg GetCageCardsRangeParams) ([]CageCard, error) {
+	rows, err := q.db.QueryContext(ctx, getCageCardsRange, arg.CcID, arg.CcID_2)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetCageCardsInvestigatorRow
+	var items []CageCard
 	for rows.Next() {
-		var i GetCageCardsInvestigatorRow
+		var i CageCard
 		if err := rows.Scan(
 			&i.CcID,
-			&i.IName,
-			&i.PNumber,
-			&i.SName,
+			&i.ProtocolID,
 			&i.ActivatedOn,
 			&i.DeactivatedOn,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getCageCardsProtocol = `-- name: GetCageCardsProtocol :many
-SELECT cage_cards.cc_id, investigators.i_name, protocols.p_number, strains.s_name, cage_cards.activated_on, cage_cards.deactivated_on
-FROM cage_cards
-INNER JOIN investigators ON cage_cards.investigator_id = investigators.id
-INNER JOIN protocols ON cage_cards.protocol_id = protocols.id
-LEFT JOIN strains ON cage_cards.strain = strains.id
-WHERE (activated_on IS NOT NULL AND activated_on >= $1) AND (deactivated_on <= $2 OR deactivated_on IS NULL)
-AND cage_cards.protocol_id = $3
-ORDER BY cage_cards.cc_id ASC
-`
-
-type GetCageCardsProtocolParams struct {
-	ActivatedOn   sql.NullTime
-	DeactivatedOn sql.NullTime
-	ProtocolID    uuid.UUID
-}
-
-type GetCageCardsProtocolRow struct {
-	CcID          int32
-	IName         string
-	PNumber       string
-	SName         sql.NullString
-	ActivatedOn   sql.NullTime
-	DeactivatedOn sql.NullTime
-}
-
-func (q *Queries) GetCageCardsProtocol(ctx context.Context, arg GetCageCardsProtocolParams) ([]GetCageCardsProtocolRow, error) {
-	rows, err := q.db.QueryContext(ctx, getCageCardsProtocol, arg.ActivatedOn, arg.DeactivatedOn, arg.ProtocolID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetCageCardsProtocolRow
-	for rows.Next() {
-		var i GetCageCardsProtocolRow
-		if err := rows.Scan(
-			&i.CcID,
-			&i.IName,
-			&i.PNumber,
-			&i.SName,
-			&i.ActivatedOn,
-			&i.DeactivatedOn,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getCardsDateRange = `-- name: GetCardsDateRange :many
-SELECT cage_cards.cc_id, investigators.i_name, protocols.p_number, strains.s_name, cage_cards.activated_on, cage_cards.deactivated_on
-FROM cage_cards
-INNER JOIN investigators ON cage_cards.investigator_id = investigators.id
-INNER JOIN protocols ON cage_cards.protocol_id = protocols.id
-LEFT JOIN strains ON cage_cards.strain = strains.id
-WHERE (activated_on IS NOT NULL AND activated_on >= $1) AND (deactivated_on <= $2 OR deactivated_on IS NULL)
-ORDER BY cage_cards.cc_id ASC
-`
-
-type GetCardsDateRangeParams struct {
-	ActivatedOn   sql.NullTime
-	DeactivatedOn sql.NullTime
-}
-
-type GetCardsDateRangeRow struct {
-	CcID          int32
-	IName         string
-	PNumber       string
-	SName         sql.NullString
-	ActivatedOn   sql.NullTime
-	DeactivatedOn sql.NullTime
-}
-
-func (q *Queries) GetCardsDateRange(ctx context.Context, arg GetCardsDateRangeParams) ([]GetCardsDateRangeRow, error) {
-	rows, err := q.db.QueryContext(ctx, getCardsDateRange, arg.ActivatedOn, arg.DeactivatedOn)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetCardsDateRangeRow
-	for rows.Next() {
-		var i GetCardsDateRangeRow
-		if err := rows.Scan(
-			&i.CcID,
-			&i.IName,
-			&i.PNumber,
-			&i.SName,
-			&i.ActivatedOn,
-			&i.DeactivatedOn,
+			&i.InvestigatorID,
+			&i.Strain,
+			&i.Notes,
+			&i.ActivatedBy,
+			&i.DeactivatedBy,
+			&i.OrderID,
 		); err != nil {
 			return nil, err
 		}
@@ -603,6 +391,50 @@ func (q *Queries) ReactivateCageCard(ctx context.Context, ccID int32) error {
 	return err
 }
 
+const receiveCageCard = `-- name: ReceiveCageCard :one
+INSERT INTO cage_cards(cc_id, protocol_id, activated_on, investigator_id, strain, notes, activated_by, order_id)
+VALUES($1, $2, $3, $4, $5, $6, $7, $8)
+RETURNING cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by, order_id
+`
+
+type ReceiveCageCardParams struct {
+	CcID           int32
+	ProtocolID     uuid.UUID
+	ActivatedOn    sql.NullTime
+	InvestigatorID uuid.UUID
+	Strain         uuid.NullUUID
+	Notes          sql.NullString
+	ActivatedBy    uuid.NullUUID
+	OrderID        uuid.NullUUID
+}
+
+func (q *Queries) ReceiveCageCard(ctx context.Context, arg ReceiveCageCardParams) (CageCard, error) {
+	row := q.db.QueryRowContext(ctx, receiveCageCard,
+		arg.CcID,
+		arg.ProtocolID,
+		arg.ActivatedOn,
+		arg.InvestigatorID,
+		arg.Strain,
+		arg.Notes,
+		arg.ActivatedBy,
+		arg.OrderID,
+	)
+	var i CageCard
+	err := row.Scan(
+		&i.CcID,
+		&i.ProtocolID,
+		&i.ActivatedOn,
+		&i.DeactivatedOn,
+		&i.InvestigatorID,
+		&i.Strain,
+		&i.Notes,
+		&i.ActivatedBy,
+		&i.DeactivatedBy,
+		&i.OrderID,
+	)
+	return i, err
+}
+
 const trueActivateCageCard = `-- name: TrueActivateCageCard :one
 UPDATE cage_cards
 SET activated_on = $2,
@@ -610,7 +442,7 @@ SET activated_on = $2,
     strain = $4,
     notes = $5
 WHERE cc_id = $1
-RETURNING cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by
+RETURNING cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by, order_id
 `
 
 type TrueActivateCageCardParams struct {
@@ -640,6 +472,7 @@ func (q *Queries) TrueActivateCageCard(ctx context.Context, arg TrueActivateCage
 		&i.Notes,
 		&i.ActivatedBy,
 		&i.DeactivatedBy,
+		&i.OrderID,
 	)
 	return i, err
 }

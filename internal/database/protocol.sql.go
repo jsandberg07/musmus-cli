@@ -14,16 +14,16 @@ import (
 
 const addBalance = `-- name: AddBalance :exec
 UPDATE protocols SET balance = (balance + $2)
-WHERE $1 = p_number
+WHERE $1 = id
 `
 
 type AddBalanceParams struct {
-	PNumber string
+	ID      uuid.UUID
 	Balance int32
 }
 
 func (q *Queries) AddBalance(ctx context.Context, arg AddBalanceParams) error {
-	_, err := q.db.ExecContext(ctx, addBalance, arg.PNumber, arg.Balance)
+	_, err := q.db.ExecContext(ctx, addBalance, arg.ID, arg.Balance)
 	return err
 }
 
@@ -53,6 +53,28 @@ func (q *Queries) CreateProtocol(ctx context.Context, arg CreateProtocolParams) 
 		arg.ExpirationDate,
 		arg.PreviousProtocol,
 	)
+	var i Protocol
+	err := row.Scan(
+		&i.ID,
+		&i.PNumber,
+		&i.PrimaryInvestigator,
+		&i.Title,
+		&i.Allocated,
+		&i.Balance,
+		&i.ExpirationDate,
+		&i.IsActive,
+		&i.PreviousProtocol,
+	)
+	return i, err
+}
+
+const getProtocolByID = `-- name: GetProtocolByID :one
+SELECT id, p_number, primary_investigator, title, allocated, balance, expiration_date, is_active, previous_protocol FROM protocols
+WHERE $1 = id
+`
+
+func (q *Queries) GetProtocolByID(ctx context.Context, id uuid.UUID) (Protocol, error) {
+	row := q.db.QueryRowContext(ctx, getProtocolByID, id)
 	var i Protocol
 	err := row.Scan(
 		&i.ID,

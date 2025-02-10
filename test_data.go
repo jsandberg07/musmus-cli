@@ -67,6 +67,18 @@ func (cfg *Config) testData() error {
 		return err
 	}
 
+	// add a reminder for today
+	err = addTestReminder(cfg)
+	if err != nil {
+		return err
+	}
+
+	// add an order expected today
+	err = addTestOrder(cfg)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -361,7 +373,7 @@ func addTestCageCards(cfg *Config) error {
 
 func activateTestCageCards(cfg *Config) error {
 	fmt.Println("* Activating test cage cards")
-	lastWeek := time.Now().AddDate(0, 0, -7)
+	lastWeek := normalizeDate(time.Now().AddDate(0, 0, -7))
 	activatedBy, err := cfg.db.GetInvestigatorByName(context.Background(), "Sonya Ball")
 	if err != nil {
 		fmt.Println("Error getting investigator for activation")
@@ -409,7 +421,7 @@ func activateTestCageCards(cfg *Config) error {
 
 func deactivateTestCageCards(cfg *Config) error {
 	fmt.Println("* Deactivating test cage cards")
-	yesterday := time.Now().AddDate(0, 0, -1)
+	yesterday := normalizeDate(time.Now().AddDate(0, 0, -1))
 	deactivatedBy, err := cfg.db.GetInvestigatorByName(context.Background(), "Sonya Ball")
 	if err != nil {
 		fmt.Println("Error getting investigator for activation")
@@ -451,6 +463,83 @@ func getTestActiveCageCards(cfg *Config) error {
 		if verbose {
 			fmt.Println(cc)
 		}
+	}
+
+	return nil
+}
+
+func addTestReminder(cfg *Config) error {
+	// actually add two and make sure they dont both show up
+	// better for testing login later
+	names := []string{"Sharon Thornton", "Johnny Boi"}
+	ccID := 100
+
+	for i, name := range names {
+		inv, err := cfg.db.GetInvestigatorByName(context.Background(), name)
+		if err != nil {
+			return err
+		}
+		if len(inv) == 0 {
+			return errors.New("no investigators found")
+		}
+		if len(inv) > 1 {
+			return errors.New("vague investigator while adding reminder")
+		}
+		arp := database.AddReminderParams{
+			RDate:          normalizeDate(time.Now()),
+			RCcID:          int32(ccID),
+			InvestigatorID: inv[0].ID,
+			Note:           "Test Reminder",
+		}
+		reminder, err := cfg.db.AddReminder(context.Background(), arp)
+		if err != nil {
+			fmt.Printf("Error adding reminder %v -- %s", i, name)
+			return err
+		}
+		if verbose {
+			fmt.Println(reminder)
+		}
+		ccID++
+
+	}
+	return nil
+}
+
+func addTestOrder(cfg *Config) error {
+	inv, err := cfg.db.GetInvestigatorByName(context.Background(), "Johnny Boi")
+	if err != nil {
+		return err
+	}
+	if len(inv) == 0 {
+		return errors.New("no investigators found")
+	}
+	if len(inv) > 1 {
+		return errors.New("vague investigator while adding reminder")
+	}
+	pro, err := cfg.db.GetProtocolByNumber(context.Background(), "12-24-32")
+	if err != nil {
+		return err
+	}
+	strain, err := cfg.db.GetStrainByName(context.Background(), "000664")
+	if err != nil {
+		return err
+	}
+
+	cnop := database.CreateNewOrderParams{
+		OrderNumber:    "B1234",
+		ExpectedDate:   normalizeDate(time.Now()),
+		ProtocolID:     pro.ID,
+		InvestigatorID: inv[0].ID,
+		StrainID:       strain.ID,
+		Note:           sql.NullString{Valid: true, String: "Test Order"},
+	}
+
+	order, err := cfg.db.CreateNewOrder(context.Background(), cnop)
+	if err != nil {
+		return err
+	}
+	if verbose {
+		fmt.Println(order)
 	}
 
 	return nil

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jsandberg07/clitest/internal/database"
 )
 
@@ -61,6 +62,47 @@ type CageCardExport struct {
 	SName         sql.NullString
 	ActivatedOn   sql.NullTime
 	DeactivatedOn sql.NullTime
+	OrderNumber   sql.NullString
+}
+
+// TODO: optimize size (order by largest to smallest size)
+type CageCardActivationParams struct {
+	ccID         int
+	date         time.Time
+	allotment    int
+	strain       database.Strain
+	keepStrain   bool
+	note         string
+	keepNote     bool
+	daysReminder int
+	keepReminder bool
+}
+
+// sets defaults or 0 values for struct
+func (s *CageCardActivationParams) init() {
+	s.ccID = 0
+	s.date = normalizeDate(time.Now())
+	s.allotment = 0
+	s.strain = database.Strain{ID: uuid.Nil}
+	s.keepStrain = false
+	s.note = ""
+	s.keepNote = false
+	s.daysReminder = 0
+	s.keepReminder = false
+}
+
+// checks the keep properties and resets the ones that aren't marked as kept.
+// Is this a bad name? It's like of close to the variable names so it might be confusing
+func (s *CageCardActivationParams) keepCheck() {
+	if !s.keepStrain {
+		s.strain = database.Strain{ID: uuid.Nil}
+	}
+	if !s.keepNote {
+		s.note = ""
+	}
+	if !s.keepReminder {
+		s.daysReminder = 0
+	}
 }
 
 /*

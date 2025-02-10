@@ -27,6 +27,7 @@ type CageCard struct {
 	Notes          sql.NullString
 	ActivatedBy    uuid.NullUUID
 	DeactivatedBy  uuid.NullUUID
+	OrderID        uuid.NullUUID
 }
 
 type Investigator struct {
@@ -36,6 +37,17 @@ type Investigator struct {
 	Email    sql.NullString
 	Position uuid.UUID
 	Active   bool
+}
+
+type Order struct {
+	ID             uuid.UUID
+	OrderNumber    string
+	ExpectedDate   time.Time
+	ProtocolID     uuid.UUID
+	InvestigatorID uuid.UUID
+	StrainID       uuid.UUID
+	Note           sql.NullString
+	Received       bool
 }
 
 type Position struct {
@@ -59,6 +71,14 @@ type Protocol struct {
 	ExpirationDate      time.Time
 	IsActive            bool
 	PreviousProtocol    uuid.NullUUID
+}
+
+type Reminder struct {
+	ID             uuid.UUID
+	RDate          time.Time
+	RCcID          int32
+	InvestigatorID uuid.UUID
+	Note           string
 }
 
 type Setting struct {
