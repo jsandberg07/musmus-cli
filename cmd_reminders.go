@@ -371,7 +371,6 @@ func ccActivationReminder(cfg *Config, t int, cc *database.CageCard) error {
 	}
 	reminder, err := cfg.db.AddReminder(context.Background(), arParams)
 	if err != nil {
-		fmt.Println("Could not create reminder")
 		return err
 	}
 	if verbose {

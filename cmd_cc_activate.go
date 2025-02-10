@@ -220,7 +220,10 @@ func activateFunction(cfg *Config, args []Argument) error {
 					fmt.Println(err)
 					continue
 				}
-
+				if err != nil {
+					fmt.Println("Invalid entry. Please enter an integer for cage card")
+					continue
+				}
 				ccParams.ccID = ccID
 				err = activationWrapper(cfg, &ccParams)
 				if err != nil {
@@ -233,6 +236,10 @@ func activateFunction(cfg *Config, args []Argument) error {
 					// an error occured and it was not from passing a word in to atoi
 					fmt.Println("Error convering input to cage card number")
 					fmt.Println(err)
+					continue
+				}
+				if err != nil {
+					fmt.Println("Invalid entry. Please enter an integer for allotment")
 					continue
 				}
 				if num < 0 {
@@ -338,7 +345,7 @@ func activateFunction(cfg *Config, args []Argument) error {
 				}
 
 			case "exit":
-				fmt.Println("Exiting without processing")
+				fmt.Println("Exiting...")
 				exit = true
 
 			default:
@@ -396,21 +403,25 @@ func activationWrapper(cfg *Config, s *CageCardActivationParams) error {
 
 	s.keepCheck()
 
-	/*
-		// add animals to allotment
-		if s.allotment != 0 {
-			err := addBalanceToProtocol(cfg, s.allotment)
-			if err != nil {
-				return err
-			}
+	// add animals to allotment
+	if s.allotment != 0 {
+		err := addBalanceToProtocol(cfg, s.allotment, &activatedCC)
+		if err != nil {
+			fmt.Println("Could not add balance to protocol")
+			fmt.Println(err)
 		}
-	*/
+	}
 
 	// check if reminder should be created
 	if s.daysReminder != 0 {
+		if !activatedCC.Notes.Valid {
+			fmt.Println("Can't create a reminder without a note")
+			return nil
+		}
 		err := ccActivationReminder(cfg, s.daysReminder, &activatedCC)
 		if err != nil {
-			return err
+			fmt.Println("Could not create reminder")
+			fmt.Println(err)
 		}
 	}
 

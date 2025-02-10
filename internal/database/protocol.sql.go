@@ -14,16 +14,16 @@ import (
 
 const addBalance = `-- name: AddBalance :exec
 UPDATE protocols SET balance = (balance + $2)
-WHERE $1 = p_number
+WHERE $1 = id
 `
 
 type AddBalanceParams struct {
-	PNumber string
+	ID      uuid.UUID
 	Balance int32
 }
 
 func (q *Queries) AddBalance(ctx context.Context, arg AddBalanceParams) error {
-	_, err := q.db.ExecContext(ctx, addBalance, arg.PNumber, arg.Balance)
+	_, err := q.db.ExecContext(ctx, addBalance, arg.ID, arg.Balance)
 	return err
 }
 

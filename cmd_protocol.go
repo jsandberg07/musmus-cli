@@ -571,6 +571,29 @@ func checkProtocolExists(cfg *Config, input string) (database.Protocol, error) {
 	return protocol, nil
 }
 
+func addBalanceToProtocol(cfg *Config, input int, cc *database.CageCard) error {
+	abParams := database.AddBalanceParams{
+		ID:      cc.ProtocolID,
+		Balance: int32(input),
+	}
+	err := cfg.db.AddBalance(context.Background(), abParams)
+	if err != nil {
+		return err
+	}
+
+	// TODO: is there a way to get psql to return a bool for balance > allocated?
+	protocol, err := cfg.db.GetProtocolByID(context.Background(), cc.ProtocolID)
+	if err != nil {
+		return err
+	}
+	if protocol.Allocated < protocol.Balance {
+		fmt.Println("Animals used on protocol exceeds allotment")
+		fmt.Printf("Allocated - %v \nBalance - %v\n", protocol.Allocated, protocol.Balance)
+	}
+
+	return nil
+}
+
 /* removed via refactor
 func getProtocolByNumber(cfg *Config) (database.Protocol, error) {
 	reader := bufio.NewReader(os.Stdin)
