@@ -157,7 +157,6 @@ func addCCFunction(cfg *Config, args []Argument) error {
 					fmt.Println(err)
 				}
 				end = num
-				fmt.Printf("Protocol set as %s\n", protocol.PNumber)
 
 			case "-i":
 				inv, err := getInvestigatorByFlag2(cfg, arg.value)
