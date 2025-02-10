@@ -36,6 +36,9 @@ import (
 // reminders show up for a person or for everybody
 // see reminders with dates for today, next week, export. no past stuff. once it's done, have it be done (dont delete it anyway)
 
+// fix CC activation
+// add the ability to automatically create reminders when entering breeding for next day or E something for E days + 1 or just reminder days then note something like that
+
 // Next:
 // Cc activation is weak, make it a go routine that just does it as it goes. it's fast enough im sure and not http based. you're literally typing by hand. it's fake remember?
 
