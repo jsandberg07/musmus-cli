@@ -297,8 +297,15 @@ func deleteReminderFunction(cfg *Config, args []Argument) error {
 	}
 
 	printRemindersList(&reminders)
+	count := len(reminders)
 
 	num, err := getIntPrompt("Enter a number to delete the corresponding reminder")
+	// handle out of bounds
+	if num < 1 || num > count {
+		fmt.Println("Invalid entry. Exiting...")
+		return nil
+	}
+
 	if err != nil {
 		return err
 	}
@@ -342,6 +349,33 @@ func getTodaysReminders(cfg *Config) error {
 	fmt.Println("Reminders for today: ")
 	for i, reminder := range reminders {
 		fmt.Printf("* %v CC: %v -- %s\n", i+1, reminder.RCcID, reminder.Note)
+	}
+
+	return nil
+}
+
+// adds a reminder X days after the
+func ccActivationReminder(cfg *Config, t int, cc *database.CageCard) error {
+	// can't create a reminder without a note
+	if !cc.Notes.Valid {
+		fmt.Println("Can't create a reminder without a note")
+		return nil
+	}
+	// ugly, has to be a better way
+	date := cc.ActivatedOn.Time.Add(time.Hour * (24 * time.Duration(t)))
+	arParams := database.AddReminderParams{
+		RDate:          date,
+		RCcID:          cc.CcID,
+		InvestigatorID: cc.InvestigatorID,
+		Note:           cc.Notes.String,
+	}
+	reminder, err := cfg.db.AddReminder(context.Background(), arParams)
+	if err != nil {
+		fmt.Println("Could not create reminder")
+		return err
+	}
+	if verbose {
+		fmt.Println(reminder)
 	}
 
 	return nil

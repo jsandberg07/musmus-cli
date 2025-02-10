@@ -472,6 +472,7 @@ func addTestReminder(cfg *Config) error {
 	// actually add two and make sure they dont both show up
 	// better for testing login later
 	names := []string{"Sharon Thornton", "Johnny Boi"}
+	ccID := 100
 
 	for i, name := range names {
 		inv, err := cfg.db.GetInvestigatorByName(context.Background(), name)
@@ -486,7 +487,7 @@ func addTestReminder(cfg *Config) error {
 		}
 		arp := database.AddReminderParams{
 			RDate:          normalizeDate(time.Now()),
-			RCcID:          100,
+			RCcID:          int32(ccID),
 			InvestigatorID: inv[0].ID,
 			Note:           "Test Reminder",
 		}
@@ -498,6 +499,7 @@ func addTestReminder(cfg *Config) error {
 		if verbose {
 			fmt.Println(reminder)
 		}
+		ccID++
 
 	}
 	return nil

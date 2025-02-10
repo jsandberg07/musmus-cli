@@ -14,38 +14,6 @@ import (
 	"github.com/jsandberg07/clitest/internal/database"
 )
 
-// IDEA: struct that contains an array of dates, and creates a cage card activation param with dates with a reference to that date
-// then a true param is created with the value, pass to a go routine and activated
-// a memory saving measure, help with a LOT of cards but really a few dates and IDs aren't anything major but it would be cool
-// would also work for investigator
-
-// TODO: set reminders with a flag. either by like E17 for a date or just a date
-// TODO: actually add an allotment and way to handle it, what to do if an activation errors
-// cause it's not passed in with the activation struct
-// an allotment stuct that is the cc, allot, pro, then removes ccs with errors, then sums them
-// maybe
-// or i just add a number of animals field to the CC activation and never use it for anything else
-// yeah keep it as a reference just add it....... later
-
-// TODO: update the sql for activation, need more fields
-// actually making the activate cards uhh contact the db
-// handling cards that are already active, previously deactivated and other misc errors
-// changing date and adding to activation
-// adding strain to activation
-// adding notes to activation
-// add a flag for cards, so you can add a note at the same time
-// a print for what the current settings are
-// capital S and N for keep notes and strains for multiple cages
-// automatically add the "activated by"
-// handling allotment / updating protocol (be fast and have structs with the prot uudis + total)
-
-// then more of the same for deactivation ect
-// cards that haven't been activated
-
-// IDEA: actually have the cards get processed with a go routine as they come in
-// would look cooler, and threaded would mean they dont lag like cayuse
-
-// these ideas suck
 // 1. add a new reminder field. add a X days after with the note (hint: make sure the note is required)
 // 2. do "linear" activation. set params as you like that persist, when you enter a number immedietly start to activate it. return an error if there is one.
 // 3. update the print too
@@ -53,9 +21,8 @@ import (
 // 5. fuck yeah let's do like 4 db calls with each one
 // 6. DONT thread them, they have to be linear also
 
-// check the flags and add new ones
-// check the switch and add the new ones
-// redo the activation order
+// add reminders
+// how hard could it be
 
 func getCCActivationCmd() Command {
 	activateFlags := make(map[string]Flag)
@@ -217,16 +184,9 @@ func activateFunction(cfg *Config, args []Argument) error {
 			// a misread on cc means the value 0 init
 			if ccID != 0 {
 				ccParams.ccID = ccID
-				activateParams := getCCToActivate(&ccParams, cfg.loggedInInvestigator)
-				activatedCC, err := activateCageCard(cfg, &activateParams)
+				err := activationWrapper(cfg, &ccParams)
 				if err != nil {
 					fmt.Println(err)
-					continue
-				}
-				ccParams.keepCheck()
-				fmt.Printf("%v activated!\n", activatedCC.CcID)
-				if verbose {
-					fmt.Println(activatedCC)
 				}
 				// don't need to visit the switch, one input is assumed to be a cc#
 				continue
@@ -262,16 +222,9 @@ func activateFunction(cfg *Config, args []Argument) error {
 				}
 
 				ccParams.ccID = ccID
-				activateParams := getCCToActivate(&ccParams, cfg.loggedInInvestigator)
-				activatedCC, err := activateCageCard(cfg, &activateParams)
+				err = activationWrapper(cfg, &ccParams)
 				if err != nil {
 					fmt.Println(err)
-					continue
-				}
-				fmt.Printf("%v activated!\n", activatedCC.CcID)
-				ccParams.keepCheck()
-				if verbose {
-					fmt.Println(activatedCC)
 				}
 
 			case "-a":
@@ -429,6 +382,42 @@ func printCurrentActivationParams(cfg *Config, s *CageCardActivationParams) erro
 
 }
 
+// TODO: naming things is hard. Decide if any errors like reminder or balance undoes CC activation
+func activationWrapper(cfg *Config, s *CageCardActivationParams) error {
+	activateParams := getCCToActivate(s, cfg.loggedInInvestigator)
+	activatedCC, err := activateCageCard(cfg, &activateParams)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%v activated!\n", activatedCC.CcID)
+	if verbose {
+		fmt.Println(activatedCC)
+	}
+
+	s.keepCheck()
+
+	/*
+		// add animals to allotment
+		if s.allotment != 0 {
+			err := addBalanceToProtocol(cfg, s.allotment)
+			if err != nil {
+				return err
+			}
+		}
+	*/
+
+	// check if reminder should be created
+	if s.daysReminder != 0 {
+		err := ccActivationReminder(cfg, s.daysReminder, &activatedCC)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+
+}
+
 // TODO: naming things is hard
 func getCCToActivate(s *CageCardActivationParams, i *database.Investigator) database.TrueActivateCageCardParams {
 
@@ -492,7 +481,6 @@ func activateCageCard(cfg *Config, cc *database.TrueActivateCageCardParams) (dat
 
 	// activate
 	activatedCard, err := cfg.db.TrueActivateCageCard(context.Background(), *cc)
-
 	// update cc db error
 	if err != nil {
 		fmt.Println("Error activating cage card")
