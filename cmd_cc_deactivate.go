@@ -28,6 +28,12 @@ func getCCDeactivationCmd() Command {
 	return deactivationCmd
 }
 
+// enter number
+// try to deactivate
+// get error if need be
+// delete reminder
+// its easier trust me
+
 // cc, pop, process, exit, list of errors (both previously deact and not activated)
 // TODO: change this to work like activation (ie linear, check reminders)
 func getDeactivationFlags() map[string]Flag {
@@ -48,17 +54,6 @@ func getDeactivationFlags() map[string]Flag {
 	}
 	deactivationFlags["-"+dFlag.symbol] = dFlag
 
-	// ect as needed or remove the "-"+ for longer ones
-
-	// lmao remove this
-	popFlag := Flag{
-		symbol:      "pop",
-		description: "Removes the last added cage card",
-		takesValue:  false,
-		printOrder:  100,
-	}
-	deactivationFlags[popFlag.symbol] = popFlag
-
 	printFlag := Flag{
 		symbol:      "print",
 		description: "Prints the current settings for card deactivation",
@@ -75,15 +70,6 @@ func getDeactivationFlags() map[string]Flag {
 	}
 	deactivationFlags[exitFlag.symbol] = exitFlag
 
-	// remove this
-	processFlag := Flag{
-		symbol:      "process",
-		description: "Processes cage cards and then exits",
-		takesValue:  false,
-		printOrder:  99,
-	}
-	deactivationFlags[processFlag.symbol] = processFlag
-
 	helpFlag := Flag{
 		symbol:      "help",
 		description: "Prints available flags for current command",
@@ -96,15 +82,13 @@ func getDeactivationFlags() map[string]Flag {
 
 }
 
-// look into removing the args thing, might have to stay
 func deactivateFunction(cfg *Config) error {
 	// get flags
 	flags := getDeactivationFlags()
 
 	// set defaults
 	exit := false
-	cardsToDeactivate := []database.DeactivateCageCardParams{}
-	date := time.Now()
+	date := normalizeDate(time.Now())
 
 	fmt.Println("Enter cards to deactivate.")
 	// the reader
@@ -139,9 +123,12 @@ func deactivateFunction(cfg *Config) error {
 
 			// a misread on cc means the value 0 init
 			if cc != 0 {
-				tDccp := getCCToDeactivate(cc, &date, cfg.loggedInInvestigator)
-				cardsToDeactivate = append(cardsToDeactivate, tDccp)
-				fmt.Printf("%v card added\n", cc)
+				err := deactivateCC(cfg, cc, date)
+				if err != nil {
+					fmt.Println(err)
+				}
+
+				// don't need to visit the switch, one input is assumed to be a cc#
 				continue
 			}
 		}
@@ -171,7 +158,7 @@ func deactivateFunction(cfg *Config) error {
 					break
 				}
 
-				date = newDate
+				date = normalizeDate(newDate)
 				fmt.Printf("Date set: %v\n", date)
 
 			// TODO: -cc isnt working for some reason but im not testing it atm
@@ -186,10 +173,10 @@ func deactivateFunction(cfg *Config) error {
 
 				// a misread on cc means the value 0 init
 				if cc != 0 {
-					tDccp := getCCToDeactivate(cc, &date, cfg.loggedInInvestigator)
-					cardsToDeactivate = append(cardsToDeactivate, tDccp)
-					fmt.Printf("%v card added\n", cc)
-					continue
+					err := deactivateCC(cfg, cc, date)
+					if err != nil {
+						fmt.Println(err)
+					}
 				}
 
 			case "print":
@@ -198,23 +185,27 @@ func deactivateFunction(cfg *Config) error {
 			case "help":
 				cmdHelp(flags)
 
-			case "pop":
-				length := len(cardsToDeactivate)
-				if length == 0 {
-					fmt.Println("No cards have been entered")
-					break
-				}
-				popped := cardsToDeactivate[length-1]
-				fmt.Printf("Popped %v\n", popped.CcID)
-				cardsToDeactivate = cardsToDeactivate[0 : length-1]
+				/* removed because cards are no longer kept in a queue
+				case "pop":
+					length := len(cardsToDeactivate)
+					if length == 0 {
+						fmt.Println("No cards have been entered")
+						break
+					}
+					popped := cardsToDeactivate[length-1]
+					fmt.Printf("Popped %v\n", popped.CcID)
+					cardsToDeactivate = cardsToDeactivate[0 : length-1]
+				*/
 
-			case "process":
-				fmt.Println("Processing...")
-				err := deactivateCageCards(cfg, cardsToDeactivate)
-				if err != nil {
-					fmt.Println(err)
-				}
-				exit = true
+				/* removed because cards are no longer kept in a queue
+				case "process":
+					fmt.Println("Processing...")
+					err := deactivateCageCards(cfg, cardsToDeactivate)
+					if err != nil {
+						fmt.Println(err)
+					}
+					exit = true
+				*/
 
 			case "exit":
 				fmt.Println("Exiting without saving...")
@@ -234,6 +225,78 @@ func deactivateFunction(cfg *Config) error {
 	return nil
 }
 
+// yeah, just the date. Keep the 'deactivated_by' hidden
+func printCurrentDeactivationParams(date *time.Time) {
+	fmt.Println("Current settings for cards being added to deactivation queue:")
+	fmt.Printf("Date: %v\n", *date)
+}
+
+// TODO: naming things is hard. really just need the ccID huh
+func deactivateCC(cfg *Config, ccID int, date time.Time) error {
+	cc, err := cfg.db.GetCageCardByID(context.Background(), int32(ccID))
+	if err != nil && err.Error() == "sql: no rows in result set" {
+		// not added to DB
+		return errors.New("cage card not found in DB")
+	}
+	if err != nil {
+		// any other error
+		return err
+	}
+
+	if !cc.ActivatedOn.Valid {
+		return errors.New("cage card not currently active")
+	}
+	if date.Before(cc.ActivatedOn.Time) {
+		// can't have a deactivation date set before activation
+		msg := fmt.Sprintf("deactivation date can't be before activation -- %v", cc.ActivatedOn.Time)
+		return errors.New(msg)
+	}
+	if cc.DeactivatedOn.Valid {
+		msg := fmt.Sprintf("cage card previously deactivated -- %v", cc.DeactivatedOn.Time)
+		return errors.New(msg)
+	}
+
+	dccParams := database.DeactivateCageCardParams{
+		CcID:          int32(ccID),
+		DeactivatedOn: sql.NullTime{Valid: true, Time: date},
+		DeactivatedBy: uuid.NullUUID{Valid: true, UUID: cfg.loggedInInvestigator.ID},
+	}
+	deactivatedCC, err := cfg.db.DeactivateCageCard(context.Background(), dccParams)
+	if err != nil {
+		fmt.Println("Error deactivating cage card in DB")
+		return err
+	}
+	fmt.Printf("%v deactivated!\n", deactivatedCC.CcID)
+	if verbose {
+		fmt.Println(deactivatedCC)
+	}
+
+	// check for reminders and delete those
+	reminders, err := cfg.db.GetRemindersByCC(context.Background(), deactivatedCC.CcID)
+	if err != nil {
+		fmt.Println("Error getting reminders from DB")
+		return err
+	}
+	if len(reminders) == 0 {
+		// no reminders, just return
+		return nil
+	}
+	fmt.Println("Reminders found for cage card:")
+	for _, r := range reminders {
+		fmt.Printf("%v -- %s\n", r.Note, r.RDate)
+	}
+	for i, r := range reminders {
+		err := cfg.db.DeleteReminder(context.Background(), r.ID)
+		if err != nil {
+			fmt.Printf("Error deleteing reminder %v -- %v\n", i, r.Note)
+		}
+	}
+	fmt.Println("Reminders have been deleted.")
+
+	return nil
+}
+
+/* removed because no longer processing CCs via a queue
 // is it more expensive to pass an int by pointer and deref or just pass by value
 func getCCToDeactivate(cc int, date *time.Time, deactivatedBy *database.Investigator) database.DeactivateCageCardParams {
 	tdate := sql.NullTime{Valid: true, Time: *date}
@@ -294,6 +357,7 @@ func deactivateCageCards(cfg *Config, ctd []database.DeactivateCageCardParams) e
 	}
 	return nil
 }
+
 
 // TODO: maybe add a check for if deactivation date is after today too
 // like can only deactivate today or past, not future, to prevent errors of course
@@ -364,9 +428,4 @@ func checkDeactivateError(cfg *Config, cc *database.DeactivateCageCardParams) cc
 	// everything ok
 	return ccError{}
 }
-
-// yeah, just the date. Keep the 'deactivated_by' hidden
-func printCurrentDeactivationParams(date *time.Time) {
-	fmt.Println("Current settings for cards being added to deactivation queue:")
-	fmt.Printf("Date: %v\n", *date)
-}
+*/

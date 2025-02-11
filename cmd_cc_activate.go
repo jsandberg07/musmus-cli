@@ -204,7 +204,7 @@ func activateFunction(cfg *Config) error {
 					fmt.Println(err)
 					break
 				}
-				ccParams.date = newDate
+				ccParams.date = normalizeDate(newDate)
 				fmt.Printf("Date set: %v\n", ccParams.date)
 
 			case "-cc":

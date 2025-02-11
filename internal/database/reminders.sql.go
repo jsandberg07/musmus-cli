@@ -120,6 +120,41 @@ func (q *Queries) GetAllTodayReminders(ctx context.Context, rDate time.Time) ([]
 	return items, nil
 }
 
+const getRemindersByCC = `-- name: GetRemindersByCC :many
+SELECT id, r_date, r_cc_id, investigator_id, note FROM reminders
+WHERE r_cc_id = $1
+ORDER BY r_date
+`
+
+func (q *Queries) GetRemindersByCC(ctx context.Context, rCcID int32) ([]Reminder, error) {
+	rows, err := q.db.QueryContext(ctx, getRemindersByCC, rCcID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Reminder
+	for rows.Next() {
+		var i Reminder
+		if err := rows.Scan(
+			&i.ID,
+			&i.RDate,
+			&i.RCcID,
+			&i.InvestigatorID,
+			&i.Note,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getRemindersDateRange = `-- name: GetRemindersDateRange :many
 SELECT id, r_date, r_cc_id, investigator_id, note FROM reminders
 WHERE (r_date BETWEEN $1 AND $2)

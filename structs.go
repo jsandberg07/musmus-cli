@@ -20,6 +20,16 @@ type Argument struct {
 	value string
 }
 
+type PositionParams struct {
+	Title             string
+	CanActivate       bool
+	CanDeactivate     bool
+	CanAddOrders      bool
+	CanQuery          bool
+	CanChangeProtocol bool
+	CanAddStaff       bool
+}
+
 type Command struct {
 	name        string
 	description string
