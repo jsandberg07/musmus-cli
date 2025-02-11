@@ -151,7 +151,7 @@ func getCCQueriesFlags() map[string]Flag {
 // look into removing the args thing, might have to stay
 // TODO: create a struct with an enum that remembers the query type, nulls the current values when you set a new one,
 // is easy to pass, run a switch on it
-func CCQueriesFunction(cfg *Config, args []Argument) error {
+func CCQueriesFunction(cfg *Config) error {
 	// get flags
 	flags := getCCQueriesFlags()
 

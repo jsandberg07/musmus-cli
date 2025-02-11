@@ -59,6 +59,13 @@ func getChangeSettingsFlags() map[string]Flag {
 	}
 	settingsFlags[exitFlag.symbol] = exitFlag
 
+	helpFlag := Flag{
+		symbol:      "help",
+		description: "Prints list of available commands.",
+		takesValue:  false,
+	}
+	settingsFlags[helpFlag.symbol] = helpFlag
+
 	// ect as needed or remove the "-"+ for longer ones
 
 	return settingsFlags
@@ -66,7 +73,7 @@ func getChangeSettingsFlags() map[string]Flag {
 }
 
 // look into removing the args thing, might have to stay
-func changeSettingsFunction(cfg *Config, args []Argument) error {
+func changeSettingsFunction(cfg *Config) error {
 	// get flags
 	flags := getChangeSettingsFlags()
 
@@ -136,6 +143,9 @@ func changeSettingsFunction(cfg *Config, args []Argument) error {
 			case "exit":
 				fmt.Println("Exiting without saving...")
 				exit = true
+
+			case "help":
+				cmdHelp(flags)
 			default:
 				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
 			}

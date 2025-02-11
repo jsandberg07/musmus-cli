@@ -109,7 +109,7 @@ func getPositionFlags() map[string]Flag {
 
 }
 
-func addPositionFunction(cfg *Config, args []Argument) error {
+func addPositionFunction(cfg *Config) error {
 	// get title before anything else, or exit early
 	title, err := getStringPrompt(cfg, "Please enter the title for the new position,", checkIfPositionTitleUnique)
 	if err != nil {
@@ -337,7 +337,7 @@ func getEditPositionCmd() Command {
 
 // TODO: print all titles so people know what the names are
 // flags are in addPosition
-func editPositionFunction(cfg *Config, args []Argument) error {
+func editPositionFunction(cfg *Config) error {
 	position, err := getStructPrompt(cfg, "Enter the title of the position to edit,", getPositionStruct)
 	if err != nil {
 		return err

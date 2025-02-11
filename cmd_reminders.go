@@ -58,7 +58,7 @@ func getAddReminderFlags() map[string]Flag {
 
 // look into removing the args thing, might have to stay
 // prompt stuff, then print or save it. that's about it.
-func addReminderFunction(cfg *Config, args []Argument) error {
+func addReminderFunction(cfg *Config) error {
 	// get flags
 	flags := getAddReminderFlags()
 
@@ -270,7 +270,7 @@ func getDeleteReminderCmd() Command {
 
 // get all the reminders for a certain date.
 // list them in whatever order, then enter 0 to delete or # to delete that one
-func deleteReminderFunction(cfg *Config, args []Argument) error {
+func deleteReminderFunction(cfg *Config) error {
 
 	var reminders []database.Reminder
 

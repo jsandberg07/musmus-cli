@@ -55,7 +55,7 @@ func getAddStrainFlags() map[string]Flag {
 }
 
 // look into removing the args thing, might have to stay
-func addStrainFunction(cfg *Config, args []Argument) error {
+func addStrainFunction(cfg *Config) error {
 
 	name, err := getStringPrompt(cfg, "Enter strain name", checkFuncNil)
 	if err != nil {
@@ -252,7 +252,7 @@ func getEditStrainFlags() map[string]Flag {
 }
 
 // look into removing the args thing, might have to stay
-func editStrainFunction(cfg *Config, args []Argument) error {
+func editStrainFunction(cfg *Config) error {
 	nilStrain := database.Strain{}
 	strain, err := getStructPrompt(cfg, "Enter strain name or ID to edit", getStrainStruct)
 	if err != nil {

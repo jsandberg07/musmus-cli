@@ -91,7 +91,7 @@ func getAddCCFlags() map[string]Flag {
 }
 
 // look into removing the args thing, might have to stay
-func addCCFunction(cfg *Config, args []Argument) error {
+func addCCFunction(cfg *Config) error {
 	var nilProtocol database.Protocol
 	protocol, err := getStructPrompt(cfg, "Enter a protocol for the cards be used with", getProtocolStruct)
 	if err != nil {

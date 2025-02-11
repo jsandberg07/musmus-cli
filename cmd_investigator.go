@@ -101,7 +101,7 @@ func getEditInvestigatorFlags() map[string]Flag {
 // ask for a name, then pass in flags for everything
 // then print old to new
 // look into removing the args thing, might have to stay
-func editInvestigatorFunction(cfg *Config, args []Argument) error {
+func editInvestigatorFunction(cfg *Config) error {
 	investigator, err := getStructPrompt(cfg, "Enter the name of the investigator you'd like to edit,", getInvestigatorStruct)
 	if err != nil {
 		return err
@@ -354,7 +354,7 @@ func getAddInvestigatorFlags() map[string]Flag {
 // and always allow you to exit early or whatever
 // name, position, email, nickname, assume active
 // look into removing the args thing, might have to stay
-func addInvestigatorFunction(cfg *Config, args []Argument) error {
+func addInvestigatorFunction(cfg *Config) error {
 	name, err := getStringPrompt(cfg, "Enter name of new investigator", checkIfInvestigatorNameUnique)
 	if err != nil {
 		return err

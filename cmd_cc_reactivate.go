@@ -61,7 +61,7 @@ func getCCReactivateFlags() map[string]Flag {
 }
 
 // look into removing the args thing, might have to stay
-func reactivateFunction(cfg *Config, args []Argument) error {
+func reactivateFunction(cfg *Config) error {
 	// get flags
 	flags := getCCReactivateFlags()
 

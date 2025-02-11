@@ -8,9 +8,9 @@ import (
 
 // just clean up the inputs
 // then we can have another function check and create the list of flags+args from the command
-func readCommandName(input string) (string, []string, error) {
+func readCommandName(input string) (string, error) {
 	if input == "" {
-		return "", nil, errors.New("no input found")
+		return "", errors.New("no input found")
 	}
 
 	splitArgs := strings.Split(input, " ")
@@ -18,17 +18,25 @@ func readCommandName(input string) (string, []string, error) {
 		splitArgs[i] = strings.TrimSpace(arg)
 	}
 
+	if len(splitArgs) > 1 {
+		fmt.Println("Too many command names entered. Only 1 is needed.")
+	}
+
 	cmdName := splitArgs[0]
+
+	/* formerly returned an array of strings that were never used
 	var arguments []string
 
 	if len(splitArgs) != 0 {
 		arguments = splitArgs[1:]
 	}
-
 	return cmdName, arguments, nil
+	*/
 
+	return cmdName, nil
 }
 
+/* removed because excessively complicated way to say "goto state." Removed with simplification of commands (but i still think it's clever)
 // for now used outside of commands but is a lot for what is essentially "goto this state"
 func parseCommandArguments(cmd *Command, parameters []string) ([]Argument, error) {
 	// no params passed in
@@ -71,6 +79,7 @@ func parseCommandArguments(cmd *Command, parameters []string) ([]Argument, error
 
 	return arguments, nil
 }
+*/
 
 // takes commands, adds common commands, then makes a map using its name as the key.
 // used in every state.
@@ -87,7 +96,7 @@ func cmdMapHelper(cmds []Command) map[string]Command {
 }
 
 func getMainMap() map[string]Command {
-	cmds := []Command{getSetStateCmd()}
+	cmds := []Command{getGotoCmd()}
 	commandMap := cmdMapHelper(cmds)
 
 	return commandMap

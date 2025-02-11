@@ -30,23 +30,17 @@ import (
 // do it
 
 // CURRENTLY:
-// reminders, orders
-// run tests before merging!
-// reminders have a CC#, can be set to automatically add to CC activation, or an order. do E something or other, or a reminder for ~21 days from now, or whatever
-// reminders show up for a person or for everybody
-// see reminders with dates for today, next week, export. no past stuff. once it's done, have it be done (dont delete it anyway)
-
-// fix CC activation
-// add the ability to automatically create reminders when entering breeding for next day or E something for E days + 1 or just reminder days then note something like that
+// removal of the []Arguments. It's only used by 'goto' and state setting. So change the way states work too. Then remove []Arguments from all the functions (many of them)
 
 // Next:
-// Cc activation is weak, make it a go routine that just does it as it goes. it's fast enough im sure and not http based. you're literally typing by hand. it's fake remember?
+// make maps print in a sorted order
+
+// Next:
+// add permissions that work (you can delete anybodys reminders currently)
 
 // AFTER THAT:
 // the great polishing
-// making maps print sortedly
-// adding permissions that work! you already have rolls. and logins
-// DRY up the state function, you don't need a separate function for each one. use a string and switch to return a state
+// logins (crpyto, storing that, creating new people, the admin tier account)
 // AFTER THAT:
 // the great readme-en-ing. write a readme and update the github page
 // AFTER THAT:
@@ -56,9 +50,6 @@ import (
 // the great job applyening, apply for jobs
 // DURING THAT:
 // the adding automated DB testing as well! cause that's a thing!
-// SOMEWHERE DURING THAT
-// i changed my mind and was cage cards to have go routines instead, so closer to cayuse process as you go
-// it's fast cause it's not html based
 // ADDITIONALLY:
 // a RESTful server version! throw out all your cli code and keep the sql! no more parsing! just json!
 
@@ -145,7 +136,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		cmdName, parameters, err := readCommandName(text)
+		cmdName, err := readCommandName(text)
 		if err != nil {
 			fmt.Println("oops error getting command name")
 			fmt.Println(err)
@@ -157,15 +148,17 @@ func main() {
 			fmt.Println("Invalid command")
 			continue
 		}
+		/* removed because arguments are no longer passed to commands (they were just never used)
 		// check to see if the flags are available, and if they take values, return flags and args
 		arguments, err := parseCommandArguments(&command, parameters)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
+		*/
 
 		// pass the args into the commands function, then run it
-		err = command.function(&cfg, arguments)
+		err = command.function(&cfg)
 		if err != nil {
 			fmt.Println(err)
 			continue
