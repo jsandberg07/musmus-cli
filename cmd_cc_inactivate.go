@@ -62,7 +62,7 @@ func getInactivateFlags() map[string]Flag {
 }
 
 // look into removing the args thing, might have to stay
-func inactivateFunction(cfg *Config, args []Argument) error {
+func inactivateFunction(cfg *Config) error {
 	// get flags
 	flags := getInactivateFlags()
 

@@ -54,7 +54,7 @@ func getAddOrderFlags() map[string]Flag {
 }
 
 // look into removing the args thing, might have to stay
-func addOrderFunction(cfg *Config, args []Argument) error {
+func addOrderFunction(cfg *Config) error {
 	// get flags
 	flags := getAddOrderFlags()
 
@@ -324,7 +324,7 @@ func getEditOrderFlags() map[string]Flag {
 
 // look into removing the args thing, might have to stay
 // ask for an order number, load params, set flags
-func editOrderFunction(cfg *Config, args []Argument) error {
+func editOrderFunction(cfg *Config) error {
 	// get flags
 	flags := getEditOrderFlags()
 
@@ -550,7 +550,7 @@ func getReceiveOrderFlags() map[string]Flag {
 // as "this many cards will be added on this day this order ok"
 // then DO IT
 // look into removing the args thing, might have to stay
-func receiveOrderFunction(cfg *Config, args []Argument) error {
+func receiveOrderFunction(cfg *Config) error {
 	// flags just for saving and exiting prompt everything else
 	flags := getReceiveOrderFlags()
 

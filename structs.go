@@ -22,7 +22,7 @@ type Argument struct {
 type Command struct {
 	name        string
 	description string
-	function    func(cfg *Config, args []Argument) error
+	function    func(cfg *Config) error
 	flags       map[string]Flag
 }
 

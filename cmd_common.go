@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 )
@@ -24,13 +23,8 @@ func getBackCmd() Command {
 
 	return backCmd
 }
-func backCommand(cfg *Config, args []Argument) error {
-	if len(args) != 0 {
-		return errors.New("back takes no params. Just takes you back to the main menu")
-	}
-
+func backCommand(cfg *Config) error {
 	cfg.nextState = getMainState()
-
 	return nil
 }
 
@@ -46,7 +40,7 @@ func getExitCmd() Command {
 
 // because you os exit this way, you never hit the end of the program to clean things
 // if you want to reset anything, put it here
-func exitCommand(cfg *Config, args []Argument) error {
+func exitCommand(cfg *Config) error {
 	fmt.Println("exiting...")
 	os.Exit(0)
 	return nil
@@ -64,7 +58,7 @@ func getStateHelpCmd() Command {
 	return helpCmd
 }
 
-func stateHelpCommand(cfg *Config, args []Argument) error {
+func stateHelpCommand(cfg *Config) error {
 	cmdMap := cfg.currentState.currentCommands
 	for _, key := range cmdMap {
 		fmt.Printf("* %s\n", key.name)

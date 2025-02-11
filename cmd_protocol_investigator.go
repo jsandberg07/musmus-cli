@@ -78,7 +78,7 @@ func getAddInvestToProtFlags() map[string]Flag {
 }
 
 // look into removing the args thing, might have to stay
-func addInvestigatorToProtocolFunction(cfg *Config, args []Argument) error {
+func addInvestigatorToProtocolFunction(cfg *Config) error {
 	// get flags
 	flags := getAddInvestToProtFlags()
 

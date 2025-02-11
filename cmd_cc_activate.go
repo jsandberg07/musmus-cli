@@ -145,7 +145,7 @@ func getActivationFlags() map[string]Flag {
 }
 
 // TODO: maybe add the keepXs in a struct. And reminders. Just for organization
-func activateFunction(cfg *Config, args []Argument) error {
+func activateFunction(cfg *Config) error {
 
 	flags := getActivationFlags()
 

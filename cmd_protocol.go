@@ -55,7 +55,7 @@ func getAddProtocolFlags() map[string]Flag {
 }
 
 // look into removing the args thing, might have to stay
-func addProtocolFunction(cfg *Config, args []Argument) error {
+func addProtocolFunction(cfg *Config) error {
 	// get flags
 	flags := getAddProtocolFlags()
 
@@ -349,7 +349,7 @@ func getEditProtocolFlags() map[string]Flag {
 }
 
 // look into removing the args thing, might have to stay
-func editProtocolFunction(cfg *Config, args []Argument) error {
+func editProtocolFunction(cfg *Config) error {
 	protocol, err := getStructPrompt(cfg, "Enter number of protocol to edit", checkProtocolExists)
 	if err != nil {
 		return err
