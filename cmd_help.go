@@ -1,16 +1,24 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"maps"
+	"slices"
+	"sort"
+)
 
-// for use in a command like card activation or add investigator
-// prints available commands or flags
-// TODO: unordered. add a numeric or enum prio to Flag struct.
-// Sort the keys, then iterate through that
-// does sort.Ints() work on enums?
-func cmdHelp(flags map[string]Flag) {
+// prints available command names or flags.
+// sorted now! neat!
+func cmdHelp(input map[string]Flag) {
+	flags := slices.Collect(maps.Values(input))
+	sort.Slice(flags, func(i, j int) bool {
+		return flags[i].printOrder < flags[j].printOrder
+	})
 	for _, flag := range flags {
 		fmt.Printf("* %s\n", flag.symbol)
-		fmt.Print(flag.description)
+		if flag.description != "" {
+			fmt.Print(flag.description)
+		}
 		if flag.takesValue {
 			fmt.Print(". Requires value")
 		}

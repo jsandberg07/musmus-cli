@@ -12,6 +12,7 @@ type Flag struct {
 	symbol      string
 	description string
 	takesValue  bool
+	printOrder  int
 }
 
 type Argument struct {
@@ -24,6 +25,7 @@ type Command struct {
 	description string
 	function    func(cfg *Config) error
 	flags       map[string]Flag
+	printOrder  int
 }
 
 type Config struct {

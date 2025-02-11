@@ -24,6 +24,7 @@ func getChangeSettingsCmd() Command {
 		description: "Used for reviewing and changing settings",
 		function:    changeSettingsFunction,
 		flags:       settingsFlags,
+		printOrder:  1,
 	}
 
 	return settingsCmd
@@ -35,6 +36,7 @@ func getChangeSettingsFlags() map[string]Flag {
 		symbol:      "a",
 		description: "Toggles the 'only activate self' setting.\nTrue means investigators can activate cards that aren't in their own name.",
 		takesValue:  false,
+		printOrder:  1,
 	}
 	settingsFlags["-"+aFlag.symbol] = aFlag
 
@@ -42,6 +44,7 @@ func getChangeSettingsFlags() map[string]Flag {
 		symbol:      "r",
 		description: "Review settings.\nDisplays the current settings BEFORE any changes are made.",
 		takesValue:  false,
+		printOrder:  2,
 	}
 	settingsFlags["-"+rFlag.symbol] = rFlag
 
@@ -49,6 +52,7 @@ func getChangeSettingsFlags() map[string]Flag {
 		symbol:      "save",
 		description: "Saves the current settings, prints them, then exits.",
 		takesValue:  false,
+		printOrder:  99,
 	}
 	settingsFlags[saveFlag.symbol] = saveFlag
 
@@ -56,6 +60,7 @@ func getChangeSettingsFlags() map[string]Flag {
 		symbol:      "exit",
 		description: "Exits without saving.",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	settingsFlags[exitFlag.symbol] = exitFlag
 
@@ -63,6 +68,7 @@ func getChangeSettingsFlags() map[string]Flag {
 		symbol:      "help",
 		description: "Prints list of available commands.",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	settingsFlags[helpFlag.symbol] = helpFlag
 

@@ -17,6 +17,7 @@ func getCCReactivateCmd() Command {
 		description: "Reactivate cage cards, removing their deactivation date",
 		function:    reactivateFunction,
 		flags:       reactivateFlags,
+		printOrder:  4,
 	}
 
 	return reactivateCmd
@@ -30,15 +31,18 @@ func getCCReactivateFlags() map[string]Flag {
 		symbol:      "cc",
 		description: "Adds CC to queue to be reactivated",
 		takesValue:  true,
+		printOrder:  1,
 	}
 	ReactivateFlags["-"+ccFlag.symbol] = ccFlag
 
 	// ect as needed or remove the "-"+ for longer ones
 
+	// maybe remove this
 	processFlag := Flag{
 		symbol:      "process",
 		description: "Reactivates card in queue",
 		takesValue:  false,
+		printOrder:  2,
 	}
 	ReactivateFlags[processFlag.symbol] = processFlag
 
@@ -46,6 +50,7 @@ func getCCReactivateFlags() map[string]Flag {
 		symbol:      "exit",
 		description: "Exits without processing queue",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	ReactivateFlags[exitFlag.symbol] = exitFlag
 
@@ -53,6 +58,7 @@ func getCCReactivateFlags() map[string]Flag {
 		symbol:      "help",
 		description: "Prints list of available flags for this command",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	ReactivateFlags[helpFlag.symbol] = helpFlag
 

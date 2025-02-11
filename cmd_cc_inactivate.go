@@ -19,6 +19,7 @@ func getCCInactivateCmd() Command {
 		description: "Used for returning cards to inactive status",
 		function:    inactivateFunction,
 		flags:       inactivateFlags,
+		printOrder:  5,
 	}
 
 	return inactivateCmd
@@ -31,15 +32,18 @@ func getInactivateFlags() map[string]Flag {
 		symbol:      "cc",
 		description: "Adds CC to queue to be reactivated",
 		takesValue:  true,
+		printOrder:  1,
 	}
 	InactivateFlags["-"+ccFlag.symbol] = ccFlag
 
 	// ect as needed or remove the "-"+ for longer ones
 
+	// maybe remove this
 	processFlag := Flag{
 		symbol:      "process",
 		description: "Reactivates card in queue",
 		takesValue:  false,
+		printOrder:  2,
 	}
 	InactivateFlags[processFlag.symbol] = processFlag
 
@@ -47,6 +51,7 @@ func getInactivateFlags() map[string]Flag {
 		symbol:      "exit",
 		description: "Exits without processing queue",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	InactivateFlags[exitFlag.symbol] = exitFlag
 
@@ -54,6 +59,7 @@ func getInactivateFlags() map[string]Flag {
 		symbol:      "help",
 		description: "Prints list of available flags for this command",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	InactivateFlags[helpFlag.symbol] = helpFlag
 

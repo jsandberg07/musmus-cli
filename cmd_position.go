@@ -17,6 +17,7 @@ func getAddPositionCmd() Command {
 		description: "Create a new position and set permissions",
 		function:    addPositionFunction,
 		flags:       addPositionFlags,
+		printOrder:  1,
 	}
 
 	return addPositionCmd
@@ -30,6 +31,7 @@ func getPositionFlags() map[string]Flag {
 		symbol:      "t",
 		description: "Changes the title",
 		takesValue:  true,
+		printOrder:  1,
 	}
 	PositionFlags["-"+tFlag.symbol] = tFlag
 
@@ -37,6 +39,7 @@ func getPositionFlags() map[string]Flag {
 		symbol:      "a",
 		description: "Toggles if the role has permission to add or activate cage cards",
 		takesValue:  false,
+		printOrder:  2,
 	}
 	PositionFlags["-"+aFlag.symbol] = aFlag
 
@@ -44,6 +47,7 @@ func getPositionFlags() map[string]Flag {
 		symbol:      "d",
 		description: "Toggles if the role has permission to deactivate cage cards",
 		takesValue:  false,
+		printOrder:  3,
 	}
 	PositionFlags["-"+dFlag.symbol] = dFlag
 
@@ -51,6 +55,7 @@ func getPositionFlags() map[string]Flag {
 		symbol:      "o",
 		description: "Toggles if the role has permission to add or mark orders as recieved",
 		takesValue:  false,
+		printOrder:  4,
 	}
 	PositionFlags["-"+oFlag.symbol] = oFlag
 
@@ -58,6 +63,7 @@ func getPositionFlags() map[string]Flag {
 		symbol:      "q",
 		description: "Toggles if the role has permission to run queries",
 		takesValue:  false,
+		printOrder:  5,
 	}
 	PositionFlags["-"+qFlag.symbol] = qFlag
 
@@ -65,6 +71,7 @@ func getPositionFlags() map[string]Flag {
 		symbol:      "p",
 		description: "Toggles if the role has permission to make changes to protocols including adding staff to them",
 		takesValue:  false,
+		printOrder:  6,
 	}
 	PositionFlags["-"+pFlag.symbol] = pFlag
 
@@ -72,6 +79,7 @@ func getPositionFlags() map[string]Flag {
 		symbol:      "s",
 		description: "Toggles if the role has permission to add or remove staff or positions",
 		takesValue:  false,
+		printOrder:  7,
 	}
 	PositionFlags["-"+sFlag.symbol] = sFlag
 
@@ -81,6 +89,7 @@ func getPositionFlags() map[string]Flag {
 		symbol:      "help",
 		description: "Prints all available flags for the command",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	PositionFlags[helpFlag.symbol] = helpFlag
 
@@ -88,6 +97,7 @@ func getPositionFlags() map[string]Flag {
 		symbol:      "print",
 		description: "Display WIP permissions current settings",
 		takesValue:  false,
+		printOrder:  99,
 	}
 	PositionFlags[printFlag.symbol] = printFlag
 
@@ -95,6 +105,7 @@ func getPositionFlags() map[string]Flag {
 		symbol:      "save",
 		description: "Saves the new position and exits",
 		takesValue:  false,
+		printOrder:  99,
 	}
 	PositionFlags[saveFlag.symbol] = saveFlag
 
@@ -102,6 +113,7 @@ func getPositionFlags() map[string]Flag {
 		symbol:      "exit",
 		description: "Exits without saving",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	PositionFlags[exitFlag.symbol] = exitFlag
 
@@ -330,6 +342,7 @@ func getEditPositionCmd() Command {
 		description: "Edit an existing position and set permissions",
 		function:    editPositionFunction,
 		flags:       editPositionFlags,
+		printOrder:  2,
 	}
 
 	return editPositionCmd

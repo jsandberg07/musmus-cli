@@ -18,6 +18,7 @@ func getAddStrainCmd() Command {
 		description: "Used for adding strains to the database",
 		function:    addStrainFunction,
 		flags:       addStrainFlags,
+		printOrder:  1,
 	}
 
 	return addStrainCmd
@@ -31,6 +32,7 @@ func getAddStrainFlags() map[string]Flag {
 		symbol:      "save",
 		description: "Saves the entered strain",
 		takesValue:  false,
+		printOrder:  99,
 	}
 	addStrainFlags[saveFlag.symbol] = saveFlag
 
@@ -38,6 +40,7 @@ func getAddStrainFlags() map[string]Flag {
 		symbol:      "exit",
 		description: "Exits without saving",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	addStrainFlags[exitFlag.symbol] = exitFlag
 
@@ -45,6 +48,7 @@ func getAddStrainFlags() map[string]Flag {
 		symbol:      "help",
 		description: "Prints available flags",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	addStrainFlags[helpFlag.symbol] = helpFlag
 
@@ -188,6 +192,7 @@ func getEditStrainCmd() Command {
 		description: "Used for editing existing strains",
 		function:    editStrainFunction,
 		flags:       editStrainFlags,
+		printOrder:  2,
 	}
 
 	return editStrainCmd
@@ -200,6 +205,7 @@ func getEditStrainFlags() map[string]Flag {
 		symbol:      "n",
 		description: "Set name of strain",
 		takesValue:  true,
+		printOrder:  1,
 	}
 	editStrainFlags["-"+nFlag.symbol] = nFlag
 
@@ -207,6 +213,7 @@ func getEditStrainFlags() map[string]Flag {
 		symbol:      "v",
 		description: "Sets vendor",
 		takesValue:  true,
+		printOrder:  2,
 	}
 	editStrainFlags["-"+vFlag.symbol] = vFlag
 
@@ -214,6 +221,7 @@ func getEditStrainFlags() map[string]Flag {
 		symbol:      "c",
 		description: "Sets strain code",
 		takesValue:  true,
+		printOrder:  3,
 	}
 	editStrainFlags["-"+cFlag.symbol] = cFlag
 
@@ -223,6 +231,7 @@ func getEditStrainFlags() map[string]Flag {
 		symbol:      "help",
 		description: "Prints available flags",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	editStrainFlags[helpFlag.symbol] = helpFlag
 
@@ -230,6 +239,7 @@ func getEditStrainFlags() map[string]Flag {
 		symbol:      "save",
 		description: "Saves current changes and exits",
 		takesValue:  false,
+		printOrder:  99,
 	}
 	editStrainFlags[saveFlag.symbol] = saveFlag
 
@@ -237,6 +247,7 @@ func getEditStrainFlags() map[string]Flag {
 		symbol:      "exit",
 		description: "Exits without saving",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	editStrainFlags[exitFlag.symbol] = exitFlag
 
@@ -244,6 +255,7 @@ func getEditStrainFlags() map[string]Flag {
 		symbol:      "print",
 		description: "Prints current strain draft for review",
 		takesValue:  false,
+		printOrder:  99,
 	}
 	editStrainFlags[printFlag.symbol] = printFlag
 

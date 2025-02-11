@@ -22,18 +22,21 @@ func getCCDeactivationCmd() Command {
 		description: "Used for deactivating cage cards",
 		function:    deactivateFunction,
 		flags:       deactivationFlags,
+		printOrder:  2,
 	}
 
 	return deactivationCmd
 }
 
 // cc, pop, process, exit, list of errors (both previously deact and not activated)
+// TODO: change this to work like activation (ie linear, check reminders)
 func getDeactivationFlags() map[string]Flag {
 	deactivationFlags := make(map[string]Flag)
 	ccFlag := Flag{
 		symbol:      "cc",
 		description: "Allows entering multiple cage cards in one pass",
 		takesValue:  true,
+		printOrder:  1,
 	}
 	deactivationFlags["-"+ccFlag.symbol] = ccFlag
 
@@ -41,15 +44,18 @@ func getDeactivationFlags() map[string]Flag {
 		symbol:      "d",
 		description: "Sets the date the cage card will be deactivated",
 		takesValue:  true,
+		printOrder:  2,
 	}
 	deactivationFlags["-"+dFlag.symbol] = dFlag
 
 	// ect as needed or remove the "-"+ for longer ones
 
+	// lmao remove this
 	popFlag := Flag{
 		symbol:      "pop",
 		description: "Removes the last added cage card",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	deactivationFlags[popFlag.symbol] = popFlag
 
@@ -57,6 +63,7 @@ func getDeactivationFlags() map[string]Flag {
 		symbol:      "print",
 		description: "Prints the current settings for card deactivation",
 		takesValue:  false,
+		printOrder:  3,
 	}
 	deactivationFlags[printFlag.symbol] = printFlag
 
@@ -64,13 +71,16 @@ func getDeactivationFlags() map[string]Flag {
 		symbol:      "exit",
 		description: "Exits without processing cage cards",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	deactivationFlags[exitFlag.symbol] = exitFlag
 
+	// remove this
 	processFlag := Flag{
 		symbol:      "process",
 		description: "Processes cage cards and then exits",
 		takesValue:  false,
+		printOrder:  99,
 	}
 	deactivationFlags[processFlag.symbol] = processFlag
 
@@ -78,6 +88,7 @@ func getDeactivationFlags() map[string]Flag {
 		symbol:      "help",
 		description: "Prints available flags for current command",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	deactivationFlags[helpFlag.symbol] = helpFlag
 

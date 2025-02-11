@@ -19,6 +19,7 @@ func getAddCCCmd() Command {
 		description: "Used to add a range of unactivated cage cards",
 		function:    addCCFunction,
 		flags:       addCCFlags,
+		printOrder:  3,
 	}
 
 	return addCCCmd
@@ -32,6 +33,7 @@ func getAddCCFlags() map[string]Flag {
 		symbol:      "s",
 		description: "Sets start of range (inclusive)",
 		takesValue:  true,
+		printOrder:  1,
 	}
 	addCCFlags["-"+sFlag.symbol] = sFlag
 
@@ -39,6 +41,7 @@ func getAddCCFlags() map[string]Flag {
 		symbol:      "e",
 		description: "Sets end of range (inclusive)",
 		takesValue:  true,
+		printOrder:  2,
 	}
 	addCCFlags["-"+eFlag.symbol] = eFlag
 
@@ -46,6 +49,7 @@ func getAddCCFlags() map[string]Flag {
 		symbol:      "a",
 		description: "Adds range of cards to database without exiting",
 		takesValue:  false,
+		printOrder:  3,
 	}
 	addCCFlags["-"+aFlag.symbol] = aFlag
 
@@ -53,6 +57,7 @@ func getAddCCFlags() map[string]Flag {
 		symbol:      "i",
 		description: "Sets who the cards will be added under",
 		takesValue:  true,
+		printOrder:  4,
 	}
 	addCCFlags["-"+iFlag.symbol] = iFlag
 
@@ -60,6 +65,7 @@ func getAddCCFlags() map[string]Flag {
 		symbol:      "p",
 		description: "Sets the protocol the cards will be added under",
 		takesValue:  true,
+		printOrder:  5,
 	}
 	addCCFlags["-"+pFlag.symbol] = pFlag
 
@@ -69,6 +75,7 @@ func getAddCCFlags() map[string]Flag {
 		symbol:      "help",
 		description: "Prints available flags",
 		takesValue:  false,
+		printOrder:  101,
 	}
 	addCCFlags[helpFlag.symbol] = helpFlag
 
@@ -76,6 +83,7 @@ func getAddCCFlags() map[string]Flag {
 		symbol:      "exit",
 		description: "Exits the current command",
 		takesValue:  false,
+		printOrder:  102,
 	}
 	addCCFlags[exitFlag.symbol] = exitFlag
 
@@ -83,6 +91,7 @@ func getAddCCFlags() map[string]Flag {
 		symbol:      "save",
 		description: "Adds range of cage cards to database and exits",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	addCCFlags[saveFlag.symbol] = saveFlag
 
