@@ -351,6 +351,10 @@ func editOrderFunction(cfg *Config) error {
 		fmt.Println("Exiting...")
 		return nil
 	}
+	if order.Received {
+		fmt.Println("Order has already been received. Exiting...")
+		return nil
+	}
 
 	// set defaults
 	exit := false
@@ -586,6 +590,10 @@ func receiveOrderFunction(cfg *Config) error {
 	nilOrder := database.Order{}
 	if order == nilOrder {
 		fmt.Println("Exiting...")
+		return nil
+	}
+	if order.Received {
+		fmt.Println("Order has already been received. Exiting...")
 		return nil
 	}
 

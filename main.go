@@ -20,29 +20,17 @@ import (
 // https://circleci.com/blog/unit-testing-vs-integration-testing/
 // use cmp, or reflect. I guess cmp is better. you can get the difference between tho values
 
-// wasted an hour to realize i can't remove []Arguments from functions. so maybe not a waste. It's tied to goto -cc ect.
-// "Problem" is reuse of types, but it's a small problem. Goto is probably gonna be the most used function (tied with back and exit)
-// addendum: remove the goto function and replace it with regular functions. it's the only one that uses the []Arguments ie why you cant remove it
-
 // australia
 // china #9
 // china #11
 // do it
 
 // CURRENTLY:
-// make maps print in a sorted order
-// printing flags be ugly
-// have an int field for print order
-// they can tie i don't care
-// then just sort smallest to largest
-// then print
-// what's a good sort function
-// bottom text
-// ok that was easy now i just have to add the order to EVERYTHING
+// add permission checks to everything. You literally have the roles already you just need to check with logged in position stored in cfg
+// this wil literally be an easy one
 
-// Before Next:
-// deactivation needs to be changed too + maybe the others if you care (i kinda dont lmao)
-// position has 2 print functions you can truncate
+// After that:
+// work on the read me cause it'll be different
 
 // Next:
 // add permissions that work (you can delete anybodys reminders currently)

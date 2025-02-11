@@ -275,6 +275,8 @@ func checkIfPositionTitleUnique(cfg *Config, input string) error {
 	return errors.New("position titles must be unique. Please try again")
 }
 
+// TODO: there are two print permission functions that are identical, but the strcuts differ in one stores the UUID.
+// can't convert the structs so easily because of it. Has to be a way to DRY this up using interfaces then.
 func printCreatePermissions(cp *database.CreatePositionParams) error {
 	granted := []string{}
 	denied := []string{}

@@ -21,3 +21,8 @@ RETURNING *;
 -- name: DeleteReminder :exec
 DELETE FROM reminders
 WHERE $1 = id;
+
+-- name: GetRemindersByCC :many
+SELECT * FROM reminders
+WHERE r_cc_id = $1
+ORDER BY r_date;
