@@ -20,6 +20,7 @@ func getAddReminderCmd() Command {
 		description: "Used for adding reminders",
 		function:    addReminderFunction,
 		flags:       addReminderFlags,
+		printOrder:  1,
 	}
 
 	return addReminderCmd
@@ -35,6 +36,7 @@ func getAddReminderFlags() map[string]Flag {
 		symbol:      "save",
 		description: "Saves the entered reminder",
 		takesValue:  false,
+		printOrder:  99,
 	}
 	addReminderFlags[saveFlag.symbol] = saveFlag
 
@@ -42,6 +44,7 @@ func getAddReminderFlags() map[string]Flag {
 		symbol:      "exit",
 		description: "Exits without saving",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	addReminderFlags[exitFlag.symbol] = exitFlag
 
@@ -49,6 +52,7 @@ func getAddReminderFlags() map[string]Flag {
 		symbol:      "help",
 		description: "Prints available flags for command",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	addReminderFlags[helpFlag.symbol] = helpFlag
 
@@ -263,6 +267,7 @@ func getDeleteReminderCmd() Command {
 		description: "Used for deleting reminders",
 		function:    deleteReminderFunction,
 		flags:       deleteReminderFlags,
+		printOrder:  2,
 	}
 
 	return deleteReminderCmd

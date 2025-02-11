@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"maps"
 	"os"
+	"slices"
+	"sort"
 )
 
 // common functions available in every state
@@ -19,6 +22,7 @@ func getBackCmd() Command {
 		name:        "back",
 		description: "goes back to main menu",
 		function:    backCommand,
+		printOrder:  99,
 	}
 
 	return backCmd
@@ -33,6 +37,7 @@ func getExitCmd() Command {
 		name:        "exit",
 		description: "Exits program.",
 		function:    exitCommand,
+		printOrder:  100,
 	}
 
 	return exitCmd
@@ -53,24 +58,24 @@ func getStateHelpCmd() Command {
 		name:        "help",
 		description: "Prints descriptions of all available functions.",
 		function:    stateHelpCommand,
+		printOrder:  100,
 	}
 
 	return helpCmd
 }
 
 func stateHelpCommand(cfg *Config) error {
-	cmdMap := cfg.currentState.currentCommands
-	for _, key := range cmdMap {
-		fmt.Printf("* %s\n", key.name)
-		fmt.Println(key.description)
-		for _, key := range key.flags {
-			fmt.Printf("%s - %s", key.symbol, key.description)
-			if key.takesValue {
-				fmt.Print(" Requires value.")
-			}
-			fmt.Println()
-		}
 
+	cmds := slices.Collect(maps.Values(cfg.currentState.currentCommands))
+	sort.Slice(cmds, func(i, j int) bool {
+		return cmds[i].printOrder < cmds[j].printOrder
+	})
+	for _, cmd := range cmds {
+		fmt.Printf("* %s\n", cmd.name)
+		if cmd.description != "" {
+			fmt.Print(cmd.description)
+		}
+		fmt.Println()
 	}
 	return nil
 }

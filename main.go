@@ -30,10 +30,19 @@ import (
 // do it
 
 // CURRENTLY:
-// removal of the []Arguments. It's only used by 'goto' and state setting. So change the way states work too. Then remove []Arguments from all the functions (many of them)
-
-// Next:
 // make maps print in a sorted order
+// printing flags be ugly
+// have an int field for print order
+// they can tie i don't care
+// then just sort smallest to largest
+// then print
+// what's a good sort function
+// bottom text
+// ok that was easy now i just have to add the order to EVERYTHING
+
+// Before Next:
+// deactivation needs to be changed too + maybe the others if you care (i kinda dont lmao)
+// position has 2 print functions you can truncate
 
 // Next:
 // add permissions that work (you can delete anybodys reminders currently)
@@ -43,6 +52,8 @@ import (
 // logins (crpyto, storing that, creating new people, the admin tier account)
 // AFTER THAT:
 // the great readme-en-ing. write a readme and update the github page
+// add some consts for the strings you use for consistency + fancy + easier changes
+// like exiting program vs exiting command
 // AFTER THAT:
 // the great adding the project to my portfolioening
 // lots of test data! for fun!

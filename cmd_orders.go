@@ -20,6 +20,7 @@ func getAddOrderCmd() Command {
 		description: "Used for adding orders",
 		function:    addOrderFunction,
 		flags:       addOrderFlags,
+		printOrder:  1,
 	}
 
 	return addOrderCmd
@@ -32,6 +33,7 @@ func getAddOrderFlags() map[string]Flag {
 		symbol:      "save",
 		description: "Saves the current order",
 		takesValue:  false,
+		printOrder:  99,
 	}
 	addOrderFlags[saveFlag.symbol] = saveFlag
 
@@ -39,6 +41,7 @@ func getAddOrderFlags() map[string]Flag {
 		symbol:      "exit",
 		description: "Exits without saving",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	addOrderFlags[exitFlag.symbol] = exitFlag
 
@@ -46,6 +49,7 @@ func getAddOrderFlags() map[string]Flag {
 		symbol:      "help",
 		description: "Prints flags available for current command",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	addOrderFlags[helpFlag.symbol] = helpFlag
 
@@ -242,6 +246,7 @@ func getEditOrderCmd() Command {
 		description: "Used for editing existing orders",
 		function:    editOrderFunction,
 		flags:       editOrderFlags,
+		printOrder:  3,
 	}
 
 	return EditOrderCmd
@@ -257,6 +262,7 @@ func getEditOrderFlags() map[string]Flag {
 		symbol:      "d",
 		description: "Sets expected date",
 		takesValue:  true,
+		printOrder:  1,
 	}
 	editOrderFlags["-"+dFlag.symbol] = dFlag
 
@@ -264,6 +270,7 @@ func getEditOrderFlags() map[string]Flag {
 		symbol:      "n",
 		description: "Sets order note. Enter 'x' to blank out the note",
 		takesValue:  true,
+		printOrder:  2,
 	}
 	editOrderFlags["-"+nFlag.symbol] = nFlag
 
@@ -271,6 +278,7 @@ func getEditOrderFlags() map[string]Flag {
 		symbol:      "i",
 		description: "Sets who the order is for",
 		takesValue:  true,
+		printOrder:  3,
 	}
 	editOrderFlags["-"+iFlag.symbol] = iFlag
 
@@ -278,6 +286,7 @@ func getEditOrderFlags() map[string]Flag {
 		symbol:      "s",
 		description: "Sets order strain",
 		takesValue:  true,
+		printOrder:  4,
 	}
 	editOrderFlags["-"+sFlag.symbol] = sFlag
 
@@ -285,6 +294,7 @@ func getEditOrderFlags() map[string]Flag {
 		symbol:      "p",
 		description: "Sets order protocol",
 		takesValue:  true,
+		printOrder:  5,
 	}
 	editOrderFlags["-"+pFlag.symbol] = pFlag
 
@@ -294,6 +304,7 @@ func getEditOrderFlags() map[string]Flag {
 		symbol:      "help",
 		description: "Prints available flags",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	editOrderFlags[helpFlag.symbol] = helpFlag
 
@@ -301,6 +312,7 @@ func getEditOrderFlags() map[string]Flag {
 		symbol:      "save",
 		description: "Saves the updated order",
 		takesValue:  false,
+		printOrder:  99,
 	}
 	editOrderFlags[saveFlag.symbol] = saveFlag
 
@@ -308,6 +320,7 @@ func getEditOrderFlags() map[string]Flag {
 		symbol:      "print",
 		description: "Prints current order parameters for review",
 		takesValue:  false,
+		printOrder:  99,
 	}
 	editOrderFlags[printFlag.symbol] = printFlag
 
@@ -315,6 +328,7 @@ func getEditOrderFlags() map[string]Flag {
 		symbol:      "exit",
 		description: "Exits without saving",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	editOrderFlags[exitFlag.symbol] = exitFlag
 
@@ -504,6 +518,7 @@ func getReceiveOrderCmd() Command {
 		description: "Used for receiving orders",
 		function:    receiveOrderFunction,
 		flags:       receiveOrderFlags,
+		printOrder:  2,
 	}
 
 	return ReceiveOrderCmd
@@ -516,6 +531,7 @@ func getReceiveOrderFlags() map[string]Flag {
 		symbol:      "receive",
 		description: "Receives the order with the current parameters",
 		takesValue:  false,
+		printOrder:  1,
 	}
 	receiveOrderFlags[receiveFlag.symbol] = receiveFlag
 
@@ -523,6 +539,7 @@ func getReceiveOrderFlags() map[string]Flag {
 		symbol:      "exit",
 		description: "Exits without receiving the current order",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	receiveOrderFlags[exitFlag.symbol] = exitFlag
 
@@ -530,6 +547,7 @@ func getReceiveOrderFlags() map[string]Flag {
 		symbol:      "print",
 		description: "Review the order params before receiving it",
 		takesValue:  false,
+		printOrder:  99,
 	}
 	receiveOrderFlags[printFlag.symbol] = printFlag
 
@@ -537,6 +555,7 @@ func getReceiveOrderFlags() map[string]Flag {
 		symbol:      "help",
 		description: "Prints available flags",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	receiveOrderFlags[helpFlag.symbol] = helpFlag
 

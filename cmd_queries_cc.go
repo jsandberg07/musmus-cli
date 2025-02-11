@@ -21,6 +21,7 @@ func getCCQueriesCmd() Command {
 		description: "Run queries on cage cards",
 		function:    CCQueriesFunction,
 		flags:       CCQueriesFlags,
+		printOrder:  1,
 	}
 
 	return CCQueriesCmd
@@ -66,6 +67,7 @@ func getCCQueriesFlags() map[string]Flag {
 		symbol:      "s",
 		description: "Sets start date for query.",
 		takesValue:  true,
+		printOrder:  2,
 	}
 	ccQueriesFlags["-"+sFlag.symbol] = sFlag
 
@@ -73,6 +75,7 @@ func getCCQueriesFlags() map[string]Flag {
 		symbol:      "e",
 		description: "Sets end date for query.",
 		takesValue:  true,
+		printOrder:  3,
 	}
 	ccQueriesFlags["-"+eFlag.symbol] = eFlag
 
@@ -80,6 +83,7 @@ func getCCQueriesFlags() map[string]Flag {
 		symbol:      "pr",
 		description: "Gets cards under set protocol.",
 		takesValue:  true,
+		printOrder:  4,
 	}
 	ccQueriesFlags["-"+prFlag.symbol] = prFlag
 
@@ -87,6 +91,7 @@ func getCCQueriesFlags() map[string]Flag {
 		symbol:      "in",
 		description: "Gets cards under set investigator.",
 		takesValue:  true,
+		printOrder:  5,
 	}
 	ccQueriesFlags["-"+inFlag.symbol] = inFlag
 
@@ -94,6 +99,7 @@ func getCCQueriesFlags() map[string]Flag {
 		symbol:      "or",
 		description: "Gets cards that were added under set order",
 		takesValue:  true,
+		printOrder:  6,
 	}
 	ccQueriesFlags["-"+orFlag.symbol] = orFlag
 
@@ -103,6 +109,7 @@ func getCCQueriesFlags() map[string]Flag {
 		symbol:      "print",
 		description: "Prints current settings for query",
 		takesValue:  false,
+		printOrder:  7,
 	}
 	ccQueriesFlags[printFlag.symbol] = printFlag
 
@@ -110,6 +117,7 @@ func getCCQueriesFlags() map[string]Flag {
 		symbol:      "active",
 		description: "Exports all currently active cage cards and exits",
 		takesValue:  false,
+		printOrder:  0,
 	}
 	ccQueriesFlags[activeFlag.symbol] = activeFlag
 
@@ -117,6 +125,7 @@ func getCCQueriesFlags() map[string]Flag {
 		symbol:      "all",
 		description: "Exports all cage cards and exits",
 		takesValue:  false,
+		printOrder:  1,
 	}
 	ccQueriesFlags[allFlag.symbol] = allFlag
 
@@ -124,6 +133,7 @@ func getCCQueriesFlags() map[string]Flag {
 		symbol:      "help",
 		description: "Prints all available flags",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	ccQueriesFlags[helpFlag.symbol] = helpFlag
 
@@ -131,6 +141,7 @@ func getCCQueriesFlags() map[string]Flag {
 		symbol:      "exit",
 		description: "Exits without exporting",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	ccQueriesFlags[exitFlag.symbol] = exitFlag
 
@@ -138,6 +149,7 @@ func getCCQueriesFlags() map[string]Flag {
 		symbol:      "query",
 		description: "Runs query with current settings",
 		takesValue:  false,
+		printOrder:  99,
 	}
 	ccQueriesFlags[queryFlag.symbol] = queryFlag
 

@@ -20,6 +20,7 @@ func getEditInvestigatorCmd() Command {
 		description: "Used for editing existing investigators",
 		function:    editInvestigatorFunction,
 		flags:       editInvestigatorFlags,
+		printOrder:  2,
 	}
 
 	return editInvestigatorCmd
@@ -33,6 +34,7 @@ func getEditInvestigatorFlags() map[string]Flag {
 		symbol:      "i",
 		description: "Changes proper 'investigator' name",
 		takesValue:  true,
+		printOrder:  1,
 	}
 	editInvestigatorFlags["-"+iFlag.symbol] = iFlag
 
@@ -40,6 +42,7 @@ func getEditInvestigatorFlags() map[string]Flag {
 		symbol:      "n",
 		description: "Changes nickname. Enter 'delete' to remove nickname",
 		takesValue:  true,
+		printOrder:  2,
 	}
 	editInvestigatorFlags["-"+nFlag.symbol] = nFlag
 
@@ -47,6 +50,7 @@ func getEditInvestigatorFlags() map[string]Flag {
 		symbol:      "p",
 		description: "Changes position",
 		takesValue:  true,
+		printOrder:  3,
 	}
 	editInvestigatorFlags["-"+pFlag.symbol] = pFlag
 
@@ -54,6 +58,7 @@ func getEditInvestigatorFlags() map[string]Flag {
 		symbol:      "a",
 		description: "Toggles if investigator is active on the protocols",
 		takesValue:  false,
+		printOrder:  4,
 	}
 	editInvestigatorFlags["-"+aFlag.symbol] = aFlag
 
@@ -61,6 +66,7 @@ func getEditInvestigatorFlags() map[string]Flag {
 		symbol:      "e",
 		description: "Changes email. Enter 'delete' to remove email",
 		takesValue:  true,
+		printOrder:  5,
 	}
 	editInvestigatorFlags["-"+eFlag.symbol] = eFlag
 
@@ -70,6 +76,7 @@ func getEditInvestigatorFlags() map[string]Flag {
 		symbol:      "print",
 		description: "Prints current data for review",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	editInvestigatorFlags[printFlag.symbol] = printFlag
 
@@ -77,6 +84,7 @@ func getEditInvestigatorFlags() map[string]Flag {
 		symbol:      "help",
 		description: "Prints all available flags",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	editInvestigatorFlags[helpFlag.symbol] = helpFlag
 
@@ -84,6 +92,7 @@ func getEditInvestigatorFlags() map[string]Flag {
 		symbol:      "exit",
 		description: "Exits without saving",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	editInvestigatorFlags[exitFlag.symbol] = exitFlag
 
@@ -91,6 +100,7 @@ func getEditInvestigatorFlags() map[string]Flag {
 		symbol:      "save",
 		description: "Saves changes made",
 		takesValue:  false,
+		printOrder:  99,
 	}
 	editInvestigatorFlags[saveFlag.symbol] = saveFlag
 
@@ -315,6 +325,7 @@ func getAddInvestigatorCmd() Command {
 		description: "Used for adding a new investigator",
 		function:    addInvestigatorFunction,
 		flags:       addInvestigatorFlags,
+		printOrder:  1,
 	}
 
 	return addInvestigatorCmd
@@ -326,6 +337,7 @@ func getAddInvestigatorFlags() map[string]Flag {
 		symbol:      "save",
 		description: "Saves the investigator to the database",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	addInvestigatorFlags[saveFlag.symbol] = saveFlag
 
@@ -333,6 +345,7 @@ func getAddInvestigatorFlags() map[string]Flag {
 		symbol:      "exit",
 		description: "Exits without saving",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	addInvestigatorFlags[exitFlag.symbol] = exitFlag
 
@@ -340,6 +353,7 @@ func getAddInvestigatorFlags() map[string]Flag {
 		symbol:      "help",
 		description: "Prints available flags",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	addInvestigatorFlags[helpFlag.symbol] = helpFlag
 

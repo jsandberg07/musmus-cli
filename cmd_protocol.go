@@ -20,6 +20,7 @@ func getAddProtocolCmd() Command {
 		description: "Used for adding a new protocol",
 		function:    addProtocolFunction,
 		flags:       addProtocolFlags,
+		printOrder:  1,
 	}
 
 	return addProtocolCmd
@@ -33,6 +34,7 @@ func getAddProtocolFlags() map[string]Flag {
 		symbol:      "save",
 		description: "Saves the new protocol",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	addProtocolFlags[saveFlag.symbol] = saveFlag
 
@@ -40,6 +42,7 @@ func getAddProtocolFlags() map[string]Flag {
 		symbol:      "exit",
 		description: "Exits without saving",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	addProtocolFlags[exitFlag.symbol] = exitFlag
 
@@ -47,6 +50,7 @@ func getAddProtocolFlags() map[string]Flag {
 		symbol:      "help",
 		description: "Prints all available flags",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	addProtocolFlags[helpFlag.symbol] = helpFlag
 
@@ -270,6 +274,7 @@ func getEditProtocolCmd() Command {
 		description: "Used for editing an existing protocol",
 		function:    editProtocolFunction,
 		flags:       editProtocolFlags,
+		printOrder:  3,
 	}
 
 	return editProtocolCmd
@@ -283,6 +288,7 @@ func getEditProtocolFlags() map[string]Flag {
 		symbol:      "t",
 		description: "Changes protocol title",
 		takesValue:  true,
+		printOrder:  1,
 	}
 	editProtocolFlags["-"+tFlag.symbol] = tFlag
 
@@ -290,6 +296,7 @@ func getEditProtocolFlags() map[string]Flag {
 		symbol:      "p",
 		description: "Changed protocol's PI",
 		takesValue:  true,
+		printOrder:  2,
 	}
 	editProtocolFlags["-"+pFlag.symbol] = pFlag
 
@@ -297,6 +304,7 @@ func getEditProtocolFlags() map[string]Flag {
 		symbol:      "a",
 		description: "Sets allocated animals",
 		takesValue:  true,
+		printOrder:  3,
 	}
 	editProtocolFlags["-"+aFlag.symbol] = aFlag
 
@@ -304,6 +312,7 @@ func getEditProtocolFlags() map[string]Flag {
 		symbol:      "b",
 		description: "Changes protocol balance",
 		takesValue:  true,
+		printOrder:  4,
 	}
 	editProtocolFlags["-"+bFlag.symbol] = bFlag
 
@@ -311,6 +320,7 @@ func getEditProtocolFlags() map[string]Flag {
 		symbol:      "e",
 		description: "Changes expiration date",
 		takesValue:  true,
+		printOrder:  5,
 	}
 	editProtocolFlags["-"+eFlag.symbol] = eFlag
 
@@ -320,6 +330,7 @@ func getEditProtocolFlags() map[string]Flag {
 		symbol:      "exit",
 		description: "Exits without saving changes",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	editProtocolFlags[exitFlag.symbol] = exitFlag
 
@@ -327,6 +338,7 @@ func getEditProtocolFlags() map[string]Flag {
 		symbol:      "help",
 		description: "Prints all available flags and their uses",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	editProtocolFlags[helpFlag.symbol] = helpFlag
 
@@ -334,6 +346,7 @@ func getEditProtocolFlags() map[string]Flag {
 		symbol:      "save",
 		description: "Saves changes made and exits",
 		takesValue:  false,
+		printOrder:  99,
 	}
 	editProtocolFlags[saveFlag.symbol] = saveFlag
 
@@ -341,6 +354,7 @@ func getEditProtocolFlags() map[string]Flag {
 		symbol:      "print",
 		description: "Prints current changes for review",
 		takesValue:  false,
+		printOrder:  99,
 	}
 	editProtocolFlags[printFlag.symbol] = printFlag
 

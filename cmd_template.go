@@ -15,6 +15,7 @@ func getXXXCmd() Command {
 		description: "Used for XXX",
 		function:    XXXFunction,
 		flags:       XXXFlags,
+		printOrder:  1,
 	}
 
 	return XXXCmd
@@ -26,6 +27,7 @@ func getXXXFlags() map[string]Flag {
 		symbol:      "X",
 		description: "Sets X",
 		takesValue:  false,
+		printOrder:  1,
 	}
 	XXXFlags["-"+XFlag.symbol] = XFlag
 

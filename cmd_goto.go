@@ -128,11 +128,14 @@ func getGotoCmd() Command {
 		description: "Used for changing menus",
 		function:    gotoFunction,
 		flags:       gotoFlags,
+		printOrder:  1,
 	}
 
 	return gotoCmd
 }
 
+// TODO: add flags that don't have a description but are just repeats of the -short version
+// then fall through them with the switch
 func getGotoFlags() map[string]Flag {
 	gotoFlags := make(map[string]Flag)
 
@@ -140,6 +143,7 @@ func getGotoFlags() map[string]Flag {
 		symbol:      "cc",
 		description: "Goes to CC processing menu.",
 		takesValue:  false,
+		printOrder:  1,
 	}
 	gotoFlags["-"+ccFlag.symbol] = ccFlag
 
@@ -147,6 +151,7 @@ func getGotoFlags() map[string]Flag {
 		symbol:      "ps",
 		description: "Goes to positions menu.",
 		takesValue:  false,
+		printOrder:  2,
 	}
 	gotoFlags["-"+psFlag.symbol] = psFlag
 
@@ -154,6 +159,7 @@ func getGotoFlags() map[string]Flag {
 		symbol:      "in",
 		description: "Goes to investigator menu.",
 		takesValue:  false,
+		printOrder:  3,
 	}
 	gotoFlags["-"+iFlag.symbol] = iFlag
 
@@ -161,6 +167,7 @@ func getGotoFlags() map[string]Flag {
 		symbol:      "pr",
 		description: "Goes to protocol menu.",
 		takesValue:  false,
+		printOrder:  4,
 	}
 	gotoFlags["-"+prFlag.symbol] = prFlag
 
@@ -168,6 +175,7 @@ func getGotoFlags() map[string]Flag {
 		symbol:      "se",
 		description: "Goes to settings menu.",
 		takesValue:  false,
+		printOrder:  5,
 	}
 	gotoFlags["-"+seFlag.symbol] = seFlag
 
@@ -175,6 +183,7 @@ func getGotoFlags() map[string]Flag {
 		symbol:      "st",
 		description: "Goes to the strains menu.",
 		takesValue:  false,
+		printOrder:  6,
 	}
 	gotoFlags["-"+stFlag.symbol] = stFlag
 
@@ -182,6 +191,7 @@ func getGotoFlags() map[string]Flag {
 		symbol:      "qu",
 		description: "Goes to the queries menu.",
 		takesValue:  false,
+		printOrder:  7,
 	}
 	gotoFlags["-"+quFlag.symbol] = quFlag
 
@@ -189,6 +199,7 @@ func getGotoFlags() map[string]Flag {
 		symbol:      "or",
 		description: "Goes to the orders menu.",
 		takesValue:  false,
+		printOrder:  8,
 	}
 	gotoFlags["-"+orFlag.symbol] = orFlag
 
@@ -196,6 +207,7 @@ func getGotoFlags() map[string]Flag {
 		symbol:      "rm",
 		description: "Goes to the reminders menu.",
 		takesValue:  false,
+		printOrder:  9,
 	}
 	gotoFlags["-"+rmFlag.symbol] = rmFlag
 
@@ -203,6 +215,7 @@ func getGotoFlags() map[string]Flag {
 		symbol:      "help",
 		description: "Prints list of available flags",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	gotoFlags[helpFlag.symbol] = helpFlag
 
@@ -210,6 +223,7 @@ func getGotoFlags() map[string]Flag {
 		symbol:      "exit",
 		description: "Exits without changing menu",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	gotoFlags[exitFlag.symbol] = exitFlag
 

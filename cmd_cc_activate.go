@@ -31,18 +31,28 @@ func getCCActivationCmd() Command {
 		description: "Used for activating cage cards",
 		function:    activateFunction,
 		flags:       activateFlags,
+		printOrder:  1,
 	}
 
 	return ccActivationCmd
 }
 
 func getActivationFlags() map[string]Flag {
-
 	activateFlags := make(map[string]Flag)
+
+	ccFlag := Flag{
+		symbol:      "cc",
+		description: "Add multiple cage cards at once. Will be activated in order it is entered (including other flags)",
+		takesValue:  true,
+		printOrder:  1,
+	}
+	activateFlags["-"+ccFlag.symbol] = ccFlag
+
 	dFlag := Flag{
 		symbol:      "d",
 		description: "Sets Date. Use format MM/DD/YYYY",
 		takesValue:  true,
+		printOrder:  2,
 	}
 	activateFlags["-"+dFlag.symbol] = dFlag
 
@@ -50,6 +60,7 @@ func getActivationFlags() map[string]Flag {
 		symbol:      "a",
 		description: "Sets number of animals added to protocol on activation",
 		takesValue:  true,
+		printOrder:  3,
 	}
 	activateFlags["-"+aFlag.symbol] = aFlag
 
@@ -57,6 +68,7 @@ func getActivationFlags() map[string]Flag {
 		symbol:      "n",
 		description: "Sets the note for only the next card to be added. Enter 'x' to clear\n Use underscores in place of spaces",
 		takesValue:  true,
+		printOrder:  4,
 	}
 	activateFlags["-"+nFlag.symbol] = nFlag
 
@@ -64,6 +76,7 @@ func getActivationFlags() map[string]Flag {
 		symbol:      "N",
 		description: "Sets the note for all cage cards added until changes. Enter 'x' to clear\n Use underscores in place of spaces",
 		takesValue:  true,
+		printOrder:  5,
 	}
 	activateFlags["-"+NFlag.symbol] = NFlag
 
@@ -71,6 +84,7 @@ func getActivationFlags() map[string]Flag {
 		symbol:      "s",
 		description: "Sets the strain for only the next card to be added. Enter 'x' to clear",
 		takesValue:  true,
+		printOrder:  6,
 	}
 	activateFlags["-"+sFlag.symbol] = sFlag
 
@@ -78,6 +92,7 @@ func getActivationFlags() map[string]Flag {
 		symbol:      "S",
 		description: "Sets the strain for all cage cards added until changed. Enter 'x' to clear",
 		takesValue:  true,
+		printOrder:  7,
 	}
 	activateFlags["-"+SFlag.symbol] = SFlag
 
@@ -85,6 +100,7 @@ func getActivationFlags() map[string]Flag {
 		symbol:      "r",
 		description: "Will add a reminder input days after activation date. \nRequires a note for the reminder. Enter 'x' to clear",
 		takesValue:  true,
+		printOrder:  8,
 	}
 	activateFlags["-"+rFlag.symbol] = rFlag
 
@@ -92,45 +108,23 @@ func getActivationFlags() map[string]Flag {
 		symbol:      "R",
 		description: "Will add a reminder input days after activation date to all cages until changes. \nRequires a note for the reminder. Enter 'x' to clear",
 		takesValue:  true,
+		printOrder:  9,
 	}
 	activateFlags["-"+RFlag.symbol] = RFlag
-
-	ccFlag := Flag{
-		symbol:      "cc",
-		description: "Add multiple cage cards at once. Will be activated in order it is entered (including other flags)",
-		takesValue:  true,
-	}
-	activateFlags["-"+ccFlag.symbol] = ccFlag
 
 	printFlag := Flag{
 		symbol:      "print",
 		description: "Prints the settings that will be applied to the next card added to the queue",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	activateFlags[printFlag.symbol] = printFlag
-
-	/* removed because CCs are no longer stored in a queue first
-	processFlag := Flag{
-		symbol:      "process",
-		description: "Processes cage cards that have been entered then exits",
-		takesValue:  false,
-	}
-	activateFlags[processFlag.symbol] = processFlag
-	*/
-
-	/* removed because CCs are no longer stored in a queue first
-	popFlag := Flag{
-		symbol:      "pop",
-		description: "Deletes the most recently scanned cage card",
-		takesValue:  false,
-	}
-	activateFlags[popFlag.symbol] = popFlag
-	*/
 
 	helpFlag := Flag{
 		symbol:      "help",
 		description: "Prints help messages and flags for commands available",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	activateFlags[helpFlag.symbol] = helpFlag
 
@@ -138,6 +132,7 @@ func getActivationFlags() map[string]Flag {
 		symbol:      "exit",
 		description: "Exits without processing cards",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	activateFlags[exitFlag.symbol] = exitFlag
 

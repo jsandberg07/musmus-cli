@@ -18,6 +18,7 @@ func getAddInvestigatorToProtocolCmd() Command {
 		description: "Used for adding investigators to a protocol",
 		function:    addInvestigatorToProtocolFunction,
 		flags:       addInvestToProtFlags,
+		printOrder:  2,
 	}
 
 	return XXXCmd
@@ -33,13 +34,15 @@ func getAddInvestToProtFlags() map[string]Flag {
 		symbol:      "a",
 		description: "Use when adding the investigator to the protocol",
 		takesValue:  false,
+		printOrder:  1,
 	}
 	addInvestToProtFlags["-"+aFlag.symbol] = aFlag
 
 	rFlag := Flag{
 		symbol:      "r",
-		description: "USe when removing the investigator from the protocol",
+		description: "Use when removing the investigator from the protocol",
 		takesValue:  false,
+		printOrder:  2,
 	}
 	addInvestToProtFlags["-"+rFlag.symbol] = rFlag
 
@@ -47,6 +50,7 @@ func getAddInvestToProtFlags() map[string]Flag {
 		symbol:      "i",
 		description: "Set what investigator to add or remove",
 		takesValue:  true,
+		printOrder:  3,
 	}
 	addInvestToProtFlags["-"+iFlag.symbol] = iFlag
 
@@ -54,6 +58,7 @@ func getAddInvestToProtFlags() map[string]Flag {
 		symbol:      "p",
 		description: "Set what protocol investigators will be added or removed from",
 		takesValue:  true,
+		printOrder:  4,
 	}
 	addInvestToProtFlags["-"+pFlag.symbol] = pFlag
 
@@ -63,6 +68,7 @@ func getAddInvestToProtFlags() map[string]Flag {
 		symbol:      "exit",
 		description: "exits the current menu",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	addInvestToProtFlags[exitFlag.symbol] = exitFlag
 
@@ -70,6 +76,7 @@ func getAddInvestToProtFlags() map[string]Flag {
 		symbol:      "help",
 		description: "Prints available flags for command",
 		takesValue:  false,
+		printOrder:  100,
 	}
 	addInvestToProtFlags[helpFlag.symbol] = helpFlag
 
