@@ -57,6 +57,7 @@ type CageCard struct {
 	Person string
 }
 
+// TODO: generally used the same in every place, add member funcs like "changed made" or "reset" or "printed" or "check"
 type Reviewed struct {
 	Printed     bool
 	ChangesMade bool
@@ -116,6 +117,19 @@ func (s *CageCardActivationParams) keepCheck() {
 		s.daysReminder = 0
 	}
 }
+
+type Permission int
+
+const (
+	PermissionActivateInactivate = iota
+	PermissionDeactivateReactivate
+	PermissionAddOrder
+	PermissionReceiveOrder
+	PermissionRunQueries
+	PermissionProtocol
+	PermissionStaff
+	PermissionReminders
+)
 
 /*
 Create a flag:

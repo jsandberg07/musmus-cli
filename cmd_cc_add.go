@@ -101,6 +101,11 @@ func getAddCCFlags() map[string]Flag {
 
 // look into removing the args thing, might have to stay
 func addCCFunction(cfg *Config) error {
+	// permission check
+	err := checkPermission(cfg.loggedInPosition, PermissionActivateInactivate)
+	if err != nil {
+		return err
+	}
 	var nilProtocol database.Protocol
 	protocol, err := getStructPrompt(cfg, "Enter a protocol for the cards be used with", getProtocolStruct)
 	if err != nil {
@@ -111,6 +116,11 @@ func addCCFunction(cfg *Config) error {
 		return nil
 	}
 	investigator := *cfg.loggedInInvestigator
+
+	err = investigatorProtocolCheck(cfg, &investigator, &protocol)
+	if err != nil {
+		return err
+	}
 
 	// get flags
 	flags := getAddCCFlags()
@@ -172,6 +182,13 @@ func addCCFunction(cfg *Config) error {
 				if err != nil {
 					return err
 				}
+
+				err = investigatorProtocolCheck(cfg, &inv, &protocol)
+				if err != nil {
+					fmt.Println(err)
+					continue
+				}
+
 				investigator = inv
 				fmt.Printf("Investigator set as %s\n", investigator.IName)
 
@@ -179,6 +196,12 @@ func addCCFunction(cfg *Config) error {
 				pro, err := getProtocolByFlag(cfg, arg.value)
 				if err != nil {
 					return err
+				}
+
+				err = investigatorProtocolCheck(cfg, &investigator, &pro)
+				if err != nil {
+					fmt.Println(err)
+					continue
 				}
 				protocol = pro
 

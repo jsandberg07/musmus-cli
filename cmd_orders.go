@@ -59,6 +59,11 @@ func getAddOrderFlags() map[string]Flag {
 
 // look into removing the args thing, might have to stay
 func addOrderFunction(cfg *Config) error {
+	// permission check
+	err := checkPermission(cfg.loggedInPosition, PermissionAddOrder)
+	if err != nil {
+		return err
+	}
 	// get flags
 	flags := getAddOrderFlags()
 
@@ -104,6 +109,12 @@ func addOrderFunction(cfg *Config) error {
 	if investigator == nilInvestigator {
 		fmt.Println("Exiting...")
 		return nil
+	}
+
+	err = investigatorProtocolCheck(cfg, &investigator, &protocol)
+	if err != nil {
+		fmt.Println("Exiting...")
+		return err
 	}
 
 	strain, err := getStructPrompt(cfg, "Enter strain of order", getStrainStruct)
@@ -339,6 +350,11 @@ func getEditOrderFlags() map[string]Flag {
 // look into removing the args thing, might have to stay
 // ask for an order number, load params, set flags
 func editOrderFunction(cfg *Config) error {
+	// permission check
+	err := checkPermission(cfg.loggedInPosition, PermissionAddOrder)
+	if err != nil {
+		return err
+	}
 	// get flags
 	flags := getEditOrderFlags()
 
@@ -469,6 +485,18 @@ func editOrderFunction(cfg *Config) error {
 				if err != nil {
 					return err
 				}
+				protocol, err := cfg.db.GetProtocolByID(context.Background(), uoParams.ProtocolID)
+				if err != nil {
+					fmt.Println("Error checking investigator - protocol information")
+					return err
+				}
+
+				err = investigatorProtocolCheck(cfg, &investigator, &protocol)
+				if err != nil {
+					fmt.Println(err)
+					continue
+				}
+
 				uoParams.InvestigatorID = investigator.ID
 				reviewed.ChangesMade = true
 
@@ -485,6 +513,18 @@ func editOrderFunction(cfg *Config) error {
 				if err != nil {
 					return err
 				}
+
+				investigator, err := cfg.db.GetInvestigatorByID(context.Background(), uoParams.InvestigatorID)
+				if err != nil {
+					fmt.Println("Error checking investigator - protocol information")
+					return err
+				}
+				err = investigatorProtocolCheck(cfg, &investigator, &protocol)
+				if err != nil {
+					fmt.Println(err)
+					continue
+				}
+
 				uoParams.ProtocolID = protocol.ID
 				reviewed.ChangesMade = true
 
@@ -574,6 +614,11 @@ func getReceiveOrderFlags() map[string]Flag {
 // then DO IT
 // look into removing the args thing, might have to stay
 func receiveOrderFunction(cfg *Config) error {
+	// permission check
+	err := checkPermission(cfg.loggedInPosition, PermissionReceiveOrder)
+	if err != nil {
+		return err
+	}
 	// flags just for saving and exiting prompt everything else
 	flags := getReceiveOrderFlags()
 

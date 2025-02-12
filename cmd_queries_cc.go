@@ -164,6 +164,11 @@ func getCCQueriesFlags() map[string]Flag {
 // TODO: create a struct with an enum that remembers the query type, nulls the current values when you set a new one,
 // is easy to pass, run a switch on it
 func CCQueriesFunction(cfg *Config) error {
+	// permission check
+	err := checkPermission(cfg.loggedInPosition, PermissionRunQueries)
+	if err != nil {
+		return err
+	}
 	// get flags
 	flags := getCCQueriesFlags()
 

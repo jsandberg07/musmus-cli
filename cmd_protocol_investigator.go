@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -13,7 +14,7 @@ import (
 
 func getAddInvestigatorToProtocolCmd() Command {
 	addInvestToProtFlags := make(map[string]Flag)
-	XXXCmd := Command{
+	addInvProCmd := Command{
 		name:        "investigator",
 		description: "Used for adding investigators to a protocol",
 		function:    addInvestigatorToProtocolFunction,
@@ -21,7 +22,7 @@ func getAddInvestigatorToProtocolCmd() Command {
 		printOrder:  2,
 	}
 
-	return XXXCmd
+	return addInvProCmd
 }
 
 // [a]dd, [r]emove, [i]nvestigator, [p]rotocol, exit
@@ -86,6 +87,11 @@ func getAddInvestToProtFlags() map[string]Flag {
 
 // look into removing the args thing, might have to stay
 func addInvestigatorToProtocolFunction(cfg *Config) error {
+	// permission check
+	err := checkPermission(cfg.loggedInPosition, PermissionProtocol)
+	if err != nil {
+		return err
+	}
 	// get flags
 	flags := getAddInvestToProtFlags()
 
@@ -234,4 +240,26 @@ func getProtocolByFlag(cfg *Config, n string) (database.Protocol, error) {
 	}
 
 	return protocol, nil
+}
+
+// investigators need to be added to a protocol before working on it. Ie adding cage cards, activating cage cards, adding orders
+func investigatorProtocolCheck(cfg *Config, i *database.Investigator, p *database.Protocol) error {
+	cip := database.CheckInvestigatorProtocolParams{
+		InvestigatorID: i.ID,
+		ProtocolID:     p.ID,
+	}
+	check, err := cfg.db.CheckInvestigatorProtocol(context.Background(), cip)
+	if err != nil && err.Error() == "sql: no rows in result set" {
+		// not found
+		return errors.New("investigator not on protocol")
+	}
+	if err != nil {
+		// any other error
+		return errors.New("error getting protocol - investigator information")
+	}
+
+	if verbose {
+		fmt.Println(check)
+	}
+	return nil
 }

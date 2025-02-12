@@ -5,9 +5,11 @@ CREATE TABLE positions(
     can_activate BOOLEAN NOT NULL DEFAULT false,
     can_deactivate BOOLEAN NOT NULL DEFAULT false,
     can_add_orders BOOLEAN NOT NULL DEFAULT false,
+    can_receive_orders BOOLEAN NOT NULL DEFAULT false,
     can_query BOOLEAN NOT NULL DEFAULT false,
     can_change_protocol BOOLEAN NOT NULL DEFAULT false,
-    can_add_staff BOOLEAN NOT NULL DEFAULT false
+    can_add_staff BOOLEAN NOT NULL DEFAULT false,
+    can_add_reminders BOOLEAN NOT NULL DEFAULT false
 );
 
 -- +goose Down

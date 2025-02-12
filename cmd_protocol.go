@@ -60,6 +60,11 @@ func getAddProtocolFlags() map[string]Flag {
 
 // look into removing the args thing, might have to stay
 func addProtocolFunction(cfg *Config) error {
+	// permission check
+	err := checkPermission(cfg.loggedInPosition, PermissionProtocol)
+	if err != nil {
+		return err
+	}
 	// get flags
 	flags := getAddProtocolFlags()
 
@@ -364,6 +369,11 @@ func getEditProtocolFlags() map[string]Flag {
 
 // look into removing the args thing, might have to stay
 func editProtocolFunction(cfg *Config) error {
+	// permission check
+	err := checkPermission(cfg.loggedInPosition, PermissionProtocol)
+	if err != nil {
+		return err
+	}
 	protocol, err := getStructPrompt(cfg, "Enter number of protocol to edit", checkProtocolExists)
 	if err != nil {
 		return err

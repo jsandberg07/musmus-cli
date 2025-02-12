@@ -10,6 +10,8 @@ import (
 
 func (cfg *Config) login() error {
 	// TODO: actually logging in. Just get the PI who can do everything.
+	// dan for testing permissions NOT being allowed
+	// investigator, err := cfg.getInvestigator("Dan")
 	investigator, err := cfg.getInvestigator("Johnny Boi")
 	if err != nil {
 		fmt.Println("Error logging user in")

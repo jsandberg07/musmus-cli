@@ -12,9 +12,9 @@ import (
 )
 
 const createPosition = `-- name: CreatePosition :one
-INSERT INTO positions(id, title, can_activate, can_deactivate, can_add_orders, can_query, can_change_protocol, can_add_staff)
-VALUES(gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7)
-RETURNING id, title, can_activate, can_deactivate, can_add_orders, can_query, can_change_protocol, can_add_staff
+INSERT INTO positions(id, title, can_activate, can_deactivate, can_add_orders, can_receive_orders, can_query, can_change_protocol, can_add_staff, can_add_reminders)
+VALUES(gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9)
+RETURNING id, title, can_activate, can_deactivate, can_add_orders, can_receive_orders, can_query, can_change_protocol, can_add_staff, can_add_reminders
 `
 
 type CreatePositionParams struct {
@@ -22,9 +22,11 @@ type CreatePositionParams struct {
 	CanActivate       bool
 	CanDeactivate     bool
 	CanAddOrders      bool
+	CanReceiveOrders  bool
 	CanQuery          bool
 	CanChangeProtocol bool
 	CanAddStaff       bool
+	CanAddReminders   bool
 }
 
 func (q *Queries) CreatePosition(ctx context.Context, arg CreatePositionParams) (Position, error) {
@@ -33,9 +35,11 @@ func (q *Queries) CreatePosition(ctx context.Context, arg CreatePositionParams) 
 		arg.CanActivate,
 		arg.CanDeactivate,
 		arg.CanAddOrders,
+		arg.CanReceiveOrders,
 		arg.CanQuery,
 		arg.CanChangeProtocol,
 		arg.CanAddStaff,
+		arg.CanAddReminders,
 	)
 	var i Position
 	err := row.Scan(
@@ -44,15 +48,17 @@ func (q *Queries) CreatePosition(ctx context.Context, arg CreatePositionParams) 
 		&i.CanActivate,
 		&i.CanDeactivate,
 		&i.CanAddOrders,
+		&i.CanReceiveOrders,
 		&i.CanQuery,
 		&i.CanChangeProtocol,
 		&i.CanAddStaff,
+		&i.CanAddReminders,
 	)
 	return i, err
 }
 
 const getPositionByTitle = `-- name: GetPositionByTitle :one
-SELECT id, title, can_activate, can_deactivate, can_add_orders, can_query, can_change_protocol, can_add_staff FROM positions
+SELECT id, title, can_activate, can_deactivate, can_add_orders, can_receive_orders, can_query, can_change_protocol, can_add_staff, can_add_reminders FROM positions
 WHERE $1 = title
 `
 
@@ -65,15 +71,17 @@ func (q *Queries) GetPositionByTitle(ctx context.Context, title string) (Positio
 		&i.CanActivate,
 		&i.CanDeactivate,
 		&i.CanAddOrders,
+		&i.CanReceiveOrders,
 		&i.CanQuery,
 		&i.CanChangeProtocol,
 		&i.CanAddStaff,
+		&i.CanAddReminders,
 	)
 	return i, err
 }
 
 const getPositions = `-- name: GetPositions :many
-SELECT id, title, can_activate, can_deactivate, can_add_orders, can_query, can_change_protocol, can_add_staff FROM positions
+SELECT id, title, can_activate, can_deactivate, can_add_orders, can_receive_orders, can_query, can_change_protocol, can_add_staff, can_add_reminders FROM positions
 `
 
 func (q *Queries) GetPositions(ctx context.Context) ([]Position, error) {
@@ -91,9 +99,11 @@ func (q *Queries) GetPositions(ctx context.Context) ([]Position, error) {
 			&i.CanActivate,
 			&i.CanDeactivate,
 			&i.CanAddOrders,
+			&i.CanReceiveOrders,
 			&i.CanQuery,
 			&i.CanChangeProtocol,
 			&i.CanAddStaff,
+			&i.CanAddReminders,
 		); err != nil {
 			return nil, err
 		}
@@ -109,7 +119,7 @@ func (q *Queries) GetPositions(ctx context.Context) ([]Position, error) {
 }
 
 const getUserPosition = `-- name: GetUserPosition :one
-SELECT id, title, can_activate, can_deactivate, can_add_orders, can_query, can_change_protocol, can_add_staff FROM positions
+SELECT id, title, can_activate, can_deactivate, can_add_orders, can_receive_orders, can_query, can_change_protocol, can_add_staff, can_add_reminders FROM positions
 WHERE $1 = id
 `
 
@@ -122,9 +132,11 @@ func (q *Queries) GetUserPosition(ctx context.Context, id uuid.UUID) (Position, 
 		&i.CanActivate,
 		&i.CanDeactivate,
 		&i.CanAddOrders,
+		&i.CanReceiveOrders,
 		&i.CanQuery,
 		&i.CanChangeProtocol,
 		&i.CanAddStaff,
+		&i.CanAddReminders,
 	)
 	return i, err
 }
@@ -135,10 +147,12 @@ SET title = $1,
     can_activate = $2,
     can_deactivate = $3,
     can_add_orders = $4,
-    can_query = $5,
-    can_change_protocol = $6,
-    can_add_staff = $7
-WHERE $8 = id
+    can_receive_orders = $5,
+    can_query = $6,
+    can_change_protocol = $7,
+    can_add_staff = $8,
+    can_add_reminders = $9
+WHERE $10 = id
 `
 
 type UpdatePositionParams struct {
@@ -146,9 +160,11 @@ type UpdatePositionParams struct {
 	CanActivate       bool
 	CanDeactivate     bool
 	CanAddOrders      bool
+	CanReceiveOrders  bool
 	CanQuery          bool
 	CanChangeProtocol bool
 	CanAddStaff       bool
+	CanAddReminders   bool
 	ID                uuid.UUID
 }
 
@@ -158,9 +174,11 @@ func (q *Queries) UpdatePosition(ctx context.Context, arg UpdatePositionParams) 
 		arg.CanActivate,
 		arg.CanDeactivate,
 		arg.CanAddOrders,
+		arg.CanReceiveOrders,
 		arg.CanQuery,
 		arg.CanChangeProtocol,
 		arg.CanAddStaff,
+		arg.CanAddReminders,
 		arg.ID,
 	)
 	return err

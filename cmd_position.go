@@ -53,11 +53,19 @@ func getPositionFlags() map[string]Flag {
 
 	oFlag := Flag{
 		symbol:      "o",
-		description: "Toggles if the role has permission to add or mark orders as recieved",
+		description: "Toggles if the role has permission to add orders",
 		takesValue:  false,
 		printOrder:  4,
 	}
 	PositionFlags["-"+oFlag.symbol] = oFlag
+
+	rFlag := Flag{
+		symbol:      "r",
+		description: "Toggles if the role has permission to mark orders as received",
+		takesValue:  false,
+		printOrder:  4,
+	}
+	PositionFlags["-"+rFlag.symbol] = rFlag
 
 	qFlag := Flag{
 		symbol:      "q",
@@ -82,6 +90,14 @@ func getPositionFlags() map[string]Flag {
 		printOrder:  7,
 	}
 	PositionFlags["-"+sFlag.symbol] = sFlag
+
+	mFlag := Flag{
+		symbol:      "m",
+		description: "Toggles if the role has permission to add reminders",
+		takesValue:  false,
+		printOrder:  8,
+	}
+	PositionFlags["-"+mFlag.symbol] = mFlag
 
 	// ect as needed or remove the "-"+ for longer ones
 
@@ -122,6 +138,10 @@ func getPositionFlags() map[string]Flag {
 }
 
 func addPositionFunction(cfg *Config) error {
+	err := checkPermission(cfg.loggedInPosition, PermissionStaff)
+	if err != nil {
+		return err
+	}
 	// get title before anything else, or exit early
 	title, err := getStringPrompt(cfg, "Please enter the title for the new position,", checkIfPositionTitleUnique)
 	if err != nil {
@@ -149,9 +169,11 @@ func addPositionFunction(cfg *Config) error {
 		CanActivate:       false,
 		CanDeactivate:     false,
 		CanAddOrders:      false,
+		CanReceiveOrders:  false,
 		CanQuery:          false,
 		CanChangeProtocol: false,
 		CanAddStaff:       false,
+		CanAddReminders:   false,
 	}
 
 	fmt.Println("Use flags to toggle permission. All permissions default to false. Multiple flags can be passed in at once.\nUse help to see flags and what permissions they toggle")
@@ -204,6 +226,12 @@ func addPositionFunction(cfg *Config) error {
 			case "-s":
 				cpParams.CanAddStaff = !cpParams.CanAddStaff
 				reviewed.ChangesMade = true
+			case "-m":
+				cpParams.CanAddReminders = !cpParams.CanAddReminders
+				reviewed.ChangesMade = true
+			case "-r":
+				cpParams.CanReceiveOrders = !cpParams.CanReceiveOrders
+				reviewed.ChangesMade = true
 
 			case "-t":
 				err := checkIfPositionTitleUnique(cfg, arg.value)
@@ -219,20 +247,14 @@ func addPositionFunction(cfg *Config) error {
 
 			case "print":
 				fmt.Println("Printing...")
-				err := printCreatePermissions(&cpParams)
-				if err != nil {
-					fmt.Println("Error printing permissions")
-				}
+				printPermissions(&cpParams, nil)
 				reviewed.ChangesMade = false
 				reviewed.Printed = true
 			case "save":
 				fmt.Println("Saving and exiting...")
 				if !reviewed.Printed {
 					fmt.Println("Creating a role with these permissions:")
-					err := printCreatePermissions(&cpParams)
-					if err != nil {
-						fmt.Println("Error printing permissions")
-					}
+					printPermissions(&cpParams, nil)
 				}
 				newPosition, err := cfg.db.CreatePosition(context.Background(), cpParams)
 				if err != nil {
@@ -275,68 +297,6 @@ func checkIfPositionTitleUnique(cfg *Config, input string) error {
 	return errors.New("position titles must be unique. Please try again")
 }
 
-// TODO: there are two print permission functions that are identical, but the strcuts differ in one stores the UUID.
-// can't convert the structs so easily because of it. Has to be a way to DRY this up using interfaces then.
-func printCreatePermissions(cp *database.CreatePositionParams) error {
-	granted := []string{}
-	denied := []string{}
-	as := "Activate cage cards"
-	if cp.CanActivate {
-		granted = append(granted, as)
-	} else {
-		denied = append(denied, as)
-	}
-	ds := "Deactivate cage cards"
-	if cp.CanDeactivate {
-		granted = append(granted, ds)
-	} else {
-		denied = append(denied, ds)
-	}
-	os := "Add and recieve orders"
-	if cp.CanAddOrders {
-		granted = append(granted, os)
-	} else {
-		denied = append(denied, os)
-	}
-	qs := "Run queries"
-	if cp.CanQuery {
-		granted = append(granted, qs)
-	} else {
-		denied = append(denied, qs)
-	}
-	ps := "Adjust protocols"
-	if cp.CanChangeProtocol {
-		granted = append(granted, ps)
-	} else {
-		denied = append(denied, ps)
-	}
-	ss := "Make changes to staff"
-	if cp.CanAddStaff {
-		granted = append(granted, ss)
-	} else {
-		denied = append(denied, ss)
-	}
-	fmt.Printf("* %s\n", cp.Title)
-	if len(granted) == 0 {
-		fmt.Println("No permissions granted.")
-		return nil
-	}
-	if len(denied) == 0 {
-		fmt.Println("All permissions granted.")
-		return nil
-	}
-	fmt.Println("* Allowed permissions:")
-	for _, perm := range granted {
-		fmt.Println(perm)
-	}
-	fmt.Println("* Denied permissions:")
-	for _, den := range denied {
-		fmt.Println(den)
-	}
-
-	return nil
-}
-
 func getEditPositionCmd() Command {
 	editPositionFlags := make(map[string]Flag)
 	editPositionCmd := Command{
@@ -353,6 +313,11 @@ func getEditPositionCmd() Command {
 // TODO: print all titles so people know what the names are
 // flags are in addPosition
 func editPositionFunction(cfg *Config) error {
+	// permission check
+	err := checkPermission(cfg.loggedInPosition, PermissionStaff)
+	if err != nil {
+		return err
+	}
 	position, err := getStructPrompt(cfg, "Enter the title of the position to edit,", getPositionStruct)
 	if err != nil {
 		return err
@@ -436,6 +401,12 @@ func editPositionFunction(cfg *Config) error {
 			case "-s":
 				upParams.CanAddStaff = !upParams.CanAddStaff
 				reviewed.ChangesMade = true
+			case "-m":
+				upParams.CanAddReminders = !upParams.CanAddReminders
+				reviewed.ChangesMade = true
+			case "-r":
+				upParams.CanReceiveOrders = !upParams.CanReceiveOrders
+				reviewed.ChangesMade = true
 
 			case "-t":
 				err := checkIfPositionTitleUnique(cfg, arg.value)
@@ -451,10 +422,7 @@ func editPositionFunction(cfg *Config) error {
 
 			case "print":
 				fmt.Println("Printing...")
-				err := printUpdatePermissions(&upParams)
-				if err != nil {
-					fmt.Println("Error printing permissions")
-				}
+				printPermissions(nil, &upParams)
 				reviewed.ChangesMade = false
 				reviewed.Printed = true
 
@@ -462,10 +430,7 @@ func editPositionFunction(cfg *Config) error {
 				fmt.Println("Saving and exiting...")
 				if !reviewed.Printed {
 					fmt.Println("Creating a role with these permissions:")
-					err := printUpdatePermissions(&upParams)
-					if err != nil {
-						fmt.Println("Error printing permissions")
-					}
+					printPermissions(nil, &upParams)
 				}
 				err := cfg.db.UpdatePosition(context.Background(), upParams)
 				if err != nil {
@@ -491,68 +456,6 @@ func editPositionFunction(cfg *Config) error {
 	return nil
 }
 
-// TODO: struct is the same as update position.
-// isn't there a way to create a func that works with 2 types?
-func printUpdatePermissions(cp *database.UpdatePositionParams) error {
-	granted := []string{}
-	denied := []string{}
-	as := "Activate cage cards"
-	if cp.CanActivate {
-		granted = append(granted, as)
-	} else {
-		denied = append(denied, as)
-	}
-	ds := "Deactivate cage cards"
-	if cp.CanDeactivate {
-		granted = append(granted, ds)
-	} else {
-		denied = append(denied, ds)
-	}
-	os := "Add and recieve orders"
-	if cp.CanAddOrders {
-		granted = append(granted, os)
-	} else {
-		denied = append(denied, os)
-	}
-	qs := "Run queries"
-	if cp.CanQuery {
-		granted = append(granted, qs)
-	} else {
-		denied = append(denied, qs)
-	}
-	ps := "Adjust protocols"
-	if cp.CanChangeProtocol {
-		granted = append(granted, ps)
-	} else {
-		denied = append(denied, ps)
-	}
-	ss := "Make changes to staff"
-	if cp.CanAddStaff {
-		granted = append(granted, ss)
-	} else {
-		denied = append(denied, ss)
-	}
-	fmt.Printf("* %s\n", cp.Title)
-	if len(granted) == 0 {
-		fmt.Println("No permissions granted.")
-		return nil
-	}
-	if len(denied) == 0 {
-		fmt.Println("All permissions granted.")
-		return nil
-	}
-	fmt.Println("* Allowed permissions:")
-	for _, perm := range granted {
-		fmt.Println(perm)
-	}
-	fmt.Println("* Denied permissions:")
-	for _, den := range denied {
-		fmt.Println(den)
-	}
-
-	return nil
-}
-
 func getPositionStruct(cfg *Config, input string) (database.Position, error) {
 	position, err := cfg.db.GetPositionByTitle(context.Background(), input)
 	if err != nil && err.Error() == "sql: no rows in result set" {
@@ -565,6 +468,175 @@ func getPositionStruct(cfg *Config, input string) (database.Position, error) {
 	}
 
 	return position, nil
+}
+
+// don't pass in both, just one, and it'll convert and print it
+// extremely hacky way to print both structs as theyre not identical in places that aren't printed anyway.
+// alternative to editing generated files / extending generated structs.
+func printPermissions(c *database.CreatePositionParams, u *database.UpdatePositionParams) {
+	if c == nil && u == nil {
+		fmt.Println("Error printing permissions: both params nil")
+		return
+	}
+	if c != nil && u != nil {
+		fmt.Println("Error printing permissions: both params NOT nil")
+	}
+
+	type PrintPosition struct {
+		Title             string
+		CanActivate       bool
+		CanDeactivate     bool
+		CanAddOrders      bool
+		CanReceiveOrders  bool
+		CanQuery          bool
+		CanChangeProtocol bool
+		CanAddStaff       bool
+		CanAddReminders   bool
+	}
+	var p PrintPosition
+
+	if c != nil {
+		p = PrintPosition(*c)
+	} else {
+		p.Title = u.Title
+		p.CanActivate = u.CanActivate
+		p.CanDeactivate = u.CanActivate
+		p.CanAddOrders = u.CanAddOrders
+		p.CanReceiveOrders = u.CanReceiveOrders
+		p.CanQuery = u.CanQuery
+		p.CanChangeProtocol = u.CanChangeProtocol
+		p.CanAddStaff = u.CanAddStaff
+		p.CanAddReminders = u.CanAddReminders
+	}
+
+	granted := []string{}
+	denied := []string{}
+	as := "Activate cage cards"
+	if p.CanActivate {
+		granted = append(granted, as)
+	} else {
+		denied = append(denied, as)
+	}
+	ds := "Deactivate cage cards"
+	if p.CanDeactivate {
+		granted = append(granted, ds)
+	} else {
+		denied = append(denied, ds)
+	}
+	os := "Add orders"
+	if p.CanAddOrders {
+		granted = append(granted, os)
+	} else {
+		denied = append(denied, os)
+	}
+	rs := "Recieve orders"
+	if p.CanReceiveOrders {
+		granted = append(granted, rs)
+	} else {
+		denied = append(denied, rs)
+	}
+	qs := "Run queries"
+	if p.CanQuery {
+		granted = append(granted, qs)
+	} else {
+		denied = append(denied, qs)
+	}
+	ps := "Adjust protocols"
+	if p.CanChangeProtocol {
+		granted = append(granted, ps)
+	} else {
+		denied = append(denied, ps)
+	}
+	ss := "Make changes to staff"
+	if p.CanAddStaff {
+		granted = append(granted, ss)
+	} else {
+		denied = append(denied, ss)
+	}
+	ms := "Add reminders"
+	if p.CanAddReminders {
+		granted = append(granted, ms)
+	} else {
+		denied = append(denied, ms)
+	}
+	fmt.Printf("* %s\n", p.Title)
+	if len(granted) == 0 {
+		fmt.Println("No permissions granted.")
+		return
+	}
+	if len(denied) == 0 {
+		fmt.Println("All permissions granted.")
+		return
+	}
+	fmt.Println("* Allowed permissions:")
+	for _, perm := range granted {
+		fmt.Println(perm)
+	}
+	fmt.Println("* Denied permissions:")
+	for _, den := range denied {
+		fmt.Println(den)
+	}
+}
+
+// pass in currently logged in user's position from cfg (it's literally stored there)
+func checkPermission(i *database.Position, p Permission) error {
+	// we dont need to contact the db, the position is already loaded in cfg but check if nil
+	if i == nil {
+		return errors.New("could not get position to verify permissions")
+	}
+	var pMsg string
+	permitted := true
+
+	switch p {
+	case PermissionActivateInactivate:
+		if !i.CanActivate {
+			permitted = false
+			pMsg = "add, activate or inactivate cage cards"
+		}
+	case PermissionDeactivateReactivate:
+		if !i.CanActivate {
+			permitted = false
+			pMsg = "deactivate or reactivate cage cards"
+		}
+	case PermissionAddOrder:
+		if !i.CanActivate {
+			permitted = false
+			pMsg = "add orders"
+		}
+	case PermissionReceiveOrder:
+		if !i.CanActivate {
+			permitted = false
+			pMsg = "receive orders"
+		}
+	case PermissionRunQueries:
+		if !i.CanActivate {
+			permitted = false
+			pMsg = "run queries"
+		}
+	case PermissionProtocol:
+		if !i.CanActivate {
+			permitted = false
+			pMsg = "adjust protocols"
+		}
+	case PermissionStaff:
+		if !i.CanActivate {
+			permitted = false
+			pMsg = "edit staff"
+		}
+	case PermissionReminders:
+		if !i.CanActivate {
+			permitted = false
+			pMsg = "add reminders"
+		}
+	default:
+		return errors.New("default in check permissions. unknown permission")
+	}
+	if !permitted {
+		msg := fmt.Sprintf("position %s is not permitted to %s", i.Title, pMsg)
+		return errors.New(msg)
+	} else {
+		return nil
+	}
 }
 
 /* removed as part of refactor
@@ -636,5 +708,133 @@ func getNewPositionTitle(cfg *Config) (string, error) {
 		}
 	}
 
+}
+*/
+
+/* removed by combining both print functions into one really bad one
+// TODO: struct is the same as update position.
+// isn't there a way to create a func that works with 2 types?
+func printUpdatePermissions(cp *database.UpdatePositionParams) error {
+	granted := []string{}
+	denied := []string{}
+	as := "Activate cage cards"
+	if cp.CanActivate {
+		granted = append(granted, as)
+	} else {
+		denied = append(denied, as)
+	}
+	ds := "Deactivate cage cards"
+	if cp.CanDeactivate {
+		granted = append(granted, ds)
+	} else {
+		denied = append(denied, ds)
+	}
+	os := "Add and recieve orders"
+	if cp.CanAddOrders {
+		granted = append(granted, os)
+	} else {
+		denied = append(denied, os)
+	}
+	qs := "Run queries"
+	if cp.CanQuery {
+		granted = append(granted, qs)
+	} else {
+		denied = append(denied, qs)
+	}
+	ps := "Adjust protocols"
+	if cp.CanChangeProtocol {
+		granted = append(granted, ps)
+	} else {
+		denied = append(denied, ps)
+	}
+	ss := "Make changes to staff"
+	if cp.CanAddStaff {
+		granted = append(granted, ss)
+	} else {
+		denied = append(denied, ss)
+	}
+	fmt.Printf("* %s\n", cp.Title)
+	if len(granted) == 0 {
+		fmt.Println("No permissions granted.")
+		return nil
+	}
+	if len(denied) == 0 {
+		fmt.Println("All permissions granted.")
+		return nil
+	}
+	fmt.Println("* Allowed permissions:")
+	for _, perm := range granted {
+		fmt.Println(perm)
+	}
+	fmt.Println("* Denied permissions:")
+	for _, den := range denied {
+		fmt.Println(den)
+	}
+
+	return nil
+}
+
+// TODO: there are two print permission functions that are identical, but the strcuts differ in one stores the UUID.
+// can't convert the structs so easily because of it. Has to be a way to DRY this up using interfaces then.
+// uuh extremely hacky have func print(*struct A, *struct B) {if struct A == nil, printable = B, else printable = B, then print printable}
+// given the weirdness of how theyre printing, this works and reuses what code i have now
+func printCreatePermissions(cp *database.CreatePositionParams) error {
+	granted := []string{}
+	denied := []string{}
+	as := "Activate cage cards"
+	if cp.CanActivate {
+		granted = append(granted, as)
+	} else {
+		denied = append(denied, as)
+	}
+	ds := "Deactivate cage cards"
+	if cp.CanDeactivate {
+		granted = append(granted, ds)
+	} else {
+		denied = append(denied, ds)
+	}
+	os := "Add and recieve orders"
+	if cp.CanAddOrders {
+		granted = append(granted, os)
+	} else {
+		denied = append(denied, os)
+	}
+	qs := "Run queries"
+	if cp.CanQuery {
+		granted = append(granted, qs)
+	} else {
+		denied = append(denied, qs)
+	}
+	ps := "Adjust protocols"
+	if cp.CanChangeProtocol {
+		granted = append(granted, ps)
+	} else {
+		denied = append(denied, ps)
+	}
+	ss := "Make changes to staff"
+	if cp.CanAddStaff {
+		granted = append(granted, ss)
+	} else {
+		denied = append(denied, ss)
+	}
+	fmt.Printf("* %s\n", cp.Title)
+	if len(granted) == 0 {
+		fmt.Println("No permissions granted.")
+		return nil
+	}
+	if len(denied) == 0 {
+		fmt.Println("All permissions granted.")
+		return nil
+	}
+	fmt.Println("* Allowed permissions:")
+	for _, perm := range granted {
+		fmt.Println(perm)
+	}
+	fmt.Println("* Denied permissions:")
+	for _, den := range denied {
+		fmt.Println(den)
+	}
+
+	return nil
 }
 */

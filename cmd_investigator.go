@@ -112,6 +112,11 @@ func getEditInvestigatorFlags() map[string]Flag {
 // then print old to new
 // look into removing the args thing, might have to stay
 func editInvestigatorFunction(cfg *Config) error {
+	// permission check
+	err := checkPermission(cfg.loggedInPosition, PermissionStaff)
+	if err != nil {
+		return err
+	}
 	investigator, err := getStructPrompt(cfg, "Enter the name of the investigator you'd like to edit,", getInvestigatorStruct)
 	if err != nil {
 		return err
@@ -369,6 +374,10 @@ func getAddInvestigatorFlags() map[string]Flag {
 // name, position, email, nickname, assume active
 // look into removing the args thing, might have to stay
 func addInvestigatorFunction(cfg *Config) error {
+	err := checkPermission(cfg.loggedInPosition, PermissionStaff)
+	if err != nil {
+		return err
+	}
 	name, err := getStringPrompt(cfg, "Enter name of new investigator", checkIfInvestigatorNameUnique)
 	if err != nil {
 		return err

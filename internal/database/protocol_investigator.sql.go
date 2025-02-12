@@ -29,6 +29,23 @@ func (q *Queries) AddInvestigatorToProtocol(ctx context.Context, arg AddInvestig
 	return i, err
 }
 
+const checkInvestigatorProtocol = `-- name: CheckInvestigatorProtocol :one
+SELECT id, investigator_id, protocol_id FROM added_to_protocol
+WHERE $1 = investigator_id AND $2 = protocol_id
+`
+
+type CheckInvestigatorProtocolParams struct {
+	InvestigatorID uuid.UUID
+	ProtocolID     uuid.UUID
+}
+
+func (q *Queries) CheckInvestigatorProtocol(ctx context.Context, arg CheckInvestigatorProtocolParams) (AddedToProtocol, error) {
+	row := q.db.QueryRowContext(ctx, checkInvestigatorProtocol, arg.InvestigatorID, arg.ProtocolID)
+	var i AddedToProtocol
+	err := row.Scan(&i.ID, &i.InvestigatorID, &i.ProtocolID)
+	return i, err
+}
+
 const removeInvestigatorFromProtocol = `-- name: RemoveInvestigatorFromProtocol :exec
 DELETE FROM added_to_protocol
 WHERE $1 = investigator_id AND $2 = protocol_id

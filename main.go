@@ -26,14 +26,17 @@ import (
 // do it
 
 // CURRENTLY:
-// add permission checks to everything. You literally have the roles already you just need to check with logged in position stored in cfg
-// this wil literally be an easy one
+// add protocol check (can only add cage cards / orders for protocols youre added to)
+// so adding people to this actually matters lmao
 
 // After that:
 // work on the read me cause it'll be different
 
 // Next:
+// improve goto with some fallthroughs
 // add permissions that work (you can delete anybodys reminders currently)
+// get the # of care days calculated for expenses
+// investigator "is active" boolean in db does nothing still kek
 
 // AFTER THAT:
 // the great polishing
@@ -42,6 +45,7 @@ import (
 // the great readme-en-ing. write a readme and update the github page
 // add some consts for the strings you use for consistency + fancy + easier changes
 // like exiting program vs exiting command
+// continue to use SIGNED ints but double check them!!! this is a deliberate design decision!
 // AFTER THAT:
 // the great adding the project to my portfolioening
 // lots of test data! for fun!
