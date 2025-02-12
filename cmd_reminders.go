@@ -300,7 +300,18 @@ func deleteReminderFunction(cfg *Config) error {
 	}
 	date = normalizeDate(date)
 
+	/* removed because this let anybody delete anybody's reminders
 	reminders, err = cfg.db.GetAllTodayReminders(context.Background(), date)
+	if err != nil && err.Error() != "sql: no rows in result set" {
+		// any other error
+		return err
+	}
+	*/
+	udrp := database.GetUserDayReminderParams{
+		InvestigatorID: cfg.loggedInInvestigator.ID,
+		RDate:          date,
+	}
+	reminders, err = cfg.db.GetUserDayReminder(context.Background(), udrp)
 	if err != nil && err.Error() != "sql: no rows in result set" {
 		// any other error
 		return err
