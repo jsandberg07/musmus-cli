@@ -139,75 +139,139 @@ func getGotoCmd() Command {
 func getGotoFlags() map[string]Flag {
 	gotoFlags := make(map[string]Flag)
 
+	cagecardFlag := Flag{
+		symbol:      "cagecard",
+		description: "",
+		takesValue:  false,
+		printOrder:  1,
+	}
+	gotoFlags[cagecardFlag.symbol] = cagecardFlag
+
 	ccFlag := Flag{
 		symbol:      "cc",
 		description: "Goes to CC processing menu.",
 		takesValue:  false,
-		printOrder:  1,
+		printOrder:  2,
 	}
 	gotoFlags["-"+ccFlag.symbol] = ccFlag
 
+	positionFlag := Flag{
+		symbol:      "position",
+		description: "",
+		takesValue:  false,
+		printOrder:  3,
+	}
+	gotoFlags[positionFlag.symbol] = positionFlag
 	psFlag := Flag{
 		symbol:      "ps",
 		description: "Goes to positions menu.",
 		takesValue:  false,
-		printOrder:  2,
+		printOrder:  4,
 	}
 	gotoFlags["-"+psFlag.symbol] = psFlag
 
+	investigatorFlag := Flag{
+		symbol:      "investigator",
+		description: "",
+		takesValue:  false,
+		printOrder:  5,
+	}
+	gotoFlags[investigatorFlag.symbol] = investigatorFlag
 	iFlag := Flag{
 		symbol:      "in",
 		description: "Goes to investigator menu.",
 		takesValue:  false,
-		printOrder:  3,
+		printOrder:  6,
 	}
 	gotoFlags["-"+iFlag.symbol] = iFlag
 
+	protocolFlag := Flag{
+		symbol:      "protocol",
+		description: "",
+		takesValue:  false,
+		printOrder:  7,
+	}
+	gotoFlags[protocolFlag.symbol] = protocolFlag
 	prFlag := Flag{
 		symbol:      "pr",
 		description: "Goes to protocol menu.",
 		takesValue:  false,
-		printOrder:  4,
+		printOrder:  8,
 	}
 	gotoFlags["-"+prFlag.symbol] = prFlag
 
+	settingFlag := Flag{
+		symbol:      "setting",
+		description: "",
+		takesValue:  false,
+		printOrder:  9,
+	}
+	gotoFlags[settingFlag.symbol] = settingFlag
 	seFlag := Flag{
 		symbol:      "se",
 		description: "Goes to settings menu.",
 		takesValue:  false,
-		printOrder:  5,
+		printOrder:  10,
 	}
 	gotoFlags["-"+seFlag.symbol] = seFlag
 
+	strainFlag := Flag{
+		symbol:      "strain",
+		description: "",
+		takesValue:  false,
+		printOrder:  11,
+	}
+	gotoFlags[strainFlag.symbol] = strainFlag
 	stFlag := Flag{
 		symbol:      "st",
 		description: "Goes to the strains menu.",
 		takesValue:  false,
-		printOrder:  6,
+		printOrder:  12,
 	}
 	gotoFlags["-"+stFlag.symbol] = stFlag
 
+	queryFlag := Flag{
+		symbol:      "query",
+		description: "Goes to the queries menu.",
+		takesValue:  false,
+		printOrder:  13,
+	}
+	gotoFlags[queryFlag.symbol] = queryFlag
 	quFlag := Flag{
 		symbol:      "qu",
 		description: "Goes to the queries menu.",
 		takesValue:  false,
-		printOrder:  7,
+		printOrder:  14,
 	}
 	gotoFlags["-"+quFlag.symbol] = quFlag
 
+	orderFlag := Flag{
+		symbol:      "orders",
+		description: "",
+		takesValue:  false,
+		printOrder:  15,
+	}
+	gotoFlags[orderFlag.symbol] = orderFlag
 	orFlag := Flag{
 		symbol:      "or",
 		description: "Goes to the orders menu.",
 		takesValue:  false,
-		printOrder:  8,
+		printOrder:  16,
 	}
 	gotoFlags["-"+orFlag.symbol] = orFlag
 
+	reminderFlag := Flag{
+		symbol:      "reminder",
+		description: "",
+		takesValue:  false,
+		printOrder:  17,
+	}
+	gotoFlags[reminderFlag.symbol] = reminderFlag
 	rmFlag := Flag{
 		symbol:      "rm",
 		description: "Goes to the reminders menu.",
 		takesValue:  false,
-		printOrder:  9,
+		printOrder:  18,
 	}
 	gotoFlags["-"+rmFlag.symbol] = rmFlag
 
@@ -272,30 +336,48 @@ func gotoFunction(cfg *Config) error {
 
 		for _, arg := range args {
 			switch arg.flag {
+			case "cagecard":
+				fallthrough
 			case "-cc":
 				cfg.nextState = getProcessingState()
 				exit = true
+			case "position":
+				fallthrough
 			case "-ps":
 				cfg.nextState = getPositionState()
 				exit = true
+			case "investigator":
+				fallthrough
 			case "-in":
 				cfg.nextState = getInvesitatorsState()
 				exit = true
+			case "protocol":
+				fallthrough
 			case "-pr":
 				cfg.nextState = getProtocolState()
 				exit = true
+			case "setting":
+				fallthrough
 			case "-se":
 				cfg.nextState = getSettingsState()
 				exit = true
+			case "strain":
+				fallthrough
 			case "-st":
 				cfg.nextState = getStrainsState()
 				exit = true
+			case "query":
+				fallthrough
 			case "-qu":
 				cfg.nextState = getQueriesState()
 				exit = true
+			case "order":
+				fallthrough
 			case "-or":
 				cfg.nextState = getOrdersState()
 				exit = true
+			case "reminder":
+				fallthrough
 			case "-rm":
 				cfg.nextState = getRemindersState()
 				exit = true

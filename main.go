@@ -26,17 +26,14 @@ import (
 // do it
 
 // CURRENTLY:
-// add protocol check (can only add cage cards / orders for protocols youre added to)
-// so adding people to this actually matters lmao
-
-// After that:
-// work on the read me cause it'll be different
-
-// Next:
 // improve goto with some fallthroughs
 // add permissions that work (you can delete anybodys reminders currently)
 // get the # of care days calculated for expenses
 // investigator "is active" boolean in db does nothing still kek
+// printiong the flags to include the "-" i should have fixd that forever ago ToT there are so many flags now
+
+// After that:
+// work on the read me cause it'll be different
 
 // AFTER THAT:
 // the great polishing

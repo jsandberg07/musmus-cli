@@ -470,9 +470,16 @@ func getPositionStruct(cfg *Config, input string) (database.Position, error) {
 	return position, nil
 }
 
+/*
+the prospective printing method
+func (c createposition) getPrint() printing struct { return p(c) } as a member
+func (u updateposition) getPrint() printing struct { return conversion-UUID }
+BUT you can't extend functions from another package + they're updating so it'll probably get overwritten on generate
+*/
+
 // don't pass in both, just one, and it'll convert and print it
 // extremely hacky way to print both structs as theyre not identical in places that aren't printed anyway.
-// alternative to editing generated files / extending generated structs.
+// can't extend structs from another package
 func printPermissions(c *database.CreatePositionParams, u *database.UpdatePositionParams) {
 	if c == nil && u == nil {
 		fmt.Println("Error printing permissions: both params nil")
