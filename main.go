@@ -36,6 +36,7 @@ import (
 // improve goto with some fallthroughs
 // add permissions that work (you can delete anybodys reminders currently)
 // get the # of care days calculated for expenses
+// investigator "is active" boolean in db does nothing still kek
 
 // AFTER THAT:
 // the great polishing
