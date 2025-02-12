@@ -138,6 +138,10 @@ func getPositionFlags() map[string]Flag {
 }
 
 func addPositionFunction(cfg *Config) error {
+	err := checkPermission(cfg.loggedInPosition, PermissionStaff)
+	if err != nil {
+		return err
+	}
 	// get title before anything else, or exit early
 	title, err := getStringPrompt(cfg, "Please enter the title for the new position,", checkIfPositionTitleUnique)
 	if err != nil {

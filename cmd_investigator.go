@@ -374,6 +374,10 @@ func getAddInvestigatorFlags() map[string]Flag {
 // name, position, email, nickname, assume active
 // look into removing the args thing, might have to stay
 func addInvestigatorFunction(cfg *Config) error {
+	err := checkPermission(cfg.loggedInPosition, PermissionStaff)
+	if err != nil {
+		return err
+	}
 	name, err := getStringPrompt(cfg, "Enter name of new investigator", checkIfInvestigatorNameUnique)
 	if err != nil {
 		return err

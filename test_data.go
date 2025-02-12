@@ -90,9 +90,11 @@ func addTestPositions(cfg *Config) error {
 		CanActivate:       true,
 		CanDeactivate:     true,
 		CanAddOrders:      true,
+		CanReceiveOrders:  true,
 		CanQuery:          true,
 		CanChangeProtocol: true,
 		CanAddStaff:       true,
+		CanAddReminders:   true,
 	}
 	posRes := database.CreatePositionParams{
 		Title:         "Researcher",
@@ -105,7 +107,10 @@ func addTestPositions(cfg *Config) error {
 		Title:    "Assistant",
 		CanQuery: true,
 	}
-	positions := []database.CreatePositionParams{posPI, posRes, posAss}
+	deniedPos := database.CreatePositionParams{
+		Title: "Denied",
+	}
+	positions := []database.CreatePositionParams{posPI, posRes, posAss, deniedPos}
 
 	for i, position := range positions {
 		cPos, err := cfg.db.CreatePosition(context.Background(), position)
@@ -158,7 +163,17 @@ func addTestInvestigators(cfg *Config) error {
 		Nickname: sql.NullString{Valid: true, String: "Coco"},
 		Position: AssPos.ID,
 	}
-	investigators := []database.CreateInvestigatorParams{invPI, invRes, invAss}
+
+	DenPos, err := cfg.db.GetPositionByTitle(context.Background(), "Denied")
+	if err != nil {
+		return err
+	}
+	denInv := database.CreateInvestigatorParams{
+		IName:    "Daniel Denial",
+		Nickname: sql.NullString{Valid: true, String: "Dan"},
+		Position: DenPos.ID,
+	}
+	investigators := []database.CreateInvestigatorParams{invPI, invRes, invAss, denInv}
 	for i, investigator := range investigators {
 		ci, err := cfg.db.CreateInvestigator(context.Background(), investigator)
 		if err != nil {

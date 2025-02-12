@@ -35,7 +35,8 @@ import (
 // Next:
 // add permissions that work (you can delete anybodys reminders currently)
 // get the # of care days calculated for expenses
-//
+// adding people to protocols does nothing too
+// can only add cage cards to allowed protocols check
 
 // AFTER THAT:
 // the great polishing
