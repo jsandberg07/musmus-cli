@@ -117,6 +117,11 @@ func addCCFunction(cfg *Config) error {
 	}
 	investigator := *cfg.loggedInInvestigator
 
+	err = investigatorProtocolCheck(cfg, &investigator, &protocol)
+	if err != nil {
+		return err
+	}
+
 	// get flags
 	flags := getAddCCFlags()
 
@@ -177,6 +182,13 @@ func addCCFunction(cfg *Config) error {
 				if err != nil {
 					return err
 				}
+
+				investigatorProtocolCheck(cfg, &inv, &protocol)
+				if err != nil {
+					fmt.Println(err)
+					continue
+				}
+
 				investigator = inv
 				fmt.Printf("Investigator set as %s\n", investigator.IName)
 
@@ -184,6 +196,12 @@ func addCCFunction(cfg *Config) error {
 				pro, err := getProtocolByFlag(cfg, arg.value)
 				if err != nil {
 					return err
+				}
+
+				err = investigatorProtocolCheck(cfg, &investigator, &pro)
+				if err != nil {
+					fmt.Println(err)
+					continue
 				}
 				protocol = pro
 

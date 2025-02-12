@@ -33,6 +33,7 @@ import (
 // work on the read me cause it'll be different
 
 // Next:
+// improve goto with some fallthroughs
 // add permissions that work (you can delete anybodys reminders currently)
 // get the # of care days calculated for expenses
 

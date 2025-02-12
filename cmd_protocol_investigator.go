@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -239,4 +240,26 @@ func getProtocolByFlag(cfg *Config, n string) (database.Protocol, error) {
 	}
 
 	return protocol, nil
+}
+
+// investigators need to be added to a protocol before working on it. Ie adding cage cards, activating cage cards, adding orders
+func investigatorProtocolCheck(cfg *Config, i *database.Investigator, p *database.Protocol) error {
+	cip := database.CheckInvestigatorProtocolParams{
+		InvestigatorID: i.ID,
+		ProtocolID:     p.ID,
+	}
+	check, err := cfg.db.CheckInvestigatorProtocol(context.Background(), cip)
+	if err != nil && err.Error() == "sql: no rows in result set" {
+		// not found
+		return errors.New("investigator not on protocol")
+	}
+	if err != nil {
+		// any other error
+		return errors.New("error getting protocol - investigator information")
+	}
+
+	if verbose {
+		fmt.Println(check)
+	}
+	return nil
 }

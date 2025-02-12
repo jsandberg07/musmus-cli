@@ -7,3 +7,6 @@ RETURNING *;
 DELETE FROM added_to_protocol
 WHERE $1 = investigator_id AND $2 = protocol_id;
 
+-- name: CheckInvestigatorProtocol :one
+SELECT * FROM added_to_protocol
+WHERE $1 = investigator_id AND $2 = protocol_id;
