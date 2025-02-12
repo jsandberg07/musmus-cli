@@ -42,6 +42,7 @@ import (
 // the great readme-en-ing. write a readme and update the github page
 // add some consts for the strings you use for consistency + fancy + easier changes
 // like exiting program vs exiting command
+// continue to use SIGNED ints but double check them!!! this is a deliberate design decision!
 // AFTER THAT:
 // the great adding the project to my portfolioening
 // lots of test data! for fun!

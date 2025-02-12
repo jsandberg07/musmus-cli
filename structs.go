@@ -57,6 +57,7 @@ type CageCard struct {
 	Person string
 }
 
+// TODO: generally used the same in every place, add member funcs like "changed made" or "reset" or "printed" or "check"
 type Reviewed struct {
 	Printed     bool
 	ChangesMade bool

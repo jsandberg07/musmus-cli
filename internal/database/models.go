@@ -56,9 +56,11 @@ type Position struct {
 	CanActivate       bool
 	CanDeactivate     bool
 	CanAddOrders      bool
+	CanReceiveOrders  bool
 	CanQuery          bool
 	CanChangeProtocol bool
 	CanAddStaff       bool
+	CanAddReminders   bool
 }
 
 type Protocol struct {
