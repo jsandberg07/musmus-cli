@@ -112,6 +112,11 @@ func getEditInvestigatorFlags() map[string]Flag {
 // then print old to new
 // look into removing the args thing, might have to stay
 func editInvestigatorFunction(cfg *Config) error {
+	// permission check
+	err := checkPermission(cfg.loggedInPosition, PermissionStaff)
+	if err != nil {
+		return err
+	}
 	investigator, err := getStructPrompt(cfg, "Enter the name of the investigator you'd like to edit,", getInvestigatorStruct)
 	if err != nil {
 		return err

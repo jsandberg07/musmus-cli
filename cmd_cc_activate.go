@@ -141,6 +141,11 @@ func getActivationFlags() map[string]Flag {
 
 // TODO: maybe add the keepXs in a struct. And reminders. Just for organization
 func activateFunction(cfg *Config) error {
+	// permission check
+	err := checkPermission(cfg.loggedInPosition, PermissionActivateInactivate)
+	if err != nil {
+		return err
+	}
 
 	flags := getActivationFlags()
 

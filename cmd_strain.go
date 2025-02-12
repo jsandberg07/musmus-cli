@@ -60,6 +60,7 @@ func getAddStrainFlags() map[string]Flag {
 
 // look into removing the args thing, might have to stay
 func addStrainFunction(cfg *Config) error {
+	// no permissions, strains are generally for reference
 
 	name, err := getStringPrompt(cfg, "Enter strain name", checkFuncNil)
 	if err != nil {
@@ -265,6 +266,7 @@ func getEditStrainFlags() map[string]Flag {
 
 // look into removing the args thing, might have to stay
 func editStrainFunction(cfg *Config) error {
+	// no permission check, strains are generally for reference
 	nilStrain := database.Strain{}
 	strain, err := getStructPrompt(cfg, "Enter strain name or ID to edit", getStrainStruct)
 	if err != nil {

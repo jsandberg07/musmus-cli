@@ -83,6 +83,11 @@ func getDeactivationFlags() map[string]Flag {
 }
 
 func deactivateFunction(cfg *Config) error {
+	// permission check
+	err := checkPermission(cfg.loggedInPosition, PermissionDeactivateReactivate)
+	if err != nil {
+		return err
+	}
 	// get flags
 	flags := getDeactivationFlags()
 

@@ -34,6 +34,8 @@ import (
 
 // Next:
 // add permissions that work (you can delete anybodys reminders currently)
+// get the # of care days calculated for expenses
+//
 
 // AFTER THAT:
 // the great polishing

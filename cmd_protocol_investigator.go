@@ -13,7 +13,7 @@ import (
 
 func getAddInvestigatorToProtocolCmd() Command {
 	addInvestToProtFlags := make(map[string]Flag)
-	XXXCmd := Command{
+	addInvProCmd := Command{
 		name:        "investigator",
 		description: "Used for adding investigators to a protocol",
 		function:    addInvestigatorToProtocolFunction,
@@ -21,7 +21,7 @@ func getAddInvestigatorToProtocolCmd() Command {
 		printOrder:  2,
 	}
 
-	return XXXCmd
+	return addInvProCmd
 }
 
 // [a]dd, [r]emove, [i]nvestigator, [p]rotocol, exit
@@ -86,6 +86,11 @@ func getAddInvestToProtFlags() map[string]Flag {
 
 // look into removing the args thing, might have to stay
 func addInvestigatorToProtocolFunction(cfg *Config) error {
+	// permission check
+	err := checkPermission(cfg.loggedInPosition, PermissionProtocol)
+	if err != nil {
+		return err
+	}
 	// get flags
 	flags := getAddInvestToProtFlags()
 

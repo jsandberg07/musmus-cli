@@ -118,6 +118,19 @@ func (s *CageCardActivationParams) keepCheck() {
 	}
 }
 
+type Permission int
+
+const (
+	PermissionActivateInactivate = iota
+	PermissionDeactivateReactivate
+	PermissionAddOrder
+	PermissionReceiveOrder
+	PermissionRunQueries
+	PermissionProtocol
+	PermissionStaff
+	PermissionReminders
+)
+
 /*
 Create a flag:
 symbol, description, and if it takes a value

@@ -59,6 +59,11 @@ func getAddOrderFlags() map[string]Flag {
 
 // look into removing the args thing, might have to stay
 func addOrderFunction(cfg *Config) error {
+	// permission check
+	err := checkPermission(cfg.loggedInPosition, PermissionAddOrder)
+	if err != nil {
+		return err
+	}
 	// get flags
 	flags := getAddOrderFlags()
 
@@ -339,6 +344,11 @@ func getEditOrderFlags() map[string]Flag {
 // look into removing the args thing, might have to stay
 // ask for an order number, load params, set flags
 func editOrderFunction(cfg *Config) error {
+	// permission check
+	err := checkPermission(cfg.loggedInPosition, PermissionAddOrder)
+	if err != nil {
+		return err
+	}
 	// get flags
 	flags := getEditOrderFlags()
 
@@ -574,6 +584,11 @@ func getReceiveOrderFlags() map[string]Flag {
 // then DO IT
 // look into removing the args thing, might have to stay
 func receiveOrderFunction(cfg *Config) error {
+	// permission check
+	err := checkPermission(cfg.loggedInPosition, PermissionReceiveOrder)
+	if err != nil {
+		return err
+	}
 	// flags just for saving and exiting prompt everything else
 	flags := getReceiveOrderFlags()
 

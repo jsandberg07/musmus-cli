@@ -68,6 +68,11 @@ func getCCReactivateFlags() map[string]Flag {
 
 // look into removing the args thing, might have to stay
 func reactivateFunction(cfg *Config) error {
+	// permission check
+	err := checkPermission(cfg.loggedInPosition, PermissionDeactivateReactivate)
+	if err != nil {
+		return err
+	}
 	// get flags
 	flags := getCCReactivateFlags()
 

@@ -69,6 +69,11 @@ func getInactivateFlags() map[string]Flag {
 
 // look into removing the args thing, might have to stay
 func inactivateFunction(cfg *Config) error {
+	// permission check
+	err := checkPermission(cfg.loggedInPosition, PermissionActivateInactivate)
+	if err != nil {
+		return err
+	}
 	// get flags
 	flags := getInactivateFlags()
 

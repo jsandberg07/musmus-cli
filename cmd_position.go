@@ -309,6 +309,11 @@ func getEditPositionCmd() Command {
 // TODO: print all titles so people know what the names are
 // flags are in addPosition
 func editPositionFunction(cfg *Config) error {
+	// permission check
+	err := checkPermission(cfg.loggedInPosition, PermissionStaff)
+	if err != nil {
+		return err
+	}
 	position, err := getStructPrompt(cfg, "Enter the title of the position to edit,", getPositionStruct)
 	if err != nil {
 		return err
@@ -566,6 +571,67 @@ func printPermissions(c *database.CreatePositionParams, u *database.UpdatePositi
 	fmt.Println("* Denied permissions:")
 	for _, den := range denied {
 		fmt.Println(den)
+	}
+}
+
+// pass in currently logged in user's position from cfg (it's literally stored there)
+func checkPermission(i *database.Position, p Permission) error {
+	// we dont need to contact the db, the position is already loaded in cfg but check if nil
+	if i == nil {
+		return errors.New("could not get position to verify permissions")
+	}
+	var pMsg string
+	permitted := true
+
+	switch p {
+	case PermissionActivateInactivate:
+		if !i.CanActivate {
+			permitted = false
+			pMsg = "add, activate or inactivate cage cards"
+		}
+	case PermissionDeactivateReactivate:
+		if !i.CanActivate {
+			permitted = false
+			pMsg = "deactivate or reactivate cage cards"
+		}
+	case PermissionAddOrder:
+		if !i.CanActivate {
+			permitted = false
+			pMsg = "add orders"
+		}
+	case PermissionReceiveOrder:
+		if !i.CanActivate {
+			permitted = false
+			pMsg = "receive orders"
+		}
+	case PermissionRunQueries:
+		if !i.CanActivate {
+			permitted = false
+			pMsg = "run queries"
+		}
+	case PermissionProtocol:
+		if !i.CanActivate {
+			permitted = false
+			pMsg = "adjust protocols"
+		}
+	case PermissionStaff:
+		if !i.CanActivate {
+			permitted = false
+			pMsg = "edit staff"
+		}
+	case PermissionReminders:
+		if !i.CanActivate {
+			permitted = false
+			pMsg = "add reminders"
+		}
+	default:
+		return errors.New("default in check permissions. unknown permission")
+	}
+	if !permitted {
+		msg := fmt.Sprintf("position %s is not permitted to %s", i.Title, pMsg)
+		return errors.New(msg)
+	} else {
+		return nil
 	}
 }
 

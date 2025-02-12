@@ -101,6 +101,11 @@ func getAddCCFlags() map[string]Flag {
 
 // look into removing the args thing, might have to stay
 func addCCFunction(cfg *Config) error {
+	// permission check
+	err := checkPermission(cfg.loggedInPosition, PermissionActivateInactivate)
+	if err != nil {
+		return err
+	}
 	var nilProtocol database.Protocol
 	protocol, err := getStructPrompt(cfg, "Enter a protocol for the cards be used with", getProtocolStruct)
 	if err != nil {
