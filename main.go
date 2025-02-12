@@ -26,8 +26,8 @@ import (
 // do it
 
 // CURRENTLY:
-// add permission checks to everything. You literally have the roles already you just need to check with logged in position stored in cfg
-// this wil literally be an easy one
+// add protocol check (can only add cage cards / orders for protocols youre added to)
+// so adding people to this actually matters lmao
 
 // After that:
 // work on the read me cause it'll be different
@@ -35,8 +35,6 @@ import (
 // Next:
 // add permissions that work (you can delete anybodys reminders currently)
 // get the # of care days calculated for expenses
-// adding people to protocols does nothing too
-// can only add cage cards to allowed protocols check
 
 // AFTER THAT:
 // the great polishing
