@@ -183,7 +183,7 @@ func addCCFunction(cfg *Config) error {
 					return err
 				}
 
-				investigatorProtocolCheck(cfg, &inv, &protocol)
+				err = investigatorProtocolCheck(cfg, &inv, &protocol)
 				if err != nil {
 					fmt.Println(err)
 					continue
