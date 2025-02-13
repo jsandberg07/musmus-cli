@@ -56,5 +56,7 @@ INNER JOIN investigators ON cage_cards.investigator_id = investigators.id
 INNER JOIN protocols ON cage_cards.protocol_id = protocols.id
 LEFT JOIN strains ON cage_cards.strain = strains.id
 LEFT JOIN orders ON cage_cards.order_id = orders.id
-WHERE (activated_on IS NOT NULL AND activated_on >= $1) AND (deactivated_on <= $2 OR deactivated_on IS NULL)
-ORDER BY cage_cards.cc_id ASC;
+WHERE (($1, $2) OVERLAPS (activated_on, deactivated_on))
+OR
+(activated_on <= $1 AND deactivated_on IS NULL)
+ORDER BY cc_id ASC;

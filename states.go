@@ -187,7 +187,7 @@ func getProtocolState() *State {
 
 func getQueriesMap() map[string]Command {
 	// put your query Commands here
-	cmds := []Command{getCCQueriesCmd()}
+	cmds := []Command{getCCQueriesCmd(), getCareDaysCmd()}
 	commandMap := cmdMapHelper(cmds)
 
 	return commandMap

@@ -39,7 +39,7 @@ func getXXXFlags() map[string]Flag {
 }
 
 // look into removing the args thing, might have to stay
-func XXXFunction(cfg *Config, args []Argument) error {
+func XXXFunction(cfg *Config) error {
 	// get flags
 	flags := getXXXFlags()
 

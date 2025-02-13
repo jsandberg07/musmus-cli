@@ -415,9 +415,15 @@ func CCQueryAll(cfg *Config) error {
 }
 
 func CCQueryDateRange(cfg *Config, start, end time.Time) error {
+	/*
+		gcdrParam := database.GetCardsDateRangeParams{
+			ActivatedOn:   sql.NullTime{Valid: true, Time: start},
+			DeactivatedOn: sql.NullTime{Valid: true, Time: end},
+		}
+	*/
 	gcdrParam := database.GetCardsDateRangeParams{
-		ActivatedOn:   sql.NullTime{Valid: true, Time: start},
-		DeactivatedOn: sql.NullTime{Valid: true, Time: end},
+		Overlaps:   sql.NullTime{Valid: true, Time: start},
+		Overlaps_2: sql.NullTime{Valid: true, Time: end},
 	}
 	ccs, err := cfg.db.GetCardsDateRange(context.Background(), gcdrParam)
 	if err != nil {

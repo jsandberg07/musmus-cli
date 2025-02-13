@@ -26,11 +26,16 @@ import (
 // do it
 
 // CURRENTLY:
-// improve goto with some fallthroughs
-// add permissions that work (you can delete anybodys reminders currently)
-// get the # of care days calculated for expenses
+// improve goto with some fallthroughs - done!
+// add permissions that work (you can delete anybodys reminders currently) - done!
+// get the # of care days calculated for expenses - x
 // investigator "is active" boolean in db does nothing still kek
 // printiong the flags to include the "-" i should have fixd that forever ago ToT there are so many flags now
+// change the "fake flag" error message into a const, have it like make sense
+// something about passing slices via pointer ONLY IF YOU MODIFY THEM
+// otherwise just pass by value
+// psql supports OVERLAPS for time stamps. rewrite using that?
+// big maybe! cause it uses BETWEEN INTERFACE which doesn't mean much i think (but i get it)
 
 // After that:
 // work on the read me cause it'll be different
