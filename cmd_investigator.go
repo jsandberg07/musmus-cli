@@ -31,44 +31,44 @@ func getEditInvestigatorCmd() Command {
 func getEditInvestigatorFlags() map[string]Flag {
 	editInvestigatorFlags := make(map[string]Flag)
 	iFlag := Flag{
-		symbol:      "i",
+		symbol:      "-i",
 		description: "Changes proper 'investigator' name",
 		takesValue:  true,
 		printOrder:  1,
 	}
-	editInvestigatorFlags["-"+iFlag.symbol] = iFlag
+	editInvestigatorFlags[iFlag.symbol] = iFlag
 
 	nFlag := Flag{
-		symbol:      "n",
+		symbol:      "-n",
 		description: "Changes nickname. Enter 'delete' to remove nickname",
 		takesValue:  true,
 		printOrder:  2,
 	}
-	editInvestigatorFlags["-"+nFlag.symbol] = nFlag
+	editInvestigatorFlags[nFlag.symbol] = nFlag
 
 	pFlag := Flag{
-		symbol:      "p",
+		symbol:      "-p",
 		description: "Changes position",
 		takesValue:  true,
 		printOrder:  3,
 	}
-	editInvestigatorFlags["-"+pFlag.symbol] = pFlag
+	editInvestigatorFlags[pFlag.symbol] = pFlag
 
 	aFlag := Flag{
-		symbol:      "a",
+		symbol:      "-a",
 		description: "Toggles if investigator is active on the protocols",
 		takesValue:  false,
 		printOrder:  4,
 	}
-	editInvestigatorFlags["-"+aFlag.symbol] = aFlag
+	editInvestigatorFlags[aFlag.symbol] = aFlag
 
 	eFlag := Flag{
-		symbol:      "e",
+		symbol:      "-e",
 		description: "Changes email. Enter 'delete' to remove email",
 		takesValue:  true,
 		printOrder:  5,
 	}
-	editInvestigatorFlags["-"+eFlag.symbol] = eFlag
+	editInvestigatorFlags[eFlag.symbol] = eFlag
 
 	// ect as needed or remove the "-"+ for longer ones
 
@@ -249,7 +249,7 @@ func editInvestigatorFunction(cfg *Config) error {
 				}
 				reviewed.ChangesMade = true
 			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
+				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
 
@@ -465,7 +465,7 @@ func addInvestigatorFunction(cfg *Config) error {
 				cmdHelp(flags)
 
 			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
+				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
 

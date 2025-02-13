@@ -148,12 +148,12 @@ func getGotoFlags() map[string]Flag {
 	gotoFlags[cagecardFlag.symbol] = cagecardFlag
 
 	ccFlag := Flag{
-		symbol:      "cc",
+		symbol:      "-cc",
 		description: "Goes to CC processing menu.",
 		takesValue:  false,
 		printOrder:  2,
 	}
-	gotoFlags["-"+ccFlag.symbol] = ccFlag
+	gotoFlags[ccFlag.symbol] = ccFlag
 
 	positionFlag := Flag{
 		symbol:      "position",
@@ -163,12 +163,12 @@ func getGotoFlags() map[string]Flag {
 	}
 	gotoFlags[positionFlag.symbol] = positionFlag
 	psFlag := Flag{
-		symbol:      "ps",
+		symbol:      "-ps",
 		description: "Goes to positions menu.",
 		takesValue:  false,
 		printOrder:  4,
 	}
-	gotoFlags["-"+psFlag.symbol] = psFlag
+	gotoFlags[psFlag.symbol] = psFlag
 
 	investigatorFlag := Flag{
 		symbol:      "investigator",
@@ -178,12 +178,12 @@ func getGotoFlags() map[string]Flag {
 	}
 	gotoFlags[investigatorFlag.symbol] = investigatorFlag
 	iFlag := Flag{
-		symbol:      "in",
+		symbol:      "-in",
 		description: "Goes to investigator menu.",
 		takesValue:  false,
 		printOrder:  6,
 	}
-	gotoFlags["-"+iFlag.symbol] = iFlag
+	gotoFlags[iFlag.symbol] = iFlag
 
 	protocolFlag := Flag{
 		symbol:      "protocol",
@@ -193,12 +193,12 @@ func getGotoFlags() map[string]Flag {
 	}
 	gotoFlags[protocolFlag.symbol] = protocolFlag
 	prFlag := Flag{
-		symbol:      "pr",
+		symbol:      "-pr",
 		description: "Goes to protocol menu.",
 		takesValue:  false,
 		printOrder:  8,
 	}
-	gotoFlags["-"+prFlag.symbol] = prFlag
+	gotoFlags[prFlag.symbol] = prFlag
 
 	settingFlag := Flag{
 		symbol:      "setting",
@@ -208,12 +208,12 @@ func getGotoFlags() map[string]Flag {
 	}
 	gotoFlags[settingFlag.symbol] = settingFlag
 	seFlag := Flag{
-		symbol:      "se",
+		symbol:      "-se",
 		description: "Goes to settings menu.",
 		takesValue:  false,
 		printOrder:  10,
 	}
-	gotoFlags["-"+seFlag.symbol] = seFlag
+	gotoFlags[seFlag.symbol] = seFlag
 
 	strainFlag := Flag{
 		symbol:      "strain",
@@ -223,12 +223,12 @@ func getGotoFlags() map[string]Flag {
 	}
 	gotoFlags[strainFlag.symbol] = strainFlag
 	stFlag := Flag{
-		symbol:      "st",
+		symbol:      "-st",
 		description: "Goes to the strains menu.",
 		takesValue:  false,
 		printOrder:  12,
 	}
-	gotoFlags["-"+stFlag.symbol] = stFlag
+	gotoFlags[stFlag.symbol] = stFlag
 
 	queryFlag := Flag{
 		symbol:      "query",
@@ -238,12 +238,12 @@ func getGotoFlags() map[string]Flag {
 	}
 	gotoFlags[queryFlag.symbol] = queryFlag
 	quFlag := Flag{
-		symbol:      "qu",
+		symbol:      "-qu",
 		description: "Goes to the queries menu.",
 		takesValue:  false,
 		printOrder:  14,
 	}
-	gotoFlags["-"+quFlag.symbol] = quFlag
+	gotoFlags[quFlag.symbol] = quFlag
 
 	orderFlag := Flag{
 		symbol:      "orders",
@@ -253,12 +253,12 @@ func getGotoFlags() map[string]Flag {
 	}
 	gotoFlags[orderFlag.symbol] = orderFlag
 	orFlag := Flag{
-		symbol:      "or",
+		symbol:      "-or",
 		description: "Goes to the orders menu.",
 		takesValue:  false,
 		printOrder:  16,
 	}
-	gotoFlags["-"+orFlag.symbol] = orFlag
+	gotoFlags[orFlag.symbol] = orFlag
 
 	reminderFlag := Flag{
 		symbol:      "reminder",
@@ -268,12 +268,12 @@ func getGotoFlags() map[string]Flag {
 	}
 	gotoFlags[reminderFlag.symbol] = reminderFlag
 	rmFlag := Flag{
-		symbol:      "rm",
+		symbol:      "-rm",
 		description: "Goes to the reminders menu.",
 		takesValue:  false,
 		printOrder:  18,
 	}
-	gotoFlags["-"+rmFlag.symbol] = rmFlag
+	gotoFlags[rmFlag.symbol] = rmFlag
 
 	helpFlag := Flag{
 		symbol:      "help",
@@ -386,7 +386,7 @@ func gotoFunction(cfg *Config) error {
 			case "help":
 				cmdHelp(flags)
 			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
+				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
 

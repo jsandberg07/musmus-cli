@@ -64,44 +64,44 @@ func getCCQueriesFlags() map[string]Flag {
 	ccQueriesFlags := make(map[string]Flag)
 
 	sFlag := Flag{
-		symbol:      "s",
+		symbol:      "-s",
 		description: "Sets start date for query.",
 		takesValue:  true,
 		printOrder:  2,
 	}
-	ccQueriesFlags["-"+sFlag.symbol] = sFlag
+	ccQueriesFlags[sFlag.symbol] = sFlag
 
 	eFlag := Flag{
-		symbol:      "e",
+		symbol:      "-e",
 		description: "Sets end date for query.",
 		takesValue:  true,
 		printOrder:  3,
 	}
-	ccQueriesFlags["-"+eFlag.symbol] = eFlag
+	ccQueriesFlags[eFlag.symbol] = eFlag
 
 	prFlag := Flag{
-		symbol:      "pr",
+		symbol:      "-pr",
 		description: "Gets cards under set protocol.",
 		takesValue:  true,
 		printOrder:  4,
 	}
-	ccQueriesFlags["-"+prFlag.symbol] = prFlag
+	ccQueriesFlags[prFlag.symbol] = prFlag
 
 	inFlag := Flag{
-		symbol:      "in",
+		symbol:      "-in",
 		description: "Gets cards under set investigator.",
 		takesValue:  true,
 		printOrder:  5,
 	}
-	ccQueriesFlags["-"+inFlag.symbol] = inFlag
+	ccQueriesFlags[inFlag.symbol] = inFlag
 
 	orFlag := Flag{
-		symbol:      "or",
+		symbol:      "-or",
 		description: "Gets cards that were added under set order",
 		takesValue:  true,
 		printOrder:  6,
 	}
-	ccQueriesFlags["-"+orFlag.symbol] = orFlag
+	ccQueriesFlags[orFlag.symbol] = orFlag
 
 	// ect as needed or remove the "-"+ for longer ones
 
@@ -346,7 +346,7 @@ func CCQueriesFunction(cfg *Config) error {
 				exit = true
 
 			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
+				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
 

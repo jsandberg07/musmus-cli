@@ -198,7 +198,7 @@ func addOrderFunction(cfg *Config) error {
 			case "help":
 				cmdHelp(flags)
 			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
+				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
 
@@ -529,7 +529,7 @@ func editOrderFunction(cfg *Config) error {
 				reviewed.ChangesMade = true
 
 			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
+				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
 

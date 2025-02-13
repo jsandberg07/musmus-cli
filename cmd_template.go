@@ -24,12 +24,12 @@ func getXXXCmd() Command {
 func getXXXFlags() map[string]Flag {
 	XXXFlags := make(map[string]Flag)
 	XFlag := Flag{
-		symbol:      "X",
+		symbol:      "-X",
 		description: "Sets X",
 		takesValue:  false,
 		printOrder:  1,
 	}
-	XXXFlags["-"+XFlag.symbol] = XFlag
+	XXXFlags[XFlag.symbol] = XFlag
 
 	// ect as needed or remove the "-"+ for longer ones
 
@@ -78,7 +78,7 @@ func XXXFunction(cfg *Config) error {
 			case "-X":
 				exit = true
 			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
+				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
 

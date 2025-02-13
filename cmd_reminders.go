@@ -172,7 +172,7 @@ func addReminderFunction(cfg *Config) error {
 				cmdHelp(getAddReminderFlags())
 
 			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
+				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
 

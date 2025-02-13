@@ -173,7 +173,7 @@ func addProtocolFunction(cfg *Config) error {
 				fmt.Println("Exiting without saving...")
 				exit = true
 			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
+				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
 
@@ -290,44 +290,44 @@ func getEditProtocolCmd() Command {
 func getEditProtocolFlags() map[string]Flag {
 	editProtocolFlags := make(map[string]Flag)
 	tFlag := Flag{
-		symbol:      "t",
+		symbol:      "-t",
 		description: "Changes protocol title",
 		takesValue:  true,
 		printOrder:  1,
 	}
-	editProtocolFlags["-"+tFlag.symbol] = tFlag
+	editProtocolFlags[tFlag.symbol] = tFlag
 
 	pFlag := Flag{
-		symbol:      "p",
+		symbol:      "-p",
 		description: "Changed protocol's PI",
 		takesValue:  true,
 		printOrder:  2,
 	}
-	editProtocolFlags["-"+pFlag.symbol] = pFlag
+	editProtocolFlags[pFlag.symbol] = pFlag
 
 	aFlag := Flag{
-		symbol:      "a",
+		symbol:      "-a",
 		description: "Sets allocated animals",
 		takesValue:  true,
 		printOrder:  3,
 	}
-	editProtocolFlags["-"+aFlag.symbol] = aFlag
+	editProtocolFlags[aFlag.symbol] = aFlag
 
 	bFlag := Flag{
-		symbol:      "b",
+		symbol:      "-b",
 		description: "Changes protocol balance",
 		takesValue:  true,
 		printOrder:  4,
 	}
-	editProtocolFlags["-"+bFlag.symbol] = bFlag
+	editProtocolFlags[bFlag.symbol] = bFlag
 
 	eFlag := Flag{
-		symbol:      "e",
+		symbol:      "-e",
 		description: "Changes expiration date",
 		takesValue:  true,
 		printOrder:  5,
 	}
-	editProtocolFlags["-"+eFlag.symbol] = eFlag
+	editProtocolFlags[eFlag.symbol] = eFlag
 
 	// ect as needed or remove the "-"+ for longer ones
 
@@ -513,7 +513,7 @@ func editProtocolFunction(cfg *Config) error {
 				}
 				exit = true
 			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
+				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
 

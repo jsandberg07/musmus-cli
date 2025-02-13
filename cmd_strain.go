@@ -150,7 +150,7 @@ func addStrainFunction(cfg *Config) error {
 				}
 				exit = true
 			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
+				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
 
@@ -203,28 +203,28 @@ func getEditStrainCmd() Command {
 func getEditStrainFlags() map[string]Flag {
 	editStrainFlags := make(map[string]Flag)
 	nFlag := Flag{
-		symbol:      "n",
+		symbol:      "-n",
 		description: "Set name of strain",
 		takesValue:  true,
 		printOrder:  1,
 	}
-	editStrainFlags["-"+nFlag.symbol] = nFlag
+	editStrainFlags[nFlag.symbol] = nFlag
 
 	vFlag := Flag{
-		symbol:      "v",
+		symbol:      "-v",
 		description: "Sets vendor",
 		takesValue:  true,
 		printOrder:  2,
 	}
-	editStrainFlags["-"+vFlag.symbol] = vFlag
+	editStrainFlags[vFlag.symbol] = vFlag
 
 	cFlag := Flag{
-		symbol:      "c",
+		symbol:      "-c",
 		description: "Sets strain code",
 		takesValue:  true,
 		printOrder:  3,
 	}
-	editStrainFlags["-"+cFlag.symbol] = cFlag
+	editStrainFlags[cFlag.symbol] = cFlag
 
 	// ect as needed or remove the "-"+ for longer ones
 
@@ -371,7 +371,7 @@ func editStrainFunction(cfg *Config) error {
 				reviewed.Printed = true
 
 			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
+				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
 

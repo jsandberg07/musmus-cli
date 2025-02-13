@@ -33,20 +33,20 @@ func getChangeSettingsCmd() Command {
 func getChangeSettingsFlags() map[string]Flag {
 	settingsFlags := make(map[string]Flag)
 	aFlag := Flag{
-		symbol:      "a",
+		symbol:      "-a",
 		description: "Toggles the 'only activate self' setting.\nTrue means investigators can activate cards that aren't in their own name.",
 		takesValue:  false,
 		printOrder:  1,
 	}
-	settingsFlags["-"+aFlag.symbol] = aFlag
+	settingsFlags[aFlag.symbol] = aFlag
 
 	rFlag := Flag{
-		symbol:      "r",
+		symbol:      "-r",
 		description: "Review settings.\nDisplays the current settings BEFORE any changes are made.",
 		takesValue:  false,
 		printOrder:  2,
 	}
-	settingsFlags["-"+rFlag.symbol] = rFlag
+	settingsFlags[rFlag.symbol] = rFlag
 
 	saveFlag := Flag{
 		symbol:      "save",
@@ -153,7 +153,7 @@ func changeSettingsFunction(cfg *Config) error {
 			case "help":
 				cmdHelp(flags)
 			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
+				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
 

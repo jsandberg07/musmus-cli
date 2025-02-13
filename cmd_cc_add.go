@@ -30,44 +30,44 @@ func getAddCCCmd() Command {
 func getAddCCFlags() map[string]Flag {
 	addCCFlags := make(map[string]Flag)
 	sFlag := Flag{
-		symbol:      "s",
+		symbol:      "-s",
 		description: "Sets start of range (inclusive)",
 		takesValue:  true,
 		printOrder:  1,
 	}
-	addCCFlags["-"+sFlag.symbol] = sFlag
+	addCCFlags[sFlag.symbol] = sFlag
 
 	eFlag := Flag{
-		symbol:      "e",
+		symbol:      "-e",
 		description: "Sets end of range (inclusive)",
 		takesValue:  true,
 		printOrder:  2,
 	}
-	addCCFlags["-"+eFlag.symbol] = eFlag
+	addCCFlags[eFlag.symbol] = eFlag
 
 	aFlag := Flag{
-		symbol:      "a",
+		symbol:      "-a",
 		description: "Adds range of cards to database without exiting",
 		takesValue:  false,
 		printOrder:  3,
 	}
-	addCCFlags["-"+aFlag.symbol] = aFlag
+	addCCFlags[aFlag.symbol] = aFlag
 
 	iFlag := Flag{
-		symbol:      "i",
+		symbol:      "-i",
 		description: "Sets who the cards will be added under",
 		takesValue:  true,
 		printOrder:  4,
 	}
-	addCCFlags["-"+iFlag.symbol] = iFlag
+	addCCFlags[iFlag.symbol] = iFlag
 
 	pFlag := Flag{
-		symbol:      "p",
+		symbol:      "-p",
 		description: "Sets the protocol the cards will be added under",
 		takesValue:  true,
 		printOrder:  5,
 	}
-	addCCFlags["-"+pFlag.symbol] = pFlag
+	addCCFlags[pFlag.symbol] = pFlag
 
 	// ect as needed or remove the "-"+ for longer ones
 
@@ -223,7 +223,7 @@ func addCCFunction(cfg *Config) error {
 				exit = true
 
 			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
+				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
 

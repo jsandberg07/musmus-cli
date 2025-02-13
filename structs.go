@@ -133,6 +133,8 @@ const (
 	PermissionReminders
 )
 
+const DefaultFlagMsg string = "An allowed flag was unhandled by the switch: "
+
 /*
 Create a flag:
 symbol, description, and if it takes a value

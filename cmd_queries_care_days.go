@@ -30,20 +30,20 @@ func getCareDaysCmd() Command {
 func getCareDaysFlags() map[string]Flag {
 	CareDaysFlags := make(map[string]Flag)
 	sFlag := Flag{
-		symbol:      "s",
+		symbol:      "-s",
 		description: "Sets start date of query period",
 		takesValue:  true,
 		printOrder:  1,
 	}
-	CareDaysFlags["-"+sFlag.symbol] = sFlag
+	CareDaysFlags[sFlag.symbol] = sFlag
 
 	eFlag := Flag{
-		symbol:      "e",
+		symbol:      "-e",
 		description: "Sets end date of query period",
 		takesValue:  true,
 		printOrder:  1,
 	}
-	CareDaysFlags["-"+eFlag.symbol] = eFlag
+	CareDaysFlags[eFlag.symbol] = eFlag
 
 	/* TODO: add the ability to get # of care days by investigator or protocol
 	iFlag := Flag{
@@ -215,7 +215,7 @@ func careDaysFunction(cfg *Config) error {
 				fmt.Println("Exiting...")
 				exit = true
 			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
+				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
 
