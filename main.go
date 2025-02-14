@@ -33,6 +33,7 @@ import (
 // printiong the flags to include the "-" i should have fixd that forever ago ToT there are so many flags now - not so bad but it's done!
 // change the "fake flag" error message into a const, have it like make sense - done!
 // something about passing slices via pointer ONLY IF YOU MODIFY THEM
+// we back at it again boys let's get these pointers all set
 // otherwise just pass by value
 // psql supports OVERLAPS for time stamps. rewrite using that?
 // big maybe! cause it uses BETWEEN INTERFACE which doesn't mean much i think (but i get it)

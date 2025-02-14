@@ -380,9 +380,9 @@ func CCQueryActive(cfg *Config) error {
 		return nil
 	}
 
-	exp := NormalizeCCExport(&ccs)
+	exp := NormalizeCCExport(ccs)
 
-	count, err := exportData(&exp)
+	count, err := exportData(exp)
 	if err != nil {
 		return err
 	}
@@ -403,9 +403,9 @@ func CCQueryAll(cfg *Config) error {
 		return nil
 	}
 
-	exp := NormalizeCCExport(&ccs)
+	exp := NormalizeCCExport(ccs)
 
-	count, err := exportData(&exp)
+	count, err := exportData(exp)
 	if err != nil {
 		return err
 	}
@@ -435,9 +435,9 @@ func CCQueryDateRange(cfg *Config, start, end time.Time) error {
 		return nil
 	}
 
-	exp := NormalizeCCExport(&ccs)
+	exp := NormalizeCCExport(ccs)
 
-	count, err := exportData(&exp)
+	count, err := exportData(exp)
 	if err != nil {
 		return err
 	}
@@ -463,9 +463,9 @@ func CCQueryInvestigator(cfg *Config, start, end time.Time, inv *database.Invest
 		return nil
 	}
 
-	exp := NormalizeCCExport(&ccs)
+	exp := NormalizeCCExport(ccs)
 
-	count, err := exportData(&exp)
+	count, err := exportData(exp)
 	if err != nil {
 		return err
 	}
@@ -488,9 +488,9 @@ func CCQueryOrder(cfg *Config, o *database.Order) error {
 	}
 
 	// TODO: adding a column to this is a bad experience. Modifying like 5 structs via sql functions.
-	exp := NormalizeCCExport(&ccs)
+	exp := NormalizeCCExport(ccs)
 
-	count, err := exportData(&exp)
+	count, err := exportData(exp)
 	if err != nil {
 		return err
 	}
@@ -502,12 +502,12 @@ func CCQueryOrder(cfg *Config, o *database.Order) error {
 // Output rows are consistent between types, but sqlc generates new struct for each query.
 // Changes them into a format that can be turned into a string to be exported. No clue what happens if the structs aren't identical!
 // Don't return error, just check if value is 0 after
-func NormalizeCCExport[T database.GetCageCardsInvestigatorRow | database.GetCageCardsAllRow | database.GetCageCardsActiveRow | database.GetCardsDateRangeRow | database.GetCageCardsProtocolRow | database.GetCageCardsOrderRow](ccs *[]T) []CageCardExport {
-	if len(*ccs) == 0 {
+func NormalizeCCExport[T database.GetCageCardsInvestigatorRow | database.GetCageCardsAllRow | database.GetCageCardsActiveRow | database.GetCardsDateRangeRow | database.GetCageCardsProtocolRow | database.GetCageCardsOrderRow](ccs []T) []CageCardExport {
+	if len(ccs) == 0 {
 		return []CageCardExport{}
 	}
-	output := make([]CageCardExport, len(*ccs))
-	for i, cc := range *ccs {
+	output := make([]CageCardExport, len(ccs))
+	for i, cc := range ccs {
 		ts := CageCardExport(cc)
 		output[i] = ts
 	}
@@ -531,9 +531,9 @@ func CCQueryProtocol(cfg *Config, start, end time.Time, pro *database.Protocol) 
 		return nil
 	}
 
-	exp := NormalizeCCExport(&ccs)
+	exp := NormalizeCCExport(ccs)
 
-	count, err := exportData(&exp)
+	count, err := exportData(exp)
 	if err != nil {
 		return err
 	}
@@ -543,7 +543,7 @@ func CCQueryProtocol(cfg *Config, start, end time.Time, pro *database.Protocol) 
 
 }
 
-func exportData(cages *[]CageCardExport) (int, error) {
+func exportData(cages []CageCardExport) (int, error) {
 	err := createExportDirectory()
 	if err != nil {
 		return 0, err
@@ -570,7 +570,7 @@ func exportData(cages *[]CageCardExport) (int, error) {
 		return 0, err
 	}
 
-	for _, cage := range *cages {
+	for _, cage := range cages {
 		err := writer.Write(stringifyCage(&cage))
 		if err != nil {
 			fmt.Printf("Error writing to csv: %s", err)

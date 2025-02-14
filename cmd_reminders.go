@@ -322,7 +322,7 @@ func deleteReminderFunction(cfg *Config) error {
 		return nil
 	}
 
-	printRemindersList(&reminders)
+	printRemindersList(reminders)
 	count := len(reminders)
 
 	num, err := getIntPrompt("Enter a number to delete the corresponding reminder")
@@ -349,8 +349,8 @@ func deleteReminderFunction(cfg *Config) error {
 
 }
 
-func printRemindersList(reminders *[]database.Reminder) {
-	for i, r := range *reminders {
+func printRemindersList(reminders []database.Reminder) {
+	for i, r := range reminders {
 		fmt.Printf("* %v: %v -- %s\n", i+1, r.RCcID, r.Note)
 	}
 }
