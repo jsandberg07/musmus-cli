@@ -86,6 +86,15 @@ func (cfg *Config) testData() error {
 		return err
 	}
 
+	// mark test data as loaded
+	err = cfg.db.TestDataLoaded(context.Background())
+	if err != nil {
+		return err
+	}
+
+	// print test data instructions
+	testDataInstructions()
+
 	return nil
 }
 
@@ -565,4 +574,9 @@ func addTestOrder(cfg *Config) error {
 	}
 
 	return nil
+}
+
+// TODO: add test data instructions
+func testDataInstructions() {
+	fmt.Println("You can login to the admin account with password 'admin' and use any commands there")
 }

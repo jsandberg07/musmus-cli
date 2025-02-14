@@ -86,8 +86,10 @@ type Reminder struct {
 }
 
 type Setting struct {
+	ID               int32
 	SettingsComplete bool
 	OnlyActivateSelf bool
+	TestDataLoaded   bool
 }
 
 type Strain struct {

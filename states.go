@@ -204,7 +204,7 @@ func getQueriesState() *State {
 
 func getSettingsMap() map[string]Command {
 	// put your settings Commands here
-	cmds := []Command{getChangeSettingsCmd()}
+	cmds := []Command{getChangeSettingsCmd(), getResetCmd()}
 	commandMap := cmdMapHelper(cmds)
 
 	return commandMap

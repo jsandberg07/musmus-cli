@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"context"
 	"database/sql"
 	"fmt"
 	"os"
@@ -82,7 +81,18 @@ func main() {
 	}
 	dbQueries := database.New(db)
 
-	fmt.Println("Hello borld")
+	// removed because i always start my programs with this but it's time to move on ToT
+	// fmt.Println("Hello borld")
+
+	// so we need to
+	// 1. load settings into cfg
+	// 2. check to see if first time set up has been run
+	// 3. if not, prompt to see if they want to load test data or regular data
+	// 4. if test data, load test data and mark test data in settings
+	// 5. if test data is loaded, on each boot ask if they want to reset it
+	// 6. reset reset's everything including settings so it's first time all over again
+	// 7. have a reset option only the admin account can perform
+
 	cfg := Config{
 		currentState:         nil,
 		nextState:            getMainState(),
@@ -91,22 +101,26 @@ func main() {
 		loggedInPosition:     nil,
 	}
 
-	err = cfg.db.ResetDatabase(context.Background())
+	/*
+		err = cfg.db.ResetDatabase(context.Background())
+		if err != nil {
+			fmt.Printf("Error resetting DB: %s", err)
+			os.Exit(1)
+		}
+	*/
+
+	err = cfg.checkFirstTimeSetup()
 	if err != nil {
-		fmt.Printf("Error resetting DB: %s", err)
+		fmt.Printf("Error checking settings from DB: %s\n", err)
 		os.Exit(1)
 	}
 
-	err = cfg.loadSettings()
-	if err != nil {
-		fmt.Printf("Error checking settings from DB: %s", err)
-		os.Exit(1)
-	}
-
+	/* removed becuse it's called in first time set up
 	err = cfg.testData()
 	if err != nil {
 		fmt.Println(err)
 	}
+	*/
 
 	reader := bufio.NewReader(os.Stdin)
 
