@@ -232,7 +232,7 @@ func getGotoFlags() map[string]Flag {
 
 	queryFlag := Flag{
 		symbol:      "query",
-		description: "Goes to the queries menu.",
+		description: "",
 		takesValue:  false,
 		printOrder:  13,
 	}

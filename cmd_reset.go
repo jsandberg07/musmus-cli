@@ -1,25 +1,33 @@
 package main
 
-/* possibly implemented later, seems excessive though compared to just truncating via sql
-// really truly commented out to satisfy staticcheck
+import (
+	"context"
+	"fmt"
+	"os"
+)
+
 func getResetCmd() Command {
-	// maybe add flags later to reset only 1 tables
 	resetCmd := Command{
 		name:        "reset",
-		description: "Resets all tables (for testing purposes).",
+		description: "Resets database",
 		function:    resetCommand,
+		printOrder:  2,
 	}
 
 	return resetCmd
 }
 
-func resetCommand(cfg *Config, args []Argument) error {
-	err := cfg.db.ResetCageCards(context.Background())
+func resetCommand(cfg *Config) error {
+	if !cfg.loggedInPosition.IsAdmin {
+		fmt.Println("Reset can only be performed by admin position")
+	}
+
+	err := cfg.db.ResetDatabase(context.Background())
 	if err != nil {
-		fmt.Println("Error resetting cage cards")
+		fmt.Println("Error resetting resetting DB")
 		return err
 	}
-	fmt.Println("Cage cards deleted from DB.")
+	fmt.Println("Database has been reset. Exiting...")
+	os.Exit(0)
 	return nil
 }
-*/

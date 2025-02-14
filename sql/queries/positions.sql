@@ -26,3 +26,8 @@ WHERE $10 = id;
 -- name: GetPositionByTitle :one
 SELECT * FROM positions
 WHERE $1 = title;
+
+-- name: CreateAdminPosition :one
+INSERT INTO positions(id, title, can_activate, can_deactivate, can_add_orders, can_receive_orders, can_query, can_change_protocol, can_add_staff, can_add_reminders, is_admin)
+VALUES(gen_random_uuid(), 'admin', true, true, true, true, true, true, true, true, true)
+RETURNING *;

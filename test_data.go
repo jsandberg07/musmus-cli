@@ -12,9 +12,16 @@ import (
 )
 
 func (cfg *Config) testData() error {
+	// add admin
+	fmt.Println("* Creating admin...")
+	err := cfg.createAdmin()
+	if err != nil {
+		return err
+	}
+
 	// settings are done
 	// add default positions
-	err := addTestPositions(cfg)
+	err = addTestPositions(cfg)
 	if err != nil {
 		return err
 	}
@@ -78,6 +85,15 @@ func (cfg *Config) testData() error {
 	if err != nil {
 		return err
 	}
+
+	// mark test data as loaded
+	err = cfg.db.TestDataLoaded(context.Background())
+	if err != nil {
+		return err
+	}
+
+	// print test data instructions
+	testDataInstructions()
 
 	return nil
 }
@@ -558,4 +574,9 @@ func addTestOrder(cfg *Config) error {
 	}
 
 	return nil
+}
+
+// TODO: add test data instructions
+func testDataInstructions() {
+	fmt.Println("You can login to the admin account with password 'admin' and use any commands there")
 }

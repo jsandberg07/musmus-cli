@@ -11,10 +11,35 @@ import (
 	"github.com/google/uuid"
 )
 
+const createAdminPosition = `-- name: CreateAdminPosition :one
+INSERT INTO positions(id, title, can_activate, can_deactivate, can_add_orders, can_receive_orders, can_query, can_change_protocol, can_add_staff, can_add_reminders, is_admin)
+VALUES(gen_random_uuid(), 'admin', true, true, true, true, true, true, true, true, true)
+RETURNING id, title, can_activate, can_deactivate, can_add_orders, can_receive_orders, can_query, can_change_protocol, can_add_staff, can_add_reminders, is_admin
+`
+
+func (q *Queries) CreateAdminPosition(ctx context.Context) (Position, error) {
+	row := q.db.QueryRowContext(ctx, createAdminPosition)
+	var i Position
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.CanActivate,
+		&i.CanDeactivate,
+		&i.CanAddOrders,
+		&i.CanReceiveOrders,
+		&i.CanQuery,
+		&i.CanChangeProtocol,
+		&i.CanAddStaff,
+		&i.CanAddReminders,
+		&i.IsAdmin,
+	)
+	return i, err
+}
+
 const createPosition = `-- name: CreatePosition :one
 INSERT INTO positions(id, title, can_activate, can_deactivate, can_add_orders, can_receive_orders, can_query, can_change_protocol, can_add_staff, can_add_reminders)
 VALUES(gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9)
-RETURNING id, title, can_activate, can_deactivate, can_add_orders, can_receive_orders, can_query, can_change_protocol, can_add_staff, can_add_reminders
+RETURNING id, title, can_activate, can_deactivate, can_add_orders, can_receive_orders, can_query, can_change_protocol, can_add_staff, can_add_reminders, is_admin
 `
 
 type CreatePositionParams struct {
@@ -53,12 +78,13 @@ func (q *Queries) CreatePosition(ctx context.Context, arg CreatePositionParams) 
 		&i.CanChangeProtocol,
 		&i.CanAddStaff,
 		&i.CanAddReminders,
+		&i.IsAdmin,
 	)
 	return i, err
 }
 
 const getPositionByTitle = `-- name: GetPositionByTitle :one
-SELECT id, title, can_activate, can_deactivate, can_add_orders, can_receive_orders, can_query, can_change_protocol, can_add_staff, can_add_reminders FROM positions
+SELECT id, title, can_activate, can_deactivate, can_add_orders, can_receive_orders, can_query, can_change_protocol, can_add_staff, can_add_reminders, is_admin FROM positions
 WHERE $1 = title
 `
 
@@ -76,12 +102,13 @@ func (q *Queries) GetPositionByTitle(ctx context.Context, title string) (Positio
 		&i.CanChangeProtocol,
 		&i.CanAddStaff,
 		&i.CanAddReminders,
+		&i.IsAdmin,
 	)
 	return i, err
 }
 
 const getPositions = `-- name: GetPositions :many
-SELECT id, title, can_activate, can_deactivate, can_add_orders, can_receive_orders, can_query, can_change_protocol, can_add_staff, can_add_reminders FROM positions
+SELECT id, title, can_activate, can_deactivate, can_add_orders, can_receive_orders, can_query, can_change_protocol, can_add_staff, can_add_reminders, is_admin FROM positions
 `
 
 func (q *Queries) GetPositions(ctx context.Context) ([]Position, error) {
@@ -104,6 +131,7 @@ func (q *Queries) GetPositions(ctx context.Context) ([]Position, error) {
 			&i.CanChangeProtocol,
 			&i.CanAddStaff,
 			&i.CanAddReminders,
+			&i.IsAdmin,
 		); err != nil {
 			return nil, err
 		}
@@ -119,7 +147,7 @@ func (q *Queries) GetPositions(ctx context.Context) ([]Position, error) {
 }
 
 const getUserPosition = `-- name: GetUserPosition :one
-SELECT id, title, can_activate, can_deactivate, can_add_orders, can_receive_orders, can_query, can_change_protocol, can_add_staff, can_add_reminders FROM positions
+SELECT id, title, can_activate, can_deactivate, can_add_orders, can_receive_orders, can_query, can_change_protocol, can_add_staff, can_add_reminders, is_admin FROM positions
 WHERE $1 = id
 `
 
@@ -137,6 +165,7 @@ func (q *Queries) GetUserPosition(ctx context.Context, id uuid.UUID) (Position, 
 		&i.CanChangeProtocol,
 		&i.CanAddStaff,
 		&i.CanAddReminders,
+		&i.IsAdmin,
 	)
 	return i, err
 }

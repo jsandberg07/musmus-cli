@@ -209,6 +209,7 @@ func editInvestigatorFunction(cfg *Config) error {
 					fmt.Println("Error updating investigator in DB")
 					return err
 				}
+				fmt.Println("Investigator has been added. They will be asked to update their password on first login")
 				exit = true
 			case "help":
 				cmdHelp(flags)

@@ -31,12 +31,13 @@ type CageCard struct {
 }
 
 type Investigator struct {
-	ID       uuid.UUID
-	IName    string
-	Nickname sql.NullString
-	Email    sql.NullString
-	Position uuid.UUID
-	Active   bool
+	ID             uuid.UUID
+	IName          string
+	Nickname       sql.NullString
+	Email          sql.NullString
+	Position       uuid.UUID
+	Active         bool
+	HashedPassword sql.NullString
 }
 
 type Order struct {
@@ -61,6 +62,7 @@ type Position struct {
 	CanChangeProtocol bool
 	CanAddStaff       bool
 	CanAddReminders   bool
+	IsAdmin           bool
 }
 
 type Protocol struct {
@@ -84,8 +86,10 @@ type Reminder struct {
 }
 
 type Setting struct {
+	ID               int32
 	SettingsComplete bool
 	OnlyActivateSelf bool
+	TestDataLoaded   bool
 }
 
 type Strain struct {

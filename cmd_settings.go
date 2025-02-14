@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"context"
-	"errors"
 	"fmt"
 	"os"
 
@@ -89,17 +88,13 @@ func changeSettingsFunction(cfg *Config) error {
 	// the reader
 	reader := bufio.NewReader(os.Stdin)
 
-	currentSettings, err := cfg.db.GetSettings(context.Background())
+	currentSetting, err := cfg.db.GetSettings(context.Background())
 	if err != nil {
 		fmt.Println("Error getting current settings")
 		return err
 	}
-	if len(currentSettings) > 1 {
-		fmt.Println("Error getting current settings")
-		return errors.New("multiple lines of settings found. Should only be one")
-	}
 
-	updatedSettings := currentSettings[0]
+	updatedSettings := currentSetting
 
 	// da loop
 	for {
@@ -131,9 +126,9 @@ func changeSettingsFunction(cfg *Config) error {
 				updatedSettings.OnlyActivateSelf = !updatedSettings.OnlyActivateSelf
 				fmt.Printf("Only activate self set to %v\n", updatedSettings.OnlyActivateSelf)
 			case "-r":
-				printSettings(&currentSettings[0])
+				printSettings(&currentSetting)
 			case "save":
-				if updatedSettings == currentSettings[0] {
+				if updatedSettings == currentSetting {
 					fmt.Println("No changes were made. Exiting...")
 				} else {
 					fmt.Println("Saving...")

@@ -23,3 +23,13 @@ WHERE $1 = id;
 -- name: GetInvestigatorByID :one
 SELECT * FROM investigators
 WHERE $1 = id;
+
+-- name: CreateAdminInvestigator :one
+INSERT INTO investigators(id, i_name, position, active, hashed_password)
+VALUES(gen_random_uuid(), 'admin', $1, true, $2)
+RETURNING *;
+
+-- name: UpdateHashedPassword :exec
+UPDATE investigators
+SET hashed_password = $2
+WHERE $1 = id;

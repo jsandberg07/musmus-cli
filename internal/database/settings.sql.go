@@ -29,42 +29,41 @@ func (q *Queries) FirstTimeSetupComplete(ctx context.Context) error {
 	return err
 }
 
-const getSettings = `-- name: GetSettings :many
-SELECT settings_complete, only_activate_self FROM settings
+const getSettings = `-- name: GetSettings :one
+SELECT id, settings_complete, only_activate_self, test_data_loaded FROM settings
+WHERE id = 1
 `
 
-func (q *Queries) GetSettings(ctx context.Context) ([]Setting, error) {
-	rows, err := q.db.QueryContext(ctx, getSettings)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Setting
-	for rows.Next() {
-		var i Setting
-		if err := rows.Scan(&i.SettingsComplete, &i.OnlyActivateSelf); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+func (q *Queries) GetSettings(ctx context.Context) (Setting, error) {
+	row := q.db.QueryRowContext(ctx, getSettings)
+	var i Setting
+	err := row.Scan(
+		&i.ID,
+		&i.SettingsComplete,
+		&i.OnlyActivateSelf,
+		&i.TestDataLoaded,
+	)
+	return i, err
 }
 
 const setUpSettings = `-- name: SetUpSettings :exec
 
-INSERT INTO settings(settings_complete, only_activate_self)
-VALUES (false, false)
+INSERT INTO settings(id, settings_complete, only_activate_self, test_data_loaded)
+VALUES (1, false, false, false)
 `
 
 // settings is saving the settings. this should ONLY ever have one row
 func (q *Queries) SetUpSettings(ctx context.Context) error {
 	_, err := q.db.ExecContext(ctx, setUpSettings)
+	return err
+}
+
+const testDataLoaded = `-- name: TestDataLoaded :exec
+UPDATE settings SET test_data_loaded = true
+`
+
+func (q *Queries) TestDataLoaded(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, testDataLoaded)
 	return err
 }
 
