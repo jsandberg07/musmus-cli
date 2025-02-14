@@ -168,12 +168,20 @@ func addCCFunction(cfg *Config) error {
 				if err != nil {
 					fmt.Println(err)
 				}
+				if num <= 0 {
+					fmt.Println("Cage card IDs cannot be negative")
+					continue
+				}
 				start = num
 
 			case "-e":
 				num, err := getNumberFromFlag(arg.value)
 				if err != nil {
 					fmt.Println(err)
+				}
+				if num <= 0 {
+					fmt.Println("Cage card IDs cannot be negative")
+					continue
 				}
 				end = num
 
