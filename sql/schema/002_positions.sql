@@ -9,7 +9,8 @@ CREATE TABLE positions(
     can_query BOOLEAN NOT NULL DEFAULT false,
     can_change_protocol BOOLEAN NOT NULL DEFAULT false,
     can_add_staff BOOLEAN NOT NULL DEFAULT false,
-    can_add_reminders BOOLEAN NOT NULL DEFAULT false
+    can_add_reminders BOOLEAN NOT NULL DEFAULT false,
+    is_admin BOOLEAN NOT NULL DEFAULT false
 );
 
 -- +goose Down

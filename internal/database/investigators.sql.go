@@ -12,10 +12,36 @@ import (
 	"github.com/google/uuid"
 )
 
+const createAdminInvestigator = `-- name: CreateAdminInvestigator :one
+INSERT INTO investigators(id, i_name, position, active, hashed_password)
+VALUES(gen_random_uuid(), 'admin', $1, true, $2)
+RETURNING id, i_name, nickname, email, position, active, hashed_password
+`
+
+type CreateAdminInvestigatorParams struct {
+	Position       uuid.UUID
+	HashedPassword sql.NullString
+}
+
+func (q *Queries) CreateAdminInvestigator(ctx context.Context, arg CreateAdminInvestigatorParams) (Investigator, error) {
+	row := q.db.QueryRowContext(ctx, createAdminInvestigator, arg.Position, arg.HashedPassword)
+	var i Investigator
+	err := row.Scan(
+		&i.ID,
+		&i.IName,
+		&i.Nickname,
+		&i.Email,
+		&i.Position,
+		&i.Active,
+		&i.HashedPassword,
+	)
+	return i, err
+}
+
 const createInvestigator = `-- name: CreateInvestigator :one
 INSERT INTO investigators(id, i_name, nickname, email, position, active)
 VALUES(gen_random_uuid(), $1, $2, $3, $4, true)
-RETURNING id, i_name, nickname, email, position, active
+RETURNING id, i_name, nickname, email, position, active, hashed_password
 `
 
 type CreateInvestigatorParams struct {
@@ -40,12 +66,13 @@ func (q *Queries) CreateInvestigator(ctx context.Context, arg CreateInvestigator
 		&i.Email,
 		&i.Position,
 		&i.Active,
+		&i.HashedPassword,
 	)
 	return i, err
 }
 
 const getInvestigatorByEmail = `-- name: GetInvestigatorByEmail :one
-SELECT id, i_name, nickname, email, position, active FROM investigators
+SELECT id, i_name, nickname, email, position, active, hashed_password FROM investigators
 WHERE $1 = email
 `
 
@@ -59,12 +86,13 @@ func (q *Queries) GetInvestigatorByEmail(ctx context.Context, email sql.NullStri
 		&i.Email,
 		&i.Position,
 		&i.Active,
+		&i.HashedPassword,
 	)
 	return i, err
 }
 
 const getInvestigatorByID = `-- name: GetInvestigatorByID :one
-SELECT id, i_name, nickname, email, position, active FROM investigators
+SELECT id, i_name, nickname, email, position, active, hashed_password FROM investigators
 WHERE $1 = id
 `
 
@@ -78,12 +106,13 @@ func (q *Queries) GetInvestigatorByID(ctx context.Context, id uuid.UUID) (Invest
 		&i.Email,
 		&i.Position,
 		&i.Active,
+		&i.HashedPassword,
 	)
 	return i, err
 }
 
 const getInvestigatorByName = `-- name: GetInvestigatorByName :many
-SELECT id, i_name, nickname, email, position, active FROM investigators
+SELECT id, i_name, nickname, email, position, active, hashed_password FROM investigators
 WHERE $1 = i_name OR $1 = nickname
 `
 
@@ -103,6 +132,7 @@ func (q *Queries) GetInvestigatorByName(ctx context.Context, iName string) ([]In
 			&i.Email,
 			&i.Position,
 			&i.Active,
+			&i.HashedPassword,
 		); err != nil {
 			return nil, err
 		}
@@ -115,6 +145,22 @@ func (q *Queries) GetInvestigatorByName(ctx context.Context, iName string) ([]In
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateHashedPassword = `-- name: UpdateHashedPassword :exec
+UPDATE investigators
+SET hashed_password = $2
+WHERE $1 = id
+`
+
+type UpdateHashedPasswordParams struct {
+	ID             uuid.UUID
+	HashedPassword sql.NullString
+}
+
+func (q *Queries) UpdateHashedPassword(ctx context.Context, arg UpdateHashedPasswordParams) error {
+	_, err := q.db.ExecContext(ctx, updateHashedPassword, arg.ID, arg.HashedPassword)
+	return err
 }
 
 const updateInvestigator = `-- name: UpdateInvestigator :exec

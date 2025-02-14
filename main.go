@@ -25,20 +25,6 @@ import (
 // china #11
 // do it
 
-// Done now:
-// improve goto with some fallthroughs - done!
-// add permissions that work (you can delete anybodys reminders currently) - done!
-// get the # of care days calculated for expenses - Done!
-// investigator "is active" boolean in db does nothing still kek
-// printiong the flags to include the "-" i should have fixd that forever ago ToT there are so many flags now - not so bad but it's done!
-// change the "fake flag" error message into a const, have it like make sense - done!
-// something about passing slices via pointer ONLY IF YOU MODIFY THEM
-// we back at it again boys let's get these pointers all set
-// otherwise just pass by value - fixed!
-// psql supports OVERLAPS for time stamps. rewrite using that?
-// big maybe! cause it uses BETWEEN INTERFACE which doesn't mean much i think (but i get it) - fixed!
-// continue to use SIGNED ints but double check them!!! this is a deliberate design decision! - done
-
 // Next:
 // logins (crpyto, storing that, creating new people, the admin tier account)
 // so we just always login as the same thing automatically but for 'production' and later
@@ -46,13 +32,24 @@ import (
 // 2. login interface
 // 3. option to load test data and storing the fact that test data was stored
 // 4. the option for anybody being able to activate anybodys cards that is already there and can be toggled
-// 5.
+// 5. uhh create position. "User will be prompted to add password on first login"
+// 6. then prompt password, exit, then ask them to login
+// 7. Then always ask for it after
+// need an investigator update password,
+// get hash where $=id
 
 // After that:
 // work on the read me cause it'll be different
 
 // AFTER THAT:
 // the great polishing
+// have the 'or enter x to exit' return const string 'exit' or whatever, check for that instead of like
+// 0 value struct and exit from that aka the great exiting
+// do you want to load test data? and allow for that'
+// add more test data
+// allow reset
+// ask each time you login if you want to keep using test data if loaded (store that in settings)
+// then we done! could easily be done by the end of the day and then make a list of what esle to do
 
 // AFTER THAT:
 // the great readme-en-ing. write a readme and update the github page

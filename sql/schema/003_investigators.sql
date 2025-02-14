@@ -6,6 +6,7 @@ CREATE TABLE investigators(
     email TEXT UNIQUE,
     position UUID NOT NULL REFERENCES positions ON UPDATE CASCADE,
     active BOOLEAN NOT NULL,
+    hashed_password TEXT,
 
     CONSTRAINT fk_investigators
     FOREIGN KEY(position)

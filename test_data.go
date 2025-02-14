@@ -12,9 +12,16 @@ import (
 )
 
 func (cfg *Config) testData() error {
+	// add admin
+	fmt.Println("* Creating admin...")
+	err := cfg.createAdmin()
+	if err != nil {
+		return err
+	}
+
 	// settings are done
 	// add default positions
-	err := addTestPositions(cfg)
+	err = addTestPositions(cfg)
 	if err != nil {
 		return err
 	}
