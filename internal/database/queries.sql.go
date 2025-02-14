@@ -122,14 +122,14 @@ INNER JOIN investigators ON cage_cards.investigator_id = investigators.id
 INNER JOIN protocols ON cage_cards.protocol_id = protocols.id
 LEFT JOIN strains ON cage_cards.strain = strains.id
 LEFT JOIN orders ON cage_cards.order_id = orders.id
-WHERE (activated_on IS NOT NULL AND activated_on >= $1) AND (deactivated_on <= $2 OR deactivated_on IS NULL)
+WHERE ((($1, $2) OVERLAPS (activated_on, deactivated_on)) OR (activated_on <= $1 AND deactivated_on IS NULL))
 AND cage_cards.investigator_id = $3
 ORDER BY cage_cards.cc_id ASC
 `
 
 type GetCageCardsInvestigatorParams struct {
-	ActivatedOn    sql.NullTime
-	DeactivatedOn  sql.NullTime
+	Overlaps       interface{}
+	Overlaps_2     interface{}
 	InvestigatorID uuid.UUID
 }
 
@@ -144,7 +144,7 @@ type GetCageCardsInvestigatorRow struct {
 }
 
 func (q *Queries) GetCageCardsInvestigator(ctx context.Context, arg GetCageCardsInvestigatorParams) ([]GetCageCardsInvestigatorRow, error) {
-	rows, err := q.db.QueryContext(ctx, getCageCardsInvestigator, arg.ActivatedOn, arg.DeactivatedOn, arg.InvestigatorID)
+	rows, err := q.db.QueryContext(ctx, getCageCardsInvestigator, arg.Overlaps, arg.Overlaps_2, arg.InvestigatorID)
 	if err != nil {
 		return nil, err
 	}
@@ -233,15 +233,15 @@ INNER JOIN investigators ON cage_cards.investigator_id = investigators.id
 INNER JOIN protocols ON cage_cards.protocol_id = protocols.id
 LEFT JOIN strains ON cage_cards.strain = strains.id
 LEFT JOIN orders ON cage_cards.order_id = orders.id
-WHERE (activated_on IS NOT NULL AND activated_on >= $1) AND (deactivated_on <= $2 OR deactivated_on IS NULL)
+WHERE ((($1, $2) OVERLAPS (activated_on, deactivated_on)) OR (activated_on <= $1 AND deactivated_on IS NULL))
 AND cage_cards.protocol_id = $3
 ORDER BY cage_cards.cc_id ASC
 `
 
 type GetCageCardsProtocolParams struct {
-	ActivatedOn   sql.NullTime
-	DeactivatedOn sql.NullTime
-	ProtocolID    uuid.UUID
+	Overlaps   interface{}
+	Overlaps_2 interface{}
+	ProtocolID uuid.UUID
 }
 
 type GetCageCardsProtocolRow struct {
@@ -255,7 +255,7 @@ type GetCageCardsProtocolRow struct {
 }
 
 func (q *Queries) GetCageCardsProtocol(ctx context.Context, arg GetCageCardsProtocolParams) ([]GetCageCardsProtocolRow, error) {
-	rows, err := q.db.QueryContext(ctx, getCageCardsProtocol, arg.ActivatedOn, arg.DeactivatedOn, arg.ProtocolID)
+	rows, err := q.db.QueryContext(ctx, getCageCardsProtocol, arg.Overlaps, arg.Overlaps_2, arg.ProtocolID)
 	if err != nil {
 		return nil, err
 	}
@@ -292,9 +292,7 @@ INNER JOIN investigators ON cage_cards.investigator_id = investigators.id
 INNER JOIN protocols ON cage_cards.protocol_id = protocols.id
 LEFT JOIN strains ON cage_cards.strain = strains.id
 LEFT JOIN orders ON cage_cards.order_id = orders.id
-WHERE (($1, $2) OVERLAPS (activated_on, deactivated_on))
-OR
-(activated_on <= $1 AND deactivated_on IS NULL)
+WHERE ((($1, $2) OVERLAPS (activated_on, deactivated_on)) OR (activated_on <= $1 AND deactivated_on IS NULL))
 ORDER BY cc_id ASC
 `
 

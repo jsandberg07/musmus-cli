@@ -448,8 +448,8 @@ func CCQueryDateRange(cfg *Config, start, end time.Time) error {
 
 func CCQueryInvestigator(cfg *Config, start, end time.Time, inv *database.Investigator) error {
 	gciParam := database.GetCageCardsInvestigatorParams{
-		ActivatedOn:    sql.NullTime{Valid: true, Time: start},
-		DeactivatedOn:  sql.NullTime{Valid: true, Time: end},
+		Overlaps:       sql.NullTime{Valid: true, Time: start},
+		Overlaps_2:     sql.NullTime{Valid: true, Time: end},
 		InvestigatorID: inv.ID,
 	}
 
@@ -516,9 +516,9 @@ func NormalizeCCExport[T database.GetCageCardsInvestigatorRow | database.GetCage
 
 func CCQueryProtocol(cfg *Config, start, end time.Time, pro *database.Protocol) error {
 	gcpParam := database.GetCageCardsProtocolParams{
-		ActivatedOn:   sql.NullTime{Valid: true, Time: start},
-		DeactivatedOn: sql.NullTime{Valid: true, Time: end},
-		ProtocolID:    pro.ID,
+		Overlaps:   sql.NullTime{Valid: true, Time: start},
+		Overlaps_2: sql.NullTime{Valid: true, Time: end},
+		ProtocolID: pro.ID,
 	}
 
 	ccs, err := cfg.db.GetCageCardsProtocol(context.Background(), gcpParam)
