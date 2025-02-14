@@ -18,10 +18,10 @@ func cmdHelp(input map[string]Flag) {
 		fmt.Printf("* %s\n", flag.symbol)
 		if flag.description != "" {
 			fmt.Print(flag.description)
+			if flag.takesValue {
+				fmt.Print(". Requires value")
+			}
+			fmt.Println()
 		}
-		if flag.takesValue {
-			fmt.Print(". Requires value")
-		}
-		fmt.Println()
 	}
 }

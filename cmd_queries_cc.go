@@ -64,44 +64,44 @@ func getCCQueriesFlags() map[string]Flag {
 	ccQueriesFlags := make(map[string]Flag)
 
 	sFlag := Flag{
-		symbol:      "s",
+		symbol:      "-s",
 		description: "Sets start date for query.",
 		takesValue:  true,
 		printOrder:  2,
 	}
-	ccQueriesFlags["-"+sFlag.symbol] = sFlag
+	ccQueriesFlags[sFlag.symbol] = sFlag
 
 	eFlag := Flag{
-		symbol:      "e",
+		symbol:      "-e",
 		description: "Sets end date for query.",
 		takesValue:  true,
 		printOrder:  3,
 	}
-	ccQueriesFlags["-"+eFlag.symbol] = eFlag
+	ccQueriesFlags[eFlag.symbol] = eFlag
 
 	prFlag := Flag{
-		symbol:      "pr",
+		symbol:      "-pr",
 		description: "Gets cards under set protocol.",
 		takesValue:  true,
 		printOrder:  4,
 	}
-	ccQueriesFlags["-"+prFlag.symbol] = prFlag
+	ccQueriesFlags[prFlag.symbol] = prFlag
 
 	inFlag := Flag{
-		symbol:      "in",
+		symbol:      "-in",
 		description: "Gets cards under set investigator.",
 		takesValue:  true,
 		printOrder:  5,
 	}
-	ccQueriesFlags["-"+inFlag.symbol] = inFlag
+	ccQueriesFlags[inFlag.symbol] = inFlag
 
 	orFlag := Flag{
-		symbol:      "or",
+		symbol:      "-or",
 		description: "Gets cards that were added under set order",
 		takesValue:  true,
 		printOrder:  6,
 	}
-	ccQueriesFlags["-"+orFlag.symbol] = orFlag
+	ccQueriesFlags[orFlag.symbol] = orFlag
 
 	// ect as needed or remove the "-"+ for longer ones
 
@@ -346,7 +346,7 @@ func CCQueriesFunction(cfg *Config) error {
 				exit = true
 
 			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
+				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
 
@@ -380,9 +380,9 @@ func CCQueryActive(cfg *Config) error {
 		return nil
 	}
 
-	exp := NormalizeCCExport(&ccs)
+	exp := NormalizeCCExport(ccs)
 
-	count, err := exportData(&exp)
+	count, err := exportData(exp)
 	if err != nil {
 		return err
 	}
@@ -403,9 +403,9 @@ func CCQueryAll(cfg *Config) error {
 		return nil
 	}
 
-	exp := NormalizeCCExport(&ccs)
+	exp := NormalizeCCExport(ccs)
 
-	count, err := exportData(&exp)
+	count, err := exportData(exp)
 	if err != nil {
 		return err
 	}
@@ -415,9 +415,15 @@ func CCQueryAll(cfg *Config) error {
 }
 
 func CCQueryDateRange(cfg *Config, start, end time.Time) error {
+	/*
+		gcdrParam := database.GetCardsDateRangeParams{
+			ActivatedOn:   sql.NullTime{Valid: true, Time: start},
+			DeactivatedOn: sql.NullTime{Valid: true, Time: end},
+		}
+	*/
 	gcdrParam := database.GetCardsDateRangeParams{
-		ActivatedOn:   sql.NullTime{Valid: true, Time: start},
-		DeactivatedOn: sql.NullTime{Valid: true, Time: end},
+		Overlaps:   sql.NullTime{Valid: true, Time: start},
+		Overlaps_2: sql.NullTime{Valid: true, Time: end},
 	}
 	ccs, err := cfg.db.GetCardsDateRange(context.Background(), gcdrParam)
 	if err != nil {
@@ -429,9 +435,9 @@ func CCQueryDateRange(cfg *Config, start, end time.Time) error {
 		return nil
 	}
 
-	exp := NormalizeCCExport(&ccs)
+	exp := NormalizeCCExport(ccs)
 
-	count, err := exportData(&exp)
+	count, err := exportData(exp)
 	if err != nil {
 		return err
 	}
@@ -442,8 +448,8 @@ func CCQueryDateRange(cfg *Config, start, end time.Time) error {
 
 func CCQueryInvestigator(cfg *Config, start, end time.Time, inv *database.Investigator) error {
 	gciParam := database.GetCageCardsInvestigatorParams{
-		ActivatedOn:    sql.NullTime{Valid: true, Time: start},
-		DeactivatedOn:  sql.NullTime{Valid: true, Time: end},
+		Overlaps:       sql.NullTime{Valid: true, Time: start},
+		Overlaps_2:     sql.NullTime{Valid: true, Time: end},
 		InvestigatorID: inv.ID,
 	}
 
@@ -457,9 +463,9 @@ func CCQueryInvestigator(cfg *Config, start, end time.Time, inv *database.Invest
 		return nil
 	}
 
-	exp := NormalizeCCExport(&ccs)
+	exp := NormalizeCCExport(ccs)
 
-	count, err := exportData(&exp)
+	count, err := exportData(exp)
 	if err != nil {
 		return err
 	}
@@ -482,9 +488,9 @@ func CCQueryOrder(cfg *Config, o *database.Order) error {
 	}
 
 	// TODO: adding a column to this is a bad experience. Modifying like 5 structs via sql functions.
-	exp := NormalizeCCExport(&ccs)
+	exp := NormalizeCCExport(ccs)
 
-	count, err := exportData(&exp)
+	count, err := exportData(exp)
 	if err != nil {
 		return err
 	}
@@ -496,12 +502,12 @@ func CCQueryOrder(cfg *Config, o *database.Order) error {
 // Output rows are consistent between types, but sqlc generates new struct for each query.
 // Changes them into a format that can be turned into a string to be exported. No clue what happens if the structs aren't identical!
 // Don't return error, just check if value is 0 after
-func NormalizeCCExport[T database.GetCageCardsInvestigatorRow | database.GetCageCardsAllRow | database.GetCageCardsActiveRow | database.GetCardsDateRangeRow | database.GetCageCardsProtocolRow | database.GetCageCardsOrderRow](ccs *[]T) []CageCardExport {
-	if len(*ccs) == 0 {
+func NormalizeCCExport[T database.GetCageCardsInvestigatorRow | database.GetCageCardsAllRow | database.GetCageCardsActiveRow | database.GetCardsDateRangeRow | database.GetCageCardsProtocolRow | database.GetCageCardsOrderRow](ccs []T) []CageCardExport {
+	if len(ccs) == 0 {
 		return []CageCardExport{}
 	}
-	output := make([]CageCardExport, len(*ccs))
-	for i, cc := range *ccs {
+	output := make([]CageCardExport, len(ccs))
+	for i, cc := range ccs {
 		ts := CageCardExport(cc)
 		output[i] = ts
 	}
@@ -510,9 +516,9 @@ func NormalizeCCExport[T database.GetCageCardsInvestigatorRow | database.GetCage
 
 func CCQueryProtocol(cfg *Config, start, end time.Time, pro *database.Protocol) error {
 	gcpParam := database.GetCageCardsProtocolParams{
-		ActivatedOn:   sql.NullTime{Valid: true, Time: start},
-		DeactivatedOn: sql.NullTime{Valid: true, Time: end},
-		ProtocolID:    pro.ID,
+		Overlaps:   sql.NullTime{Valid: true, Time: start},
+		Overlaps_2: sql.NullTime{Valid: true, Time: end},
+		ProtocolID: pro.ID,
 	}
 
 	ccs, err := cfg.db.GetCageCardsProtocol(context.Background(), gcpParam)
@@ -525,9 +531,9 @@ func CCQueryProtocol(cfg *Config, start, end time.Time, pro *database.Protocol) 
 		return nil
 	}
 
-	exp := NormalizeCCExport(&ccs)
+	exp := NormalizeCCExport(ccs)
 
-	count, err := exportData(&exp)
+	count, err := exportData(exp)
 	if err != nil {
 		return err
 	}
@@ -537,7 +543,7 @@ func CCQueryProtocol(cfg *Config, start, end time.Time, pro *database.Protocol) 
 
 }
 
-func exportData(cages *[]CageCardExport) (int, error) {
+func exportData(cages []CageCardExport) (int, error) {
 	err := createExportDirectory()
 	if err != nil {
 		return 0, err
@@ -564,7 +570,7 @@ func exportData(cages *[]CageCardExport) (int, error) {
 		return 0, err
 	}
 
-	for _, cage := range *cages {
+	for _, cage := range cages {
 		err := writer.Write(stringifyCage(&cage))
 		if err != nil {
 			fmt.Printf("Error writing to csv: %s", err)

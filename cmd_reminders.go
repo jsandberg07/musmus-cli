@@ -172,7 +172,7 @@ func addReminderFunction(cfg *Config) error {
 				cmdHelp(getAddReminderFlags())
 
 			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
+				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
 
@@ -300,7 +300,18 @@ func deleteReminderFunction(cfg *Config) error {
 	}
 	date = normalizeDate(date)
 
+	/* removed because this let anybody delete anybody's reminders
 	reminders, err = cfg.db.GetAllTodayReminders(context.Background(), date)
+	if err != nil && err.Error() != "sql: no rows in result set" {
+		// any other error
+		return err
+	}
+	*/
+	udrp := database.GetUserDayReminderParams{
+		InvestigatorID: cfg.loggedInInvestigator.ID,
+		RDate:          date,
+	}
+	reminders, err = cfg.db.GetUserDayReminder(context.Background(), udrp)
 	if err != nil && err.Error() != "sql: no rows in result set" {
 		// any other error
 		return err
@@ -311,7 +322,7 @@ func deleteReminderFunction(cfg *Config) error {
 		return nil
 	}
 
-	printRemindersList(&reminders)
+	printRemindersList(reminders)
 	count := len(reminders)
 
 	num, err := getIntPrompt("Enter a number to delete the corresponding reminder")
@@ -338,8 +349,8 @@ func deleteReminderFunction(cfg *Config) error {
 
 }
 
-func printRemindersList(reminders *[]database.Reminder) {
-	for i, r := range *reminders {
+func printRemindersList(reminders []database.Reminder) {
+	for i, r := range reminders {
 		fmt.Printf("* %v: %v -- %s\n", i+1, r.RCcID, r.Note)
 	}
 }

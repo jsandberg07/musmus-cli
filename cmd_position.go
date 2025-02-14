@@ -28,78 +28,76 @@ func getPositionFlags() map[string]Flag {
 	PositionFlags := make(map[string]Flag)
 
 	tFlag := Flag{
-		symbol:      "t",
+		symbol:      "-t",
 		description: "Changes the title",
 		takesValue:  true,
 		printOrder:  1,
 	}
-	PositionFlags["-"+tFlag.symbol] = tFlag
+	PositionFlags[tFlag.symbol] = tFlag
 
 	aFlag := Flag{
-		symbol:      "a",
+		symbol:      "-a",
 		description: "Toggles if the role has permission to add or activate cage cards",
 		takesValue:  false,
 		printOrder:  2,
 	}
-	PositionFlags["-"+aFlag.symbol] = aFlag
+	PositionFlags[aFlag.symbol] = aFlag
 
 	dFlag := Flag{
-		symbol:      "d",
+		symbol:      "-d",
 		description: "Toggles if the role has permission to deactivate cage cards",
 		takesValue:  false,
 		printOrder:  3,
 	}
-	PositionFlags["-"+dFlag.symbol] = dFlag
+	PositionFlags[dFlag.symbol] = dFlag
 
 	oFlag := Flag{
-		symbol:      "o",
+		symbol:      "-o",
 		description: "Toggles if the role has permission to add orders",
 		takesValue:  false,
 		printOrder:  4,
 	}
-	PositionFlags["-"+oFlag.symbol] = oFlag
+	PositionFlags[oFlag.symbol] = oFlag
 
 	rFlag := Flag{
-		symbol:      "r",
+		symbol:      "-r",
 		description: "Toggles if the role has permission to mark orders as received",
 		takesValue:  false,
 		printOrder:  4,
 	}
-	PositionFlags["-"+rFlag.symbol] = rFlag
+	PositionFlags[rFlag.symbol] = rFlag
 
 	qFlag := Flag{
-		symbol:      "q",
+		symbol:      "-q",
 		description: "Toggles if the role has permission to run queries",
 		takesValue:  false,
 		printOrder:  5,
 	}
-	PositionFlags["-"+qFlag.symbol] = qFlag
+	PositionFlags[qFlag.symbol] = qFlag
 
 	pFlag := Flag{
-		symbol:      "p",
+		symbol:      "-p",
 		description: "Toggles if the role has permission to make changes to protocols including adding staff to them",
 		takesValue:  false,
 		printOrder:  6,
 	}
-	PositionFlags["-"+pFlag.symbol] = pFlag
+	PositionFlags[pFlag.symbol] = pFlag
 
 	sFlag := Flag{
-		symbol:      "s",
+		symbol:      "-s",
 		description: "Toggles if the role has permission to add or remove staff or positions",
 		takesValue:  false,
 		printOrder:  7,
 	}
-	PositionFlags["-"+sFlag.symbol] = sFlag
+	PositionFlags[sFlag.symbol] = sFlag
 
 	mFlag := Flag{
-		symbol:      "m",
+		symbol:      "-m",
 		description: "Toggles if the role has permission to add reminders",
 		takesValue:  false,
 		printOrder:  8,
 	}
-	PositionFlags["-"+mFlag.symbol] = mFlag
-
-	// ect as needed or remove the "-"+ for longer ones
+	PositionFlags[mFlag.symbol] = mFlag
 
 	helpFlag := Flag{
 		symbol:      "help",
@@ -270,7 +268,7 @@ func addPositionFunction(cfg *Config) error {
 				fmt.Println("Exiting without saving...")
 				exit = true
 			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
+				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
 
@@ -443,7 +441,7 @@ func editPositionFunction(cfg *Config) error {
 				fmt.Println("Exiting without saving...")
 				exit = true
 			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
+				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
 
@@ -470,9 +468,16 @@ func getPositionStruct(cfg *Config, input string) (database.Position, error) {
 	return position, nil
 }
 
+/*
+the prospective printing method
+func (c createposition) getPrint() printing struct { return p(c) } as a member
+func (u updateposition) getPrint() printing struct { return conversion-UUID }
+BUT you can't extend functions from another package + they're updating so it'll probably get overwritten on generate
+*/
+
 // don't pass in both, just one, and it'll convert and print it
 // extremely hacky way to print both structs as theyre not identical in places that aren't printed anyway.
-// alternative to editing generated files / extending generated structs.
+// can't extend structs from another package
 func printPermissions(c *database.CreatePositionParams, u *database.UpdatePositionParams) {
 	if c == nil && u == nil {
 		fmt.Println("Error printing permissions: both params nil")

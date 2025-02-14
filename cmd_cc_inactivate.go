@@ -29,12 +29,12 @@ func getInactivateFlags() map[string]Flag {
 	// cc, process, exit, help
 	InactivateFlags := make(map[string]Flag)
 	ccFlag := Flag{
-		symbol:      "cc",
+		symbol:      "-cc",
 		description: "Adds CC to queue to be reactivated",
 		takesValue:  true,
 		printOrder:  1,
 	}
-	InactivateFlags["-"+ccFlag.symbol] = ccFlag
+	InactivateFlags[ccFlag.symbol] = ccFlag
 
 	// ect as needed or remove the "-"+ for longer ones
 
@@ -151,6 +151,9 @@ func inactivateFunction(cfg *Config) error {
 
 			case "help":
 				cmdHelp(flags)
+
+			default:
+				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
 

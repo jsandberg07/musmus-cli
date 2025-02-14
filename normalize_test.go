@@ -132,27 +132,27 @@ func TestNormalizeCCExport(t *testing.T) {
 	// i really wanted a cool array BUT []interface{} messes with generic type deduction
 
 	// should pass
-	output := NormalizeCCExport(&invTest)
+	output := NormalizeCCExport(invTest)
 	if !reflect.DeepEqual(expected, output) {
 		t.Fatal("Inv test failed")
 	}
 
-	output = NormalizeCCExport(&dateTest)
+	output = NormalizeCCExport(dateTest)
 	if !reflect.DeepEqual(expected, output) {
 		t.Fatal("Date test failed")
 	}
 
-	output = NormalizeCCExport(&allTest)
+	output = NormalizeCCExport(allTest)
 	if !reflect.DeepEqual(expected, output) {
 		t.Fatal("All test failed")
 	}
 
-	output = NormalizeCCExport(&activeTest)
+	output = NormalizeCCExport(activeTest)
 	if !reflect.DeepEqual(expected, output) {
 		t.Fatal("Active test failed")
 	}
 
-	output = NormalizeCCExport(&protocolTest)
+	output = NormalizeCCExport(protocolTest)
 	if !reflect.DeepEqual(expected, output) {
 		t.Fatal("Protocol test failed")
 	}
@@ -160,7 +160,7 @@ func TestNormalizeCCExport(t *testing.T) {
 	// empty
 	empty := []database.GetCageCardsActiveRow{}
 	expected = []CageCardExport{}
-	output = NormalizeCCExport(&empty)
+	output = NormalizeCCExport(empty)
 	if !reflect.DeepEqual(expected, output) {
 		t.Fatal("empty test failed")
 	}

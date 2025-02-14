@@ -26,3 +26,8 @@ WHERE $1 = id;
 SELECT * FROM reminders
 WHERE r_cc_id = $1
 ORDER BY r_date;
+
+-- name: GetUserDayReminder :many
+SELECT * FROM reminders
+WHERE investigator_id = $1
+AND r_date = $2;

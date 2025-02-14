@@ -39,20 +39,20 @@ func getCCDeactivationCmd() Command {
 func getDeactivationFlags() map[string]Flag {
 	deactivationFlags := make(map[string]Flag)
 	ccFlag := Flag{
-		symbol:      "cc",
+		symbol:      "-cc",
 		description: "Allows entering multiple cage cards in one pass",
 		takesValue:  true,
 		printOrder:  1,
 	}
-	deactivationFlags["-"+ccFlag.symbol] = ccFlag
+	deactivationFlags[ccFlag.symbol] = ccFlag
 
 	dFlag := Flag{
-		symbol:      "d",
+		symbol:      "-d",
 		description: "Sets the date the cage card will be deactivated",
 		takesValue:  true,
 		printOrder:  2,
 	}
-	deactivationFlags["-"+dFlag.symbol] = dFlag
+	deactivationFlags[dFlag.symbol] = dFlag
 
 	printFlag := Flag{
 		symbol:      "print",
@@ -217,7 +217,7 @@ func deactivateFunction(cfg *Config) error {
 				exit = true
 
 			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
+				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
 

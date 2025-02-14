@@ -8,6 +8,8 @@ import (
 	"github.com/jsandberg07/clitest/internal/database"
 )
 
+// TODO: replacing print order with a float would unironcally make things more extendable because you spend less time
+// adding 1 to each number you already have if you just do like 1.1, 1.11, ect. That's dumb but i love it.
 type Flag struct {
 	symbol      string
 	description string
@@ -130,6 +132,8 @@ const (
 	PermissionStaff
 	PermissionReminders
 )
+
+const DefaultFlagMsg string = "An allowed flag was unhandled by the switch: "
 
 /*
 Create a flag:

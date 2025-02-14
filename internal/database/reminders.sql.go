@@ -194,6 +194,46 @@ func (q *Queries) GetRemindersDateRange(ctx context.Context, arg GetRemindersDat
 	return items, nil
 }
 
+const getUserDayReminder = `-- name: GetUserDayReminder :many
+SELECT id, r_date, r_cc_id, investigator_id, note FROM reminders
+WHERE investigator_id = $1
+AND r_date = $2
+`
+
+type GetUserDayReminderParams struct {
+	InvestigatorID uuid.UUID
+	RDate          time.Time
+}
+
+func (q *Queries) GetUserDayReminder(ctx context.Context, arg GetUserDayReminderParams) ([]Reminder, error) {
+	rows, err := q.db.QueryContext(ctx, getUserDayReminder, arg.InvestigatorID, arg.RDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Reminder
+	for rows.Next() {
+		var i Reminder
+		if err := rows.Scan(
+			&i.ID,
+			&i.RDate,
+			&i.RCcID,
+			&i.InvestigatorID,
+			&i.Note,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getUserTodayReminders = `-- name: GetUserTodayReminders :many
 SELECT id, r_date, r_cc_id, investigator_id, note FROM reminders
 WHERE r_date = $1 AND investigator_id = $2

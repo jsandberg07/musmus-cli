@@ -28,12 +28,12 @@ func getCCReactivateFlags() map[string]Flag {
 
 	ReactivateFlags := make(map[string]Flag)
 	ccFlag := Flag{
-		symbol:      "cc",
+		symbol:      "-cc",
 		description: "Adds CC to queue to be reactivated",
 		takesValue:  true,
 		printOrder:  1,
 	}
-	ReactivateFlags["-"+ccFlag.symbol] = ccFlag
+	ReactivateFlags[ccFlag.symbol] = ccFlag
 
 	// ect as needed or remove the "-"+ for longer ones
 
@@ -154,7 +154,7 @@ func reactivateFunction(cfg *Config) error {
 				cmdHelp(flags)
 
 			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
+				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
 

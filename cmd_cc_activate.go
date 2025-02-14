@@ -41,76 +41,86 @@ func getActivationFlags() map[string]Flag {
 	activateFlags := make(map[string]Flag)
 
 	ccFlag := Flag{
-		symbol:      "cc",
+		symbol:      "-cc",
 		description: "Add multiple cage cards at once. Will be activated in order it is entered (including other flags)",
 		takesValue:  true,
 		printOrder:  1,
 	}
-	activateFlags["-"+ccFlag.symbol] = ccFlag
+	activateFlags[ccFlag.symbol] = ccFlag
 
 	dFlag := Flag{
-		symbol:      "d",
+		symbol:      "-d",
 		description: "Sets Date. Use format MM/DD/YYYY",
 		takesValue:  true,
 		printOrder:  2,
 	}
-	activateFlags["-"+dFlag.symbol] = dFlag
+	activateFlags[dFlag.symbol] = dFlag
 
 	aFlag := Flag{
-		symbol:      "a",
+		symbol:      "-a",
 		description: "Sets number of animals added to protocol on activation",
 		takesValue:  true,
 		printOrder:  3,
 	}
-	activateFlags["-"+aFlag.symbol] = aFlag
+	activateFlags[aFlag.symbol] = aFlag
 
 	nFlag := Flag{
-		symbol:      "n",
+		symbol:      "-n",
 		description: "Sets the note for only the next card to be added. Enter 'x' to clear\n Use underscores in place of spaces",
 		takesValue:  true,
 		printOrder:  4,
 	}
-	activateFlags["-"+nFlag.symbol] = nFlag
+	activateFlags[nFlag.symbol] = nFlag
 
 	NFlag := Flag{
-		symbol:      "N",
+		symbol:      "-N",
 		description: "Sets the note for all cage cards added until changes. Enter 'x' to clear\n Use underscores in place of spaces",
 		takesValue:  true,
 		printOrder:  5,
 	}
-	activateFlags["-"+NFlag.symbol] = NFlag
+	activateFlags[NFlag.symbol] = NFlag
 
 	sFlag := Flag{
-		symbol:      "s",
+		symbol:      "s-",
 		description: "Sets the strain for only the next card to be added. Enter 'x' to clear",
 		takesValue:  true,
 		printOrder:  6,
 	}
-	activateFlags["-"+sFlag.symbol] = sFlag
+	activateFlags[sFlag.symbol] = sFlag
 
 	SFlag := Flag{
-		symbol:      "S",
+		symbol:      "-S",
 		description: "Sets the strain for all cage cards added until changed. Enter 'x' to clear",
 		takesValue:  true,
 		printOrder:  7,
 	}
-	activateFlags["-"+SFlag.symbol] = SFlag
+	activateFlags[SFlag.symbol] = SFlag
 
 	rFlag := Flag{
-		symbol:      "r",
+		symbol:      "-r",
 		description: "Will add a reminder input days after activation date. \nRequires a note for the reminder. Enter 'x' to clear",
 		takesValue:  true,
 		printOrder:  8,
 	}
-	activateFlags["-"+rFlag.symbol] = rFlag
+	activateFlags[rFlag.symbol] = rFlag
 
 	RFlag := Flag{
-		symbol:      "R",
+		symbol:      "-R",
 		description: "Will add a reminder input days after activation date to all cages until changes. \nRequires a note for the reminder. Enter 'x' to clear",
 		takesValue:  true,
 		printOrder:  9,
 	}
-	activateFlags["-"+RFlag.symbol] = RFlag
+	activateFlags[RFlag.symbol] = RFlag
+
+	/* removed because i was testing default flag behavior
+	fakeFlag := Flag{
+		symbol:      "fake",
+		description: "it's fake :^3",
+		takesValue:  true,
+		printOrder:  9,
+	}
+	activateFlags[fakeFlag.symbol] = fakeFlag
+	*/
 
 	printFlag := Flag{
 		symbol:      "print",
@@ -349,7 +359,7 @@ func activateFunction(cfg *Config) error {
 				exit = true
 
 			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
+				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
 

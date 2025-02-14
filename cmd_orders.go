@@ -198,7 +198,7 @@ func addOrderFunction(cfg *Config) error {
 			case "help":
 				cmdHelp(flags)
 			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
+				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
 
@@ -529,7 +529,7 @@ func editOrderFunction(cfg *Config) error {
 				reviewed.ChangesMade = true
 
 			default:
-				fmt.Printf("Oops a fake flag snuck in: %s\n", arg.flag)
+				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
 
@@ -650,6 +650,10 @@ func receiveOrderFunction(cfg *Config) error {
 		fmt.Println("Exiting...")
 		return nil
 	}
+	if start <= 0 {
+		fmt.Println("Cage card IDs cannot be negative. Exiting...")
+		return nil
+	}
 
 	end, err := getIntPrompt("Enter end of cage card range")
 	if err != nil {
@@ -657,6 +661,10 @@ func receiveOrderFunction(cfg *Config) error {
 	}
 	if end == -1 {
 		fmt.Println("Exiting...")
+		return nil
+	}
+	if end <= 0 {
+		fmt.Println("Cage card IDs cannot be negative. Exiting...")
 		return nil
 	}
 
