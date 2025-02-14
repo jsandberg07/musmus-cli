@@ -25,30 +25,20 @@ import (
 // do it
 
 // Next:
-// logins (crpyto, storing that, creating new people, the admin tier account)
-// so we just always login as the same thing automatically but for 'production' and later
-// 1. passwords and hashing. use a different package. compare and hash. ect. do like 3 tries before exiting.
-// 2. login interface
-// 3. option to load test data and storing the fact that test data was stored
-// 4. the option for anybody being able to activate anybodys cards that is already there and can be toggled
-// 5. uhh create position. "User will be prompted to add password on first login"
-// 6. then prompt password, exit, then ask them to login
-// 7. Then always ask for it after
-// need an investigator update password,
-// get hash where $=id
+// some polishing while i have the time, then i'll go through set up on my laptop and write the read me with that
+// cover up passwords
+// reorganize files lmao
+// returning ConstReturnString as an error message and using that to return
+// and make that different from exiting. or closing or whatever. get a theseaurus.
+// More test data! doesn't matter nobody uses it!
+// more like "x entered, y updated" in edit functions
+// check how many lines of code you've added lmao
+// check for other TODOs and put there here:
+//
+// delete the massive ammount of comments that are everywhere
 
 // After that:
 // work on the read me cause it'll be different
-
-// AFTER THAT:
-// the great polishing
-// have the 'or enter x to exit' return const string 'exit' or whatever, check for that instead of like
-// 0 value struct and exit from that aka the great exiting
-// do you want to load test data? and allow for that'
-// add more test data
-// allow reset
-// ask each time you login if you want to keep using test data if loaded (store that in settings)
-// then we done! could easily be done by the end of the day and then make a list of what esle to do
 
 // AFTER THAT:
 // the great readme-en-ing. write a readme and update the github page
