@@ -25,7 +25,7 @@ import (
 // china #11
 // do it
 
-// CURRENTLY:
+// Done now:
 // improve goto with some fallthroughs - done!
 // add permissions that work (you can delete anybodys reminders currently) - done!
 // get the # of care days calculated for expenses - Done!
@@ -34,21 +34,30 @@ import (
 // change the "fake flag" error message into a const, have it like make sense - done!
 // something about passing slices via pointer ONLY IF YOU MODIFY THEM
 // we back at it again boys let's get these pointers all set
-// otherwise just pass by value
+// otherwise just pass by value - fixed!
 // psql supports OVERLAPS for time stamps. rewrite using that?
-// big maybe! cause it uses BETWEEN INTERFACE which doesn't mean much i think (but i get it)
+// big maybe! cause it uses BETWEEN INTERFACE which doesn't mean much i think (but i get it) - fixed!
+// continue to use SIGNED ints but double check them!!! this is a deliberate design decision! - done
+
+// Next:
+// logins (crpyto, storing that, creating new people, the admin tier account)
+// so we just always login as the same thing automatically but for 'production' and later
+// 1. passwords and hashing. use a different package. compare and hash. ect. do like 3 tries before exiting.
+// 2. login interface
+// 3. option to load test data and storing the fact that test data was stored
+// 4. the option for anybody being able to activate anybodys cards that is already there and can be toggled
+// 5.
 
 // After that:
 // work on the read me cause it'll be different
 
 // AFTER THAT:
 // the great polishing
-// logins (crpyto, storing that, creating new people, the admin tier account)
+
 // AFTER THAT:
 // the great readme-en-ing. write a readme and update the github page
 // add some consts for the strings you use for consistency + fancy + easier changes
 // like exiting program vs exiting command
-// continue to use SIGNED ints but double check them!!! this is a deliberate design decision!
 // AFTER THAT:
 // the great adding the project to my portfolioening
 // lots of test data! for fun!
