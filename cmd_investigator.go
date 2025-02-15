@@ -118,12 +118,11 @@ func editInvestigatorFunction(cfg *Config) error {
 		return err
 	}
 	investigator, err := getStructPrompt(cfg, "Enter the name of the investigator you'd like to edit,", getInvestigatorStruct)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	nilInvestigator := database.Investigator{}
-	if investigator == nilInvestigator {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 
@@ -380,21 +379,20 @@ func addInvestigatorFunction(cfg *Config) error {
 		return err
 	}
 	name, err := getStringPrompt(cfg, "Enter name of new investigator", checkIfInvestigatorNameUnique)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	if name == "" {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 
 	position, err := getStructPrompt(cfg, "Enter position of new investigator", getPositionStruct)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	nilPosition := database.Position{}
-	if position == nilPosition {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 

@@ -63,29 +63,29 @@ func addStrainFunction(cfg *Config) error {
 	// no permissions, strains are generally for reference
 
 	name, err := getStringPrompt(cfg, "Enter strain name", checkFuncNil)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	if name == "" {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 
 	vendor, err := getStringPrompt(cfg, "Enter vendor", checkFuncNil)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	if vendor == "" {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 
 	code, err := getStringPrompt(cfg, "Enter strain code", checkIfStrainCodeUnique)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	if code == "" {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 
@@ -267,13 +267,13 @@ func getEditStrainFlags() map[string]Flag {
 // look into removing the args thing, might have to stay
 func editStrainFunction(cfg *Config) error {
 	// no permission check, strains are generally for reference
-	nilStrain := database.Strain{}
 	strain, err := getStructPrompt(cfg, "Enter strain name or ID to edit", getStrainStruct)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	if strain == nilStrain {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
+		return nil
 	}
 
 	// get flags

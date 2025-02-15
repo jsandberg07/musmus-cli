@@ -26,12 +26,12 @@ import (
 
 // Next:
 // some polishing while i have the time, then i'll go through set up on my laptop and write the read me with that
-// cover up passwords
+// cover up passwords - done
 // reorganize files lmao
 // returning ConstReturnString as an error message and using that to return
 // and make that different from exiting. or closing or whatever. get a theseaurus.
 // More test data! doesn't matter nobody uses it!
-// more like "x entered, y updated" in edit functions
+// more like "x entered, y updated" in edit functions. Can i do like a func printSet(type string, s {}interface) what would that do / look like. Yes it works, but watch setting structs
 // check how many lines of code you've added lmao
 // check for other TODOs and put there here:
 //

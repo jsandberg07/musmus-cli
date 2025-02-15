@@ -74,11 +74,12 @@ func addOrderFunction(cfg *Config) error {
 	reader := bufio.NewReader(os.Stdin)
 
 	orderNumber, err := getStringPrompt(cfg, "Enter order number", checkIfOrderNumberUnique)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	if orderNumber == "" {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
+		return nil
 	}
 
 	date, err := getDatePrompt("Enter expected date")
@@ -92,25 +93,22 @@ func addOrderFunction(cfg *Config) error {
 	}
 
 	protocol, err := getStructPrompt(cfg, "Enter protocol for order", getProtocolStruct)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	nilProtocol := database.Protocol{}
-	if protocol == nilProtocol {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 
 	investigator, err := getStructPrompt(cfg, "Enter investigator receiving order", getInvestigatorStruct)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	nilInvestigator := database.Investigator{}
-	if investigator == nilInvestigator {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
-
 	err = investigatorProtocolCheck(cfg, &investigator, &protocol)
 	if err != nil {
 		fmt.Println("Exiting...")
@@ -118,18 +116,21 @@ func addOrderFunction(cfg *Config) error {
 	}
 
 	strain, err := getStructPrompt(cfg, "Enter strain of order", getStrainStruct)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	nilStrain := database.Strain{}
-	if strain == nilStrain {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 
 	note, err := getStringPrompt(cfg, "Optionally enter a note. Will be applied to all cage cards from order", checkFuncNil)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
+	}
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
+		return nil
 	}
 	var dbNote sql.NullString
 	if note == "" {
@@ -359,12 +360,11 @@ func editOrderFunction(cfg *Config) error {
 	flags := getEditOrderFlags()
 
 	order, err := getStructPrompt(cfg, "Enter order number", getOrderStruct)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	nilOrder := database.Order{}
-	if order == nilOrder {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 	if order.Received {
@@ -629,12 +629,11 @@ func receiveOrderFunction(cfg *Config) error {
 	reader := bufio.NewReader(os.Stdin)
 
 	order, err := getStructPrompt(cfg, "Enter order number for order to receive", getOrderStruct)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	nilOrder := database.Order{}
-	if order == nilOrder {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 	if order.Received {
@@ -643,11 +642,11 @@ func receiveOrderFunction(cfg *Config) error {
 	}
 
 	start, err := getIntPrompt("Enter start of cage card range")
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	if start == -1 {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 	if start <= 0 {
@@ -656,11 +655,11 @@ func receiveOrderFunction(cfg *Config) error {
 	}
 
 	end, err := getIntPrompt("Enter end of cage card range")
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	if end == -1 {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 	if end <= 0 {

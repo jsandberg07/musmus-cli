@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -15,9 +16,9 @@ import (
 // just pass in "get investigator name to edit" instead of new function just to say "to edit"
 // write the same program 3 times and you'll realize what you want you want to refactor
 
-// prints prompt, takes an input from the user, then runs it through the check function for uniqueness or
-// if valid entry in the database. Will repeat if checkFunc returns an error. Can probably remove error return
-// TODO: return a specific error that informs the function to exit instead of checking for nil
+// Prints prompt (+ instructions on how to cancel), takes an input from the user, then runs it through the check function for uniqueness or
+// if valid entry in the database. Will repeat if checkFunc returns an error. Returns an Error() const that can be checked
+// for when the user decides to cancel and should be checked
 func getStringPrompt(cfg *Config, prompt string, checkFunc func(*Config, string) error) (string, error) {
 	fmt.Println(prompt + " or exit to cancel")
 	reader := bufio.NewReader(os.Stdin)
@@ -25,8 +26,7 @@ func getStringPrompt(cfg *Config, prompt string, checkFunc func(*Config, string)
 		fmt.Print("> ")
 		text, err := reader.ReadString('\n')
 		if err != nil {
-			fmt.Printf("Error reading input string: %s", err)
-			os.Exit(1)
+			return "", err
 		}
 		input := strings.TrimSpace(text)
 		if input == "" {
@@ -34,7 +34,8 @@ func getStringPrompt(cfg *Config, prompt string, checkFunc func(*Config, string)
 			continue
 		}
 		if input == "exit" || input == "cancel" {
-			return "", nil
+			// return an error string instead of a blank version, then check that
+			return "", errors.New(CancelError)
 		}
 
 		// then have check if unique or check if not unique after
@@ -59,8 +60,7 @@ func getIntPrompt(prompt string) (int, error) {
 		fmt.Print("> ")
 		text, err := reader.ReadString('\n')
 		if err != nil {
-			fmt.Printf("Error reading input string: %s", err)
-			os.Exit(1)
+			return 0, err
 		}
 		input := strings.TrimSpace(text)
 		if input == "" {
@@ -69,12 +69,11 @@ func getIntPrompt(prompt string) (int, error) {
 		}
 		if input == "exit" || input == "cancel" {
 			// -1 instead of the 0 value for an int because checking to exit
-			return -1, nil
+			return 0, errors.New(CancelError)
 		}
 
 		output, err := strconv.Atoi(input)
 		if err != nil {
-			// TODO: what's the specific error for putting letters in an atoi?
 			fmt.Println(err)
 			continue
 		}
@@ -110,7 +109,7 @@ func getStructPrompt[T any](cfg *Config, prompt string, getFunc func(*Config, st
 		}
 		if input == "exit" || input == "cancel" {
 			var nilT T
-			return nilT, nil
+			return nilT, errors.New(CancelError)
 		}
 
 		// then have check if unique or check if not unique after

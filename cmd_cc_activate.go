@@ -440,7 +440,7 @@ func activationWrapper(cfg *Config, s *CageCardActivationParams) error {
 }
 
 // TODO: naming things is hard
-func getCCToActivate(s *CageCardActivationParams, i *database.Investigator) database.TrueActivateCageCardParams {
+func getCCToActivate(s *CageCardActivationParams, i *database.Investigator) database.ActivateCageCardParams {
 
 	tdate := sql.NullTime{
 		Valid: true,
@@ -465,7 +465,7 @@ func getCCToActivate(s *CageCardActivationParams, i *database.Investigator) data
 
 	tactivatedBy := uuid.NullUUID{Valid: true, UUID: i.ID}
 
-	taccp := database.TrueActivateCageCardParams{
+	taccp := database.ActivateCageCardParams{
 		CcID:        int32(s.ccID),
 		ActivatedOn: tdate,
 		Strain:      tstrain,
@@ -475,7 +475,7 @@ func getCCToActivate(s *CageCardActivationParams, i *database.Investigator) data
 	return taccp
 }
 
-func activateCageCard(cfg *Config, cc *database.TrueActivateCageCardParams) (database.CageCard, error) {
+func activateCageCard(cfg *Config, cc *database.ActivateCageCardParams) (database.CageCard, error) {
 	tCard, err := cfg.db.GetCageCardByID(context.Background(), int32(cc.CcID))
 	// check if added to db
 	if err != nil && err.Error() == "sql: no rows in result set" {
@@ -501,7 +501,7 @@ func activateCageCard(cfg *Config, cc *database.TrueActivateCageCardParams) (dat
 	}
 
 	// activate
-	activatedCard, err := cfg.db.TrueActivateCageCard(context.Background(), *cc)
+	activatedCard, err := cfg.db.ActivateCageCard(context.Background(), *cc)
 	// update cc db error
 	if err != nil {
 		fmt.Println("Error activating cage card")

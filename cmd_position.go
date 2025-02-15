@@ -142,11 +142,11 @@ func addPositionFunction(cfg *Config) error {
 	}
 	// get title before anything else, or exit early
 	title, err := getStringPrompt(cfg, "Please enter the title for the new position,", checkIfPositionTitleUnique)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	if title == "" {
-		// user said exit, so cancel creating new position
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 
@@ -317,12 +317,11 @@ func editPositionFunction(cfg *Config) error {
 		return err
 	}
 	position, err := getStructPrompt(cfg, "Enter the title of the position to edit,", getPositionStruct)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	nilPosition := database.Position{}
-	if position == nilPosition {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 

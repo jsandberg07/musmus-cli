@@ -134,6 +134,8 @@ const (
 )
 
 const DefaultFlagMsg string = "An allowed flag was unhandled by the switch: "
+const CancelMsg string = "Exiting..."
+const CancelError string = "cancel"
 
 /*
 Create a flag:

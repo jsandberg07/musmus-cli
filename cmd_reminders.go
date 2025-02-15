@@ -89,22 +89,20 @@ func addReminderFunction(cfg *Config) error {
 	}
 
 	cc, err := getStructPrompt(cfg, "Enter cage card id for reminder. Cage card must be active", getCageCardStructActive)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	nilCC := database.CageCard{}
-	if cc == nilCC {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 
 	investigator, err := getStructPrompt(cfg, "Enter investigator who will recieve the reminder", getInvestigatorStruct)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	nilInv := database.Investigator{}
-	if investigator == nilInv {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 
@@ -331,12 +329,11 @@ func deleteReminderFunction(cfg *Config) error {
 		fmt.Println("Invalid entry. Exiting...")
 		return nil
 	}
-
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	if num == -1 {
-		fmt.Println("exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 

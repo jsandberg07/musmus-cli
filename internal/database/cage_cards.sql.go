@@ -12,6 +12,48 @@ import (
 	"github.com/google/uuid"
 )
 
+const activateCageCard = `-- name: ActivateCageCard :one
+UPDATE cage_cards
+SET activated_on = $2,
+    activated_by = $3,
+    strain = $4,
+    notes = $5
+WHERE cc_id = $1
+RETURNING cc_id, protocol_id, activated_on, deactivated_on, investigator_id, strain, notes, activated_by, deactivated_by, order_id
+`
+
+type ActivateCageCardParams struct {
+	CcID        int32
+	ActivatedOn sql.NullTime
+	ActivatedBy uuid.NullUUID
+	Strain      uuid.NullUUID
+	Notes       sql.NullString
+}
+
+func (q *Queries) ActivateCageCard(ctx context.Context, arg ActivateCageCardParams) (CageCard, error) {
+	row := q.db.QueryRowContext(ctx, activateCageCard,
+		arg.CcID,
+		arg.ActivatedOn,
+		arg.ActivatedBy,
+		arg.Strain,
+		arg.Notes,
+	)
+	var i CageCard
+	err := row.Scan(
+		&i.CcID,
+		&i.ProtocolID,
+		&i.ActivatedOn,
+		&i.DeactivatedOn,
+		&i.InvestigatorID,
+		&i.Strain,
+		&i.Notes,
+		&i.ActivatedBy,
+		&i.DeactivatedBy,
+		&i.OrderID,
+	)
+	return i, err
+}
+
 const addCageCard = `-- name: AddCageCard :one
 INSERT INTO cage_cards(cc_id, protocol_id, investigator_id)
 VALUES ($1, $2, $3)
@@ -121,7 +163,6 @@ type GetActiveTestCardsRow struct {
 	DeactivatedOn sql.NullTime
 }
 
-// the possibly unused pile
 func (q *Queries) GetActiveTestCards(ctx context.Context) ([]GetActiveTestCardsRow, error) {
 	rows, err := q.db.QueryContext(ctx, getActiveTestCards)
 	if err != nil {
@@ -359,24 +400,6 @@ WHERE $1 = cc_id
 
 func (q *Queries) InactivateCageCard(ctx context.Context, ccID int32) error {
 	_, err := q.db.ExecContext(ctx, inactivateCageCard, ccID)
-	return err
-}
-
-const newActivateCageCard = `-- name: NewActivateCageCard :exec
-UPDATE cage_cards
-SET activated_on = $2,
-    activated_by = $3
-WHERE cc_id = $1
-`
-
-type NewActivateCageCardParams struct {
-	CcID        int32
-	ActivatedOn sql.NullTime
-	ActivatedBy uuid.NullUUID
-}
-
-func (q *Queries) NewActivateCageCard(ctx context.Context, arg NewActivateCageCardParams) error {
-	_, err := q.db.ExecContext(ctx, newActivateCageCard, arg.CcID, arg.ActivatedOn, arg.ActivatedBy)
 	return err
 }
 

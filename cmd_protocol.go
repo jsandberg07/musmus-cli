@@ -76,39 +76,39 @@ func addProtocolFunction(cfg *Config) error {
 
 	// TODO: not all of these even have errs that can be returned, remove as needed
 	pi, err := getStructPrompt(cfg, "Enter the name of the PI overseeing the protocol", getPIStruct)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	nilInvestigator := database.Investigator{}
-	if pi == nilInvestigator {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
+		return nil
 	}
 
 	title, err := getStringPrompt(cfg, "Enter title of the new protocol", checkFuncNil)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	if title == "" {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 
 	number, err := getStringPrompt(cfg, "Enter number of new protocol", checkProtocolUniqueFunc)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	if number == "" {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 
 	allocated, err := getIntPrompt("Enter the numbers of animals allocated to the protocol")
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	if allocated == -1 {
-		fmt.Println("Exiting...")
-		return err
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
+		return nil
 	}
 
 	// don't use prompts for this one, defaults to three years from today
@@ -375,12 +375,11 @@ func editProtocolFunction(cfg *Config) error {
 		return err
 	}
 	protocol, err := getStructPrompt(cfg, "Enter number of protocol to edit", checkProtocolExists)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	nilProtocol := database.Protocol{}
-	if protocol == nilProtocol {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 

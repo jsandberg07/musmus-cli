@@ -106,13 +106,12 @@ func addCCFunction(cfg *Config) error {
 	if err != nil {
 		return err
 	}
-	var nilProtocol database.Protocol
 	protocol, err := getStructPrompt(cfg, "Enter a protocol for the cards be used with", getProtocolStruct)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	if protocol == nilProtocol {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 	investigator := *cfg.loggedInInvestigator
