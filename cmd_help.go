@@ -7,8 +7,7 @@ import (
 	"sort"
 )
 
-// prints available command names or flags.
-// sorted now! neat!
+// prints available flags for the command. Sorted now! Neat!
 func cmdHelp(input map[string]Flag) {
 	flags := slices.Collect(maps.Values(input))
 	sort.Slice(flags, func(i, j int) bool {

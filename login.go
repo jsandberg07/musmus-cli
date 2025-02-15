@@ -120,7 +120,6 @@ func (cfg *Config) createAdmin() error {
 	return nil
 }
 
-// TODO: can we make this show stars instead of the password?
 func getNewPassword() (string, error) {
 	fmt.Println("No password found")
 	for {
@@ -172,19 +171,3 @@ func getSecureInput(prompt string) (string, error) {
 		return input, nil
 	}
 }
-
-/* removed because it was justed used for logging in, identical to getInv(cfg, name)(inv, err) anyway
-func (cfg *Config) getInvestigator(name string) (database.Investigator, error) {
-	investigators, err := cfg.db.GetInvestigatorByName(context.Background(), name)
-	if err != nil {
-		fmt.Println("Error getting investigator")
-		return database.Investigator{}, nil
-	}
-	if len(investigators) > 1 {
-		fmt.Println("Error getting investigator")
-		return database.Investigator{}, errors.New("vague investigator name")
-	}
-
-	return investigators[0], nil
-}
-*/

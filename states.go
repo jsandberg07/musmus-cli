@@ -6,8 +6,8 @@ import (
 	"strings"
 )
 
-// just clean up the inputs
-// then we can have another function check and create the list of flags+args from the command
+// used in states / menus to get command name (as opposed to in the commands themselves).
+// won't throw an error for too many names, will just keep going
 func readCommandName(input string) (string, error) {
 	if input == "" {
 		return "", errors.New("no input found")
@@ -23,15 +23,6 @@ func readCommandName(input string) (string, error) {
 	}
 
 	cmdName := splitArgs[0]
-
-	/* formerly returned an array of strings that were never used
-	var arguments []string
-
-	if len(splitArgs) != 0 {
-		arguments = splitArgs[1:]
-	}
-	return cmdName, arguments, nil
-	*/
 
 	return cmdName, nil
 }
@@ -81,7 +72,7 @@ func parseCommandArguments(cmd *Command, parameters []string) ([]Argument, error
 }
 */
 
-// takes commands, adds common commands, then makes a map using its name as the key.
+// takes commands, adds common commands, then makes a map of commands using the cmd.name as it's key.
 // used in every state.
 func cmdMapHelper(cmds []Command) map[string]Command {
 	commonCmds := getCommonCmds()
@@ -112,7 +103,7 @@ func getMainState() *State {
 	return &mainState
 }
 
-// TODO: gotta be some way to condense this into one function. Theyre literally copy and paste
+// TODO: condense this into one function. Theyre literally copy and paste
 // input a string, use a switch to get a map, set the cli message, return &state
 func getInvestigatorsMap() map[string]Command {
 	cmds := []Command{getAddInvestigatorCmd(), getEditInvestigatorCmd()}
@@ -131,7 +122,6 @@ func getInvesitatorsState() *State {
 }
 
 func getPositionMap() map[string]Command {
-	// put that commands related to positions you want here
 	cmds := []Command{getAddPositionCmd(), getEditPositionCmd()}
 	commandMap := cmdMapHelper(cmds)
 
@@ -168,7 +158,6 @@ func getProcessingState() *State {
 }
 
 func getProtocolMap() map[string]Command {
-	// put your protocol Commands here
 	cmds := []Command{getAddProtocolCmd(), getEditProtocolCmd(), getAddInvestigatorToProtocolCmd()}
 	commandMap := cmdMapHelper(cmds)
 
@@ -186,7 +175,6 @@ func getProtocolState() *State {
 }
 
 func getQueriesMap() map[string]Command {
-	// put your query Commands here
 	cmds := []Command{getCCQueriesCmd(), getCareDaysCmd()}
 	commandMap := cmdMapHelper(cmds)
 
@@ -203,7 +191,6 @@ func getQueriesState() *State {
 }
 
 func getSettingsMap() map[string]Command {
-	// put your settings Commands here
 	cmds := []Command{getChangeSettingsCmd(), getResetCmd()}
 	commandMap := cmdMapHelper(cmds)
 

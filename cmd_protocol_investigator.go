@@ -25,10 +25,6 @@ func getAddInvestigatorToProtocolCmd() Command {
 	return addInvProCmd
 }
 
-// [a]dd, [r]emove, [i]nvestigator, [p]rotocol, exit
-// helper for printing changes
-// ask if they want to save
-// MAYBE add an undo
 func getAddInvestToProtFlags() map[string]Flag {
 	addInvestToProtFlags := make(map[string]Flag)
 	aFlag := Flag{
@@ -63,8 +59,6 @@ func getAddInvestToProtFlags() map[string]Flag {
 	}
 	addInvestToProtFlags[pFlag.symbol] = pFlag
 
-	// ect as needed or remove the "-"+ for longer ones
-
 	exitFlag := Flag{
 		symbol:      "exit",
 		description: "exits the current menu",
@@ -85,25 +79,19 @@ func getAddInvestToProtFlags() map[string]Flag {
 
 }
 
-// look into removing the args thing, might have to stay
 func addInvestigatorToProtocolFunction(cfg *Config) error {
-	// permission check
 	err := checkPermission(cfg.loggedInPosition, PermissionProtocol)
 	if err != nil {
 		return err
 	}
-	// get flags
 	flags := getAddInvestToProtFlags()
 
-	// set defaults
 	exit := false
 	investigator := database.Investigator{ID: uuid.Nil}
 	protocol := database.Protocol{ID: uuid.Nil}
 
-	// the reader
 	reader := bufio.NewReader(os.Stdin)
 
-	// da loop
 	for {
 		fmt.Print("> ")
 		text, err := reader.ReadString('\n')
@@ -118,16 +106,12 @@ func addInvestigatorToProtocolFunction(cfg *Config) error {
 			continue
 		}
 
-		// do weird behavior here
-
-		// but normal loop now
 		args, err := parseArguments(flags, inputs)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
 
-		// [a]dd, [r]emove, [i]nvestigator, [p]rotocol, exit
 		for _, arg := range args {
 			switch arg.flag {
 			case "-a":
@@ -144,12 +128,12 @@ func addInvestigatorToProtocolFunction(cfg *Config) error {
 					ProtocolID:     protocol.ID,
 				}
 				addedInvest, err := cfg.db.AddInvestigatorToProtocol(context.Background(), aipParams)
-				// what if you try to remove somebody thats not on it, or remove somebody already on it
-				// literally just have to try it and see lemoo
+
 				if err != nil && !strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
 					fmt.Println("Error adding investigator to protocol")
 					return err
 				}
+
 				if err != nil && strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
 					fmt.Printf("%s is already added to %s\n", investigator.IName, protocol.PNumber)
 					break
@@ -225,23 +209,6 @@ func addInvestigatorToProtocolFunction(cfg *Config) error {
 	return nil
 }
 
-func getProtocolByFlag(cfg *Config, n string) (database.Protocol, error) {
-	protocol, err := cfg.db.GetProtocolByNumber(context.Background(), n)
-	if err != nil && err.Error() != "sql: no rows in result set" {
-		// any other error
-		fmt.Println("Error getting protocol from DB")
-		return database.Protocol{}, err
-
-	}
-	if err != nil && err.Error() == "sql: no rows in result set" {
-		// no results
-		fmt.Println("Protocol by that number not found. Please try again")
-		return database.Protocol{}, nil
-	}
-
-	return protocol, nil
-}
-
 // investigators need to be added to a protocol before working on it. Ie adding cage cards, activating cage cards, adding orders
 func investigatorProtocolCheck(cfg *Config, i *database.Investigator, p *database.Protocol) error {
 	cip := database.CheckInvestigatorProtocolParams{
@@ -255,7 +222,7 @@ func investigatorProtocolCheck(cfg *Config, i *database.Investigator, p *databas
 	}
 	if err != nil {
 		// any other error
-		return errors.New("error getting protocol - investigator information")
+		return err
 	}
 
 	if verbose {

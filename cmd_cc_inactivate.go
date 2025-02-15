@@ -10,8 +10,6 @@ import (
 	"strings"
 )
 
-// return to inactive
-
 func getCCInactivateCmd() Command {
 	inactivateFlags := make(map[string]Flag)
 	inactivateCmd := Command{
@@ -26,8 +24,8 @@ func getCCInactivateCmd() Command {
 }
 
 func getInactivateFlags() map[string]Flag {
-	// cc, process, exit, help
 	InactivateFlags := make(map[string]Flag)
+
 	ccFlag := Flag{
 		symbol:      "-cc",
 		description: "Adds CC to queue to be reactivated",
@@ -36,9 +34,6 @@ func getInactivateFlags() map[string]Flag {
 	}
 	InactivateFlags[ccFlag.symbol] = ccFlag
 
-	// ect as needed or remove the "-"+ for longer ones
-
-	// maybe remove this
 	processFlag := Flag{
 		symbol:      "process",
 		description: "Reactivates card in queue",
@@ -67,25 +62,19 @@ func getInactivateFlags() map[string]Flag {
 
 }
 
-// look into removing the args thing, might have to stay
 func inactivateFunction(cfg *Config) error {
-	// permission check
 	err := checkPermission(cfg.loggedInPosition, PermissionActivateInactivate)
 	if err != nil {
 		return err
 	}
-	// get flags
 	flags := getInactivateFlags()
 
-	// set defaults
 	exit := false
 	cardsToInactivate := []int{}
 
-	// the reader
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Enter cards to inactivate")
 
-	// da loop
 	for {
 		fmt.Print("> ")
 		text, err := reader.ReadString('\n')
@@ -100,8 +89,6 @@ func inactivateFunction(cfg *Config) error {
 			continue
 		}
 
-		// do weird behavior here
-		// try to run as a number, and add it to the list of cards to activate using the current values
 		if len(inputs) == 1 {
 			cc, err := strconv.Atoi(inputs[0])
 			if err != nil && !strings.Contains(err.Error(), "invalid syntax") {
@@ -118,7 +105,6 @@ func inactivateFunction(cfg *Config) error {
 			}
 		}
 
-		// but normal loop now
 		args, err := parseArguments(flags, inputs)
 		if err != nil {
 			fmt.Println(err)
@@ -156,11 +142,9 @@ func inactivateFunction(cfg *Config) error {
 				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
 		}
-
 		if exit {
 			break
 		}
-
 	}
 
 	return nil
@@ -168,7 +152,7 @@ func inactivateFunction(cfg *Config) error {
 
 func inactivateCageCards(cfg *Config, cti []int) error {
 	if len(cti) == 0 {
-		return errors.New("oops! No cards")
+		return errors.New("no cards have been added")
 	}
 	inactivationErrors := []ccError{}
 	totalInactivated := 0
@@ -189,8 +173,6 @@ func inactivateCageCards(cfg *Config, cti []int) error {
 			inactivationErrors = append(inactivationErrors, tcce)
 			continue
 		}
-
-		// nothing to verbose
 		totalInactivated++
 	}
 

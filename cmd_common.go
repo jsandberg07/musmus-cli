@@ -8,15 +8,12 @@ import (
 	"sort"
 )
 
-// common functions available in every state
-// help, exit, back
-
+// Commands that are available for each state / menu
 func getCommonCmds() []Command {
 	commonCmds := []Command{getBackCmd(), getStateHelpCmd(), getExitCmd()}
 	return commonCmds
 }
 
-// just set the state as main
 func getBackCmd() Command {
 	backCmd := Command{
 		name:        "back",
@@ -43,16 +40,14 @@ func getExitCmd() Command {
 	return exitCmd
 }
 
-// because you os exit this way, you never hit the end of the program to clean things
-// if you want to reset anything, put it here
+// uses os.Exit instead of going back to the loop in main. Any clean up upon exit needs to be done here.
 func exitCommand(cfg *Config) error {
 	fmt.Println("exiting...")
 	os.Exit(0)
 	return nil
 }
 
-// for the main menu
-// prints all processes that are available for the state
+// for the state / menu. prints all processes that are available for the state
 func getStateHelpCmd() Command {
 	helpCmd := Command{
 		name:        "help",
@@ -65,7 +60,6 @@ func getStateHelpCmd() Command {
 }
 
 func stateHelpCommand(cfg *Config) error {
-
 	cmds := slices.Collect(maps.Values(cfg.currentState.currentCommands))
 	sort.Slice(cmds, func(i, j int) bool {
 		return cmds[i].printOrder < cmds[j].printOrder

@@ -26,7 +26,6 @@ func getAddOrderCmd() Command {
 	return addOrderCmd
 }
 
-// prompts so just save, exit, print
 func getAddOrderFlags() map[string]Flag {
 	addOrderFlags := make(map[string]Flag)
 	saveFlag := Flag{
@@ -57,20 +56,15 @@ func getAddOrderFlags() map[string]Flag {
 
 }
 
-// look into removing the args thing, might have to stay
 func addOrderFunction(cfg *Config) error {
-	// permission check
 	err := checkPermission(cfg.loggedInPosition, PermissionAddOrder)
 	if err != nil {
 		return err
 	}
-	// get flags
 	flags := getAddOrderFlags()
 
-	// set defaults
 	exit := false
 
-	// the reader
 	reader := bufio.NewReader(os.Stdin)
 
 	orderNumber, err := getStringPrompt(cfg, "Enter order number", checkIfOrderNumberUnique)
@@ -149,12 +143,9 @@ func addOrderFunction(cfg *Config) error {
 		Note:           dbNote,
 	}
 
-	// working here: create the params, set the flags, remember to check if note valid or not
-	// thanks for the reminder. vacation time.
 	fmt.Println("Order will be created with the following settings:")
 	printNewOrder(&cnoParam, &protocol, &investigator, &strain)
 	fmt.Println("Enter 'save' or 'exit'")
-	// da loop
 	for {
 		fmt.Print("> ")
 		text, err := reader.ReadString('\n')
@@ -169,9 +160,6 @@ func addOrderFunction(cfg *Config) error {
 			continue
 		}
 
-		// do weird behavior here
-
-		// but normal loop now
 		args, err := parseArguments(flags, inputs)
 		if err != nil {
 			fmt.Println(err)
@@ -212,23 +200,6 @@ func addOrderFunction(cfg *Config) error {
 	return nil
 }
 
-func checkIfOrderNumberUnique(cfg *Config, input string) error {
-	_, err := cfg.db.GetOrderByNumber(context.Background(), input)
-	if err != nil && err.Error() != "sql: no rows in result set" {
-		// any other error
-		return err
-	}
-
-	if err == nil {
-		// is not unique
-		return errors.New("order number is not unique. Please try again")
-	}
-
-	// is unique
-	return nil
-
-}
-
 func printNewOrder(o *database.CreateNewOrderParams, p *database.Protocol, i *database.Investigator, s *database.Strain) {
 	fmt.Printf("* Number - %s\n", o.OrderNumber)
 	fmt.Printf("* Date - %v\n", o.ExpectedDate)
@@ -264,9 +235,6 @@ func getEditOrderCmd() Command {
 	return EditOrderCmd
 }
 
-// can't change the number that's too much
-// expected [d]ate, [i]nvestigator, [s]train, [n]ote, dont bother with unreceiving too much work for a fake program
-// save print
 func getEditOrderFlags() map[string]Flag {
 	editOrderFlags := make(map[string]Flag)
 
@@ -310,8 +278,6 @@ func getEditOrderFlags() map[string]Flag {
 	}
 	editOrderFlags["-"+pFlag.symbol] = pFlag
 
-	// ect as needed or remove the "-"+ for longer ones
-
 	helpFlag := Flag{
 		symbol:      "help",
 		description: "Prints available flags",
@@ -348,15 +314,11 @@ func getEditOrderFlags() map[string]Flag {
 
 }
 
-// look into removing the args thing, might have to stay
-// ask for an order number, load params, set flags
 func editOrderFunction(cfg *Config) error {
-	// permission check
 	err := checkPermission(cfg.loggedInPosition, PermissionAddOrder)
 	if err != nil {
 		return err
 	}
-	// get flags
 	flags := getEditOrderFlags()
 
 	order, err := getStructPrompt(cfg, "Enter order number", getOrderStruct)
@@ -372,7 +334,6 @@ func editOrderFunction(cfg *Config) error {
 		return nil
 	}
 
-	// set defaults
 	exit := false
 	reviewed := Reviewed{
 		Printed:     false,
@@ -386,10 +347,8 @@ func editOrderFunction(cfg *Config) error {
 		Note:           order.Note,
 	}
 
-	// the reader
 	reader := bufio.NewReader(os.Stdin)
 
-	// da loop
 	for {
 		fmt.Print("> ")
 		text, err := reader.ReadString('\n')
@@ -404,18 +363,16 @@ func editOrderFunction(cfg *Config) error {
 			continue
 		}
 
-		// do weird behavior here
 		if reviewed.ChangesMade {
 			reviewed.Printed = false
 		}
 
-		// but normal loop now
 		args, err := parseArguments(flags, inputs)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
-		// d, n, i, s, save, print, exit
+
 		for _, arg := range args {
 			switch arg.flag {
 			case "exit":
@@ -607,25 +564,15 @@ func getReceiveOrderFlags() map[string]Flag {
 
 }
 
-// ask for an order number
-// ask for a date to receive (blank for today)
-// cage card range (start to finish)
-// as "this many cards will be added on this day this order ok"
-// then DO IT
-// look into removing the args thing, might have to stay
 func receiveOrderFunction(cfg *Config) error {
-	// permission check
 	err := checkPermission(cfg.loggedInPosition, PermissionReceiveOrder)
 	if err != nil {
 		return err
 	}
-	// flags just for saving and exiting prompt everything else
 	flags := getReceiveOrderFlags()
 
-	// set defaults
 	exit := false
 
-	// the reader
 	reader := bufio.NewReader(os.Stdin)
 
 	order, err := getStructPrompt(cfg, "Enter order number for order to receive", getOrderStruct)
@@ -676,7 +623,6 @@ func receiveOrderFunction(cfg *Config) error {
 
 	fmt.Println("Enter 'receive' to continue receiving, or help to see other commands")
 
-	// da loop
 	for {
 		fmt.Print("> ")
 		text, err := reader.ReadString('\n')
@@ -691,9 +637,6 @@ func receiveOrderFunction(cfg *Config) error {
 			continue
 		}
 
-		// do weird behavior here
-
-		// but normal loop now
 		args, err := parseArguments(flags, inputs)
 		if err != nil {
 			fmt.Println(err)
@@ -769,11 +712,6 @@ func printReceiveOrder(start, end int, o *database.Order, p *database.Protocol, 
 	fmt.Printf("* Total CC - %v\n", end-start+1)
 }
 
-// you should take it in steps but instead go whole hog. what i lack in it working i make
-// up with being so large you wont notice edge cases kek
-// loop start to end
-// add cage card, activation date, order number, ect
-// mark order as received at the end if it works ok
 func receiveOrder(cfg *Config, start, end int, o *database.Order) error {
 	// check if cage cards are already in db
 	cageCards, err := cfg.db.GetCageCardsRange(context.Background(), database.GetCageCardsRangeParams{CcID: int32(start), CcID_2: int32(end)})
@@ -827,8 +765,6 @@ func receiveOrder(cfg *Config, start, end int, o *database.Order) error {
 	return nil
 }
 
-// "duplicate key value violates unique constraint"
-// already exists
 func getTodaysOrders(cfg *Config) error {
 	gueoParams := database.GetUserExpectedOrdersParams{
 		ExpectedDate:   normalizeDate(time.Now()),
@@ -854,22 +790,4 @@ func getTodaysOrders(cfg *Config) error {
 	}
 
 	return nil
-}
-
-func getOrderByFlag(cfg *Config, input string) (database.Order, error) {
-	order, err := cfg.db.GetOrderByNumber(context.Background(), input)
-	if err != nil && err.Error() == "sql: no rows in result set" {
-		// no order found
-		fmt.Println("No order by that number found. Please try again.")
-		return database.Order{}, nil
-	}
-	if err != nil {
-		// any other error
-		fmt.Println("Error getting order from DB.")
-		return database.Order{}, err
-	}
-
-	// found and ok
-	return order, nil
-
 }

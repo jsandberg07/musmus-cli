@@ -65,11 +65,13 @@ type Reviewed struct {
 	ChangesMade bool
 }
 
+// TODO: used in card inactivation / reactivation. Keep those consistent with activate / deactivate and remove this
 type ccError struct {
 	CCid int
 	Err  string
 }
 
+// Consistent way of exporting CC queries to CSVs
 type CageCardExport struct {
 	CcID          int32
 	IName         string
@@ -119,40 +121,3 @@ func (s *CageCardActivationParams) keepCheck() {
 		s.daysReminder = 0
 	}
 }
-
-type Permission int
-
-const (
-	PermissionActivateInactivate = iota
-	PermissionDeactivateReactivate
-	PermissionAddOrder
-	PermissionReceiveOrder
-	PermissionRunQueries
-	PermissionProtocol
-	PermissionStaff
-	PermissionReminders
-)
-
-const DefaultFlagMsg string = "An allowed flag was unhandled by the switch: "
-const CancelMsg string = "Exiting..."
-const CancelError string = "cancel"
-
-/*
-Create a flag:
-symbol, description, and if it takes a value
-symbol is without the -
-in the getCmd function, $flag := flag{}
-add to commands map
-add handling in the function itself. takes value are used later, doesnt sets a bool
-
-Create a command:
-write the new function (handle flagss)
-create a new function getNewCmd() Command {}
-flags map := make(map[string]flag)
-newCmd := Command{name, description, function, flags}
-
-Create a state:
-getState() &State {map, cli message}
-make sure to add help by default, prints what is available in current map
-getStateMap() and put that in
-*/

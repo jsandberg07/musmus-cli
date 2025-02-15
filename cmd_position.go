@@ -23,7 +23,6 @@ func getAddPositionCmd() Command {
 	return addPositionCmd
 }
 
-// TODO: extremely minor, but maybe add a check to see if ANY changes have been made and just discard if they havent
 func getPositionFlags() map[string]Flag {
 	PositionFlags := make(map[string]Flag)
 
@@ -140,7 +139,6 @@ func addPositionFunction(cfg *Config) error {
 	if err != nil {
 		return err
 	}
-	// get title before anything else, or exit early
 	title, err := getStringPrompt(cfg, "Please enter the title for the new position,", checkIfPositionTitleUnique)
 	if err != nil && err.Error() != CancelError {
 		return err
@@ -150,13 +148,10 @@ func addPositionFunction(cfg *Config) error {
 		return nil
 	}
 
-	// get flags
 	flags := getPositionFlags()
 
-	// the reader
 	reader := bufio.NewReader(os.Stdin)
 
-	// set defaults
 	exit := false
 	reviewed := Reviewed{
 		Printed:     false,
@@ -176,7 +171,6 @@ func addPositionFunction(cfg *Config) error {
 
 	fmt.Println("Use flags to toggle permission. All permissions default to false. Multiple flags can be passed in at once.\nUse help to see flags and what permissions they toggle")
 
-	// da loop
 	for {
 		fmt.Print("> ")
 		text, err := reader.ReadString('\n')
@@ -191,19 +185,16 @@ func addPositionFunction(cfg *Config) error {
 			continue
 		}
 
-		// do weird behavior here
 		if reviewed.ChangesMade {
 			reviewed.Printed = false
 		}
 
-		// but normal loop now
 		args, err := parseArguments(flags, inputs)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
-		// [a]ctivate, [d]eact, add [o]rders, [q]uery, [p]rotocol, [s]taff
-		// print, save, exit
+
 		for _, arg := range args {
 			switch arg.flag {
 			case "-a":
@@ -281,20 +272,6 @@ func addPositionFunction(cfg *Config) error {
 	return nil
 }
 
-func checkIfPositionTitleUnique(cfg *Config, input string) error {
-	_, err := cfg.db.GetPositionByTitle(context.Background(), input)
-	if err != nil && err.Error() == "sql: no rows in result set" {
-		// no position by that name was found
-		return nil
-	}
-	if err != nil {
-		// any other DB error so exit
-		fmt.Printf("Error checking database for title: %s\n", err)
-		os.Exit(1)
-	}
-	return errors.New("position titles must be unique. Please try again")
-}
-
 func getEditPositionCmd() Command {
 	editPositionFlags := make(map[string]Flag)
 	editPositionCmd := Command{
@@ -308,10 +285,7 @@ func getEditPositionCmd() Command {
 	return editPositionCmd
 }
 
-// TODO: print all titles so people know what the names are
-// flags are in addPosition
 func editPositionFunction(cfg *Config) error {
-	// permission check
 	err := checkPermission(cfg.loggedInPosition, PermissionStaff)
 	if err != nil {
 		return err
@@ -325,13 +299,10 @@ func editPositionFunction(cfg *Config) error {
 		return nil
 	}
 
-	// get flags
 	flags := getPositionFlags()
 
-	// the reader
 	reader := bufio.NewReader(os.Stdin)
 
-	// set defaults
 	exit := false
 	reviewed := Reviewed{
 		Printed:     false,
@@ -350,7 +321,6 @@ func editPositionFunction(cfg *Config) error {
 
 	fmt.Println("Use flags to toggle permission. All permissions default to false. Multiple flags can be passed in at once.\nUse help to see flags and what permissions they toggle")
 
-	// da loop
 	for {
 		fmt.Print("> ")
 		text, err := reader.ReadString('\n')
@@ -365,19 +335,16 @@ func editPositionFunction(cfg *Config) error {
 			continue
 		}
 
-		// do weird behavior here
 		if reviewed.ChangesMade {
 			reviewed.Printed = false
 		}
 
-		// but normal loop now
 		args, err := parseArguments(flags, inputs)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
-		// [a]ctivate, [d]eact, add [o]rders, [q]uery, [p]rotocol, [s]taff
-		// print, save, exit
+
 		for _, arg := range args {
 			switch arg.flag {
 			case "-a":
@@ -474,9 +441,9 @@ func (u updateposition) getPrint() printing struct { return conversion-UUID }
 BUT you can't extend functions from another package + they're updating so it'll probably get overwritten on generate
 */
 
-// don't pass in both, just one, and it'll convert and print it
+// don't pass in both, just one, and it'll convert and print it.
 // extremely hacky way to print both structs as theyre not identical in places that aren't printed anyway.
-// can't extend structs from another package
+// can't extend structs from another package (plus they're generated and may end up reverted)
 func printPermissions(c *database.CreatePositionParams, u *database.UpdatePositionParams) {
 	if c == nil && u == nil {
 		fmt.Println("Error printing permissions: both params nil")
@@ -582,9 +549,8 @@ func printPermissions(c *database.CreatePositionParams, u *database.UpdatePositi
 	}
 }
 
-// pass in currently logged in user's position from cfg (it's literally stored there)
+// currently logged in used is stored in cfg for quick reference already. Permission is enum.
 func checkPermission(i *database.Position, p Permission) error {
-	// we dont need to contact the db, the position is already loaded in cfg but check if nil
 	if i == nil {
 		return errors.New("could not get position to verify permissions")
 	}
@@ -642,203 +608,3 @@ func checkPermission(i *database.Position, p Permission) error {
 		return nil
 	}
 }
-
-/* removed as part of refactor
-func getPositionToEdit(cfg *Config) (database.Position, error) {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Println("* Please enter the title of the position to edit, or exit to cancel")
-	for {
-		fmt.Print("> ")
-		text, err := reader.ReadString('\n')
-		if err != nil {
-			fmt.Printf("Error getting input: %s", err)
-			os.Exit(1)
-		}
-
-		input := strings.TrimSpace(text)
-		if input == "" {
-			fmt.Println("No input entered. Title must be at least one character.")
-			continue
-		}
-
-		if input == "exit" || input == "cancel" {
-			fmt.Println("Exiting...")
-			return database.Position{}, nil
-		}
-
-		position, err := cfg.db.GetPositionByTitle(context.Background(), input)
-		if err != nil && err.Error() == "sql: no rows in result set" {
-			// no position by that name was found
-			fmt.Println("No position by that title was found. Please try again.")
-			continue
-		}
-		if err != nil {
-			// any other DB error so exit
-			fmt.Printf("Error checking database for title: %s\n", err)
-			os.Exit(1)
-		}
-
-		return position, nil
-	}
-}
-*/
-
-/* removed in refactor
-func getNewPositionTitle(cfg *Config) (string, error) {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Println("* Please enter the title for the new position, or exit to cancel")
-	for {
-		fmt.Print("> ")
-		text, err := reader.ReadString('\n')
-		if err != nil {
-			fmt.Printf("Error getting new title: %s", err)
-			os.Exit(1)
-		}
-
-		input := strings.TrimSpace(text)
-		if input == "" {
-			fmt.Println("No input entered. Title must be at least one character.")
-			continue
-		}
-
-		if input == "exit" || input == "cancel" {
-			fmt.Println("Exiting...")
-			return "", nil
-		}
-
-		name := checkIfPositionTitleUnique(cfg, input)
-		if name != "" {
-			return name, nil
-		}
-	}
-
-}
-*/
-
-/* removed by combining both print functions into one really bad one
-// TODO: struct is the same as update position.
-// isn't there a way to create a func that works with 2 types?
-func printUpdatePermissions(cp *database.UpdatePositionParams) error {
-	granted := []string{}
-	denied := []string{}
-	as := "Activate cage cards"
-	if cp.CanActivate {
-		granted = append(granted, as)
-	} else {
-		denied = append(denied, as)
-	}
-	ds := "Deactivate cage cards"
-	if cp.CanDeactivate {
-		granted = append(granted, ds)
-	} else {
-		denied = append(denied, ds)
-	}
-	os := "Add and recieve orders"
-	if cp.CanAddOrders {
-		granted = append(granted, os)
-	} else {
-		denied = append(denied, os)
-	}
-	qs := "Run queries"
-	if cp.CanQuery {
-		granted = append(granted, qs)
-	} else {
-		denied = append(denied, qs)
-	}
-	ps := "Adjust protocols"
-	if cp.CanChangeProtocol {
-		granted = append(granted, ps)
-	} else {
-		denied = append(denied, ps)
-	}
-	ss := "Make changes to staff"
-	if cp.CanAddStaff {
-		granted = append(granted, ss)
-	} else {
-		denied = append(denied, ss)
-	}
-	fmt.Printf("* %s\n", cp.Title)
-	if len(granted) == 0 {
-		fmt.Println("No permissions granted.")
-		return nil
-	}
-	if len(denied) == 0 {
-		fmt.Println("All permissions granted.")
-		return nil
-	}
-	fmt.Println("* Allowed permissions:")
-	for _, perm := range granted {
-		fmt.Println(perm)
-	}
-	fmt.Println("* Denied permissions:")
-	for _, den := range denied {
-		fmt.Println(den)
-	}
-
-	return nil
-}
-
-// TODO: there are two print permission functions that are identical, but the strcuts differ in one stores the UUID.
-// can't convert the structs so easily because of it. Has to be a way to DRY this up using interfaces then.
-// uuh extremely hacky have func print(*struct A, *struct B) {if struct A == nil, printable = B, else printable = B, then print printable}
-// given the weirdness of how theyre printing, this works and reuses what code i have now
-func printCreatePermissions(cp *database.CreatePositionParams) error {
-	granted := []string{}
-	denied := []string{}
-	as := "Activate cage cards"
-	if cp.CanActivate {
-		granted = append(granted, as)
-	} else {
-		denied = append(denied, as)
-	}
-	ds := "Deactivate cage cards"
-	if cp.CanDeactivate {
-		granted = append(granted, ds)
-	} else {
-		denied = append(denied, ds)
-	}
-	os := "Add and recieve orders"
-	if cp.CanAddOrders {
-		granted = append(granted, os)
-	} else {
-		denied = append(denied, os)
-	}
-	qs := "Run queries"
-	if cp.CanQuery {
-		granted = append(granted, qs)
-	} else {
-		denied = append(denied, qs)
-	}
-	ps := "Adjust protocols"
-	if cp.CanChangeProtocol {
-		granted = append(granted, ps)
-	} else {
-		denied = append(denied, ps)
-	}
-	ss := "Make changes to staff"
-	if cp.CanAddStaff {
-		granted = append(granted, ss)
-	} else {
-		denied = append(denied, ss)
-	}
-	fmt.Printf("* %s\n", cp.Title)
-	if len(granted) == 0 {
-		fmt.Println("No permissions granted.")
-		return nil
-	}
-	if len(denied) == 0 {
-		fmt.Println("All permissions granted.")
-		return nil
-	}
-	fmt.Println("* Allowed permissions:")
-	for _, perm := range granted {
-		fmt.Println(perm)
-	}
-	fmt.Println("* Denied permissions:")
-	for _, den := range denied {
-		fmt.Println(den)
-	}
-
-	return nil
-}
-*/

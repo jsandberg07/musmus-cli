@@ -8,12 +8,7 @@ import (
 	"github.com/jsandberg07/clitest/internal/database"
 )
 
-// TODO: 2 tests with similar data, make them arrays
 func TestCareDays(t *testing.T) {
-	// we gonna do a nasty and use the DB for now
-	// jk we can't we dont have a db connection
-	// pyramid it so 1+2+3 up to max
-	// days should be equal to i
 	max := 20
 	start := normalizeDate(time.Now())
 	end := normalizeDate(time.Now().AddDate(0, 0, max))
@@ -49,5 +44,4 @@ func TestCareDays(t *testing.T) {
 	if num != expected {
 		t.Fatalf("One Test: Care days did not match E: %v -- N: %v\n", expected, num)
 	}
-
 }

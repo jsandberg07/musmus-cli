@@ -9,7 +9,6 @@ import (
 	"github.com/jsandberg07/clitest/internal/database"
 )
 
-// learning a lot about generics thats for sure
 func TestNormalizeCCExport(t *testing.T) {
 	date := time.Now()
 
