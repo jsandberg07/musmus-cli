@@ -14,16 +14,6 @@ import (
 	"github.com/jsandberg07/clitest/internal/database"
 )
 
-// 1. add a new reminder field. add a X days after with the note (hint: make sure the note is required)
-// 2. do "linear" activation. set params as you like that persist, when you enter a number immedietly start to activate it. return an error if there is one.
-// 3. update the print too
-// 4. do we even add animals to the protocol?
-// 5. fuck yeah let's do like 4 db calls with each one
-// 6. DONT thread them, they have to be linear also
-
-// add reminders
-// how hard could it be
-
 func getCCActivationCmd() Command {
 	activateFlags := make(map[string]Flag)
 	ccActivationCmd := Command{
@@ -112,16 +102,6 @@ func getActivationFlags() map[string]Flag {
 	}
 	activateFlags[RFlag.symbol] = RFlag
 
-	/* removed because i was testing default flag behavior
-	fakeFlag := Flag{
-		symbol:      "fake",
-		description: "it's fake :^3",
-		takesValue:  true,
-		printOrder:  9,
-	}
-	activateFlags[fakeFlag.symbol] = fakeFlag
-	*/
-
 	printFlag := Flag{
 		symbol:      "print",
 		description: "Prints the settings that will be applied to the next card added to the queue",
@@ -149,9 +129,7 @@ func getActivationFlags() map[string]Flag {
 	return activateFlags
 }
 
-// TODO: maybe add the keepXs in a struct. And reminders. Just for organization
 func activateFunction(cfg *Config) error {
-	// permission check
 	err := checkPermission(cfg.loggedInPosition, PermissionActivateInactivate)
 	if err != nil {
 		return err
@@ -159,7 +137,6 @@ func activateFunction(cfg *Config) error {
 
 	flags := getActivationFlags()
 
-	// set defaults for the command
 	exit := false
 	ccParams := CageCardActivationParams{}
 	ccParams.init()
@@ -203,7 +180,6 @@ func activateFunction(cfg *Config) error {
 			}
 		}
 
-		// otherwise set values based on what was passed in, or process things
 		args, err := parseArguments(flags, inputs)
 		if err != nil {
 			fmt.Println(err)
@@ -321,28 +297,6 @@ func activateFunction(cfg *Config) error {
 					ccParams.keepReminder = true
 				}
 
-				/* removed because cage cards are no longer stored in a queue
-				case "process":
-					fmt.Println("Processing...")
-					err := processCageCards(cfg, cardsToProcess)
-					if err != nil {
-						fmt.Println(err)
-					}
-					exit = true
-				*/
-
-				/* removed because cage cards are no longer stored in a queue
-				case "pop":
-					length := len(cardsToProcess)
-					if length == 0 {
-						fmt.Println("No cards have been entered")
-						break
-					}
-					popped := cardsToProcess[length-1]
-					fmt.Printf("Popped %v\n", popped.CcID)
-					cardsToProcess = cardsToProcess[0 : length-1]
-				*/
-
 			case "help":
 				fmt.Println("Notes and strains can be added for individual cards, or set for many")
 				fmt.Println("Then you can either add only cage cards, or mark a cage card for activation with -cc")
@@ -372,7 +326,6 @@ func activateFunction(cfg *Config) error {
 
 }
 
-// TODO: candidate for checking the strain outside and passing it.
 func printCurrentActivationParams(cfg *Config, s *CageCardActivationParams) error {
 	fmt.Println("Current settings for cage cards being activated:")
 	fmt.Printf("* Date - %v\n", s.date)
@@ -399,7 +352,8 @@ func printCurrentActivationParams(cfg *Config, s *CageCardActivationParams) erro
 
 }
 
-// TODO: naming things is hard. Decide if any errors like reminder or balance undoes CC activation
+// Handles all the processes of activating a cage card. Sets activation date, checks to see if optional activation params should be kept,
+// adds balance to protocol, and checks for reminders.
 func activationWrapper(cfg *Config, s *CageCardActivationParams) error {
 	activateParams := getCCToActivate(s, cfg.loggedInInvestigator)
 	activatedCC, err := activateCageCard(cfg, &activateParams)
@@ -439,8 +393,8 @@ func activationWrapper(cfg *Config, s *CageCardActivationParams) error {
 
 }
 
-// TODO: naming things is hard
-func getCCToActivate(s *CageCardActivationParams, i *database.Investigator) database.TrueActivateCageCardParams {
+// Helper that creates cage card activation struct
+func getCCToActivate(s *CageCardActivationParams, i *database.Investigator) database.ActivateCageCardParams {
 
 	tdate := sql.NullTime{
 		Valid: true,
@@ -465,7 +419,7 @@ func getCCToActivate(s *CageCardActivationParams, i *database.Investigator) data
 
 	tactivatedBy := uuid.NullUUID{Valid: true, UUID: i.ID}
 
-	taccp := database.TrueActivateCageCardParams{
+	taccp := database.ActivateCageCardParams{
 		CcID:        int32(s.ccID),
 		ActivatedOn: tdate,
 		Strain:      tstrain,
@@ -475,7 +429,7 @@ func getCCToActivate(s *CageCardActivationParams, i *database.Investigator) data
 	return taccp
 }
 
-func activateCageCard(cfg *Config, cc *database.TrueActivateCageCardParams) (database.CageCard, error) {
+func activateCageCard(cfg *Config, cc *database.ActivateCageCardParams) (database.CageCard, error) {
 	tCard, err := cfg.db.GetCageCardByID(context.Background(), int32(cc.CcID))
 	// check if added to db
 	if err != nil && err.Error() == "sql: no rows in result set" {
@@ -500,121 +454,10 @@ func activateCageCard(cfg *Config, cc *database.TrueActivateCageCardParams) (dat
 		}
 	}
 
-	// activate
-	activatedCard, err := cfg.db.TrueActivateCageCard(context.Background(), *cc)
-	// update cc db error
+	activatedCard, err := cfg.db.ActivateCageCard(context.Background(), *cc)
 	if err != nil {
 		fmt.Println("Error activating cage card")
 		return database.CageCard{}, err
 	}
-
-	// activated
 	return activatedCard, nil
-
 }
-
-/* no longer prints all the CC errors in one big chunk at the end so no longer needed
-func checkActivateError(cfg *Config, cc *database.TrueActivateCageCardParams) ccError {
-	// check if already active
-	td, err := cfg.db.GetActivationDate(context.Background(), cc.CcID)
-	if err != nil && err.Error() == "sql: no rows in result set" {
-		// cc not added to db or not found
-		tcce := ccError{
-			CCid: int(cc.CcID),
-			Err:  "CC not added to database",
-		}
-
-		return tcce
-	}
-
-	if td.Valid {
-		// card was previously activated
-		errmsg := fmt.Sprintf("CC is already active -- %s", td.Time)
-		tcce := ccError{
-			CCid: int(cc.CcID),
-			Err:  errmsg,
-		}
-		return tcce
-	}
-
-	if err != nil {
-		// any other error
-		tcce := ccError{
-			CCid: int(cc.CcID),
-			Err:  err.Error(),
-		}
-		return tcce
-	}
-
-	// check if previously deactivated
-	dd, err := cfg.db.GetDeactivationDate(context.Background(), cc.CcID)
-	// dont need to check if not in db
-	if dd.Valid {
-		// card was previously deactivated
-		errmsg := fmt.Sprintf("CC is already deactivated -- %s", dd.Time)
-		tcce := ccError{
-			CCid: int(cc.CcID),
-			Err:  errmsg,
-		}
-		return tcce
-	}
-
-	if err != nil {
-		// any other error
-		tcce := ccError{
-			CCid: int(cc.CcID),
-			Err:  err.Error(),
-		}
-		return tcce
-	}
-
-	// everything ok
-	return ccError{}
-}
-*/
-
-/* removed because no longer making a queue to activate cage cards
-func processCageCards(cfg *Config, cctp []database.TrueActivateCageCardParams) error {
-	if len(cctp) == 0 {
-		return errors.New("oops no cards")
-	}
-	activationErrors := []ccError{}
-	totalActivated := 0
-
-	for _, cc := range cctp {
-
-		ccErr := checkActivateError(cfg, &cc)
-		// hacky way to see if a nil struct was returned, meaning no error
-		if ccErr.CCid != 0 {
-			activationErrors = append(activationErrors, ccErr)
-			continue
-		}
-
-		acc, err := cfg.db.TrueActivateCageCard(context.Background(), cc)
-		if err != nil {
-			// any other error
-			tcce := ccError{
-				CCid: int(acc.CcID),
-				Err:  err.Error(),
-			}
-			activationErrors = append(activationErrors, tcce)
-			continue
-		}
-
-		if verbose {
-			fmt.Println(acc)
-		}
-
-		totalActivated++
-	}
-
-	fmt.Printf("%v cards activated\n", totalActivated)
-	if len(activationErrors) > 0 {
-		fmt.Println("Errors activating these cage cards:")
-		for _, cce := range activationErrors {
-			fmt.Printf("%v -- %s\n", cce.CCid, cce.Err)
-		}
-	}
-	return nil
-}
-*/

@@ -1,11 +1,6 @@
 package main
 
-// creating a template for implementing commands
-// reminders:
-// include the help and exit flags
-// add getXXXcmd to the function's state
-//
-
+// template for creating new commands
 /* commented out because staticcheck hates it. copy and paste a skeleton for new commands
 
 func getXXXCmd() Command {
@@ -31,14 +26,11 @@ func getXXXFlags() map[string]Flag {
 	}
 	XXXFlags[XFlag.symbol] = XFlag
 
-	// ect as needed or remove the "-"+ for longer ones
-
 	fmt.Println("If you see this, you accidentally left the template flag function in")
 	return XXXFlags
 
 }
 
-// look into removing the args thing, might have to stay
 func XXXFunction(cfg *Config) error {
 	// get flags
 	flags := getXXXFlags()
@@ -49,7 +41,7 @@ func XXXFunction(cfg *Config) error {
 	// the reader
 	reader := bufio.NewReader(os.Stdin)
 
-	// da loop
+	// loop
 	for {
 		fmt.Print("> ")
 		text, err := reader.ReadString('\n')
@@ -64,9 +56,9 @@ func XXXFunction(cfg *Config) error {
 			continue
 		}
 
-		// do weird behavior here
+		// do between loop behavior here
 
-		// but normal loop now
+		// regular parsing
 		args, err := parseArguments(flags, inputs)
 		if err != nil {
 			fmt.Println(err)

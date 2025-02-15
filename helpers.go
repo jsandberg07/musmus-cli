@@ -1,126 +1,146 @@
 package main
 
 import (
-	"bufio"
+	"context"
 	"fmt"
-	"os"
 	"strconv"
-	"strings"
+
+	"github.com/google/uuid"
+	"github.com/jsandberg07/clitest/internal/database"
 )
 
-// temp file name, part of the refactor
-
-// idea for how i should have created more reusable functions for all the other data types
-// more generic get string with a prompt, instead of separate functions for everything
-// just pass in "get investigator name to edit" instead of new function just to say "to edit"
-// write the same program 3 times and you'll realize what you want you want to refactor
-
-// prints prompt, takes an input from the user, then runs it through the check function for uniqueness or
-// if valid entry in the database. Will repeat if checkFunc returns an error. Can probably remove error return
-// TODO: return a specific error that informs the function to exit instead of checking for nil
-func getStringPrompt(cfg *Config, prompt string, checkFunc func(*Config, string) error) (string, error) {
-	fmt.Println(prompt + " or exit to cancel")
-	reader := bufio.NewReader(os.Stdin)
-	for {
-		fmt.Print("> ")
-		text, err := reader.ReadString('\n')
-		if err != nil {
-			fmt.Printf("Error reading input string: %s", err)
-			os.Exit(1)
-		}
-		input := strings.TrimSpace(text)
-		if input == "" {
-			fmt.Println("No input found. Please try again.")
-			continue
-		}
-		if input == "exit" || input == "cancel" {
-			return "", nil
-		}
-
-		// then have check if unique or check if not unique after
-		err = checkFunc(cfg, input)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-
-		return input, nil
-
+// Parses int when passed in via flag (as opposed to prompt)
+func getNumberFromFlag(input string) (int, error) {
+	if input == "" {
+		fmt.Println("No input found. Please try again.")
+		return 0, nil
 	}
+	num, err := strconv.Atoi(input)
+	if err != nil {
+		fmt.Println("Could not read number from input")
+		return 0, err
+	}
+	return num, nil
 }
 
-// quite possibly used one place but an alternative to making the prompts generic ie insaner than necessary.
-// returns -1 on exit.
-// TODO: return a specific error that informs the function to exit
-func getIntPrompt(prompt string) (int, error) {
-	fmt.Println(prompt + " or exit to cancel")
-	reader := bufio.NewReader(os.Stdin)
-	for {
-		fmt.Print("> ")
-		text, err := reader.ReadString('\n')
-		if err != nil {
-			fmt.Printf("Error reading input string: %s", err)
-			os.Exit(1)
-		}
-		input := strings.TrimSpace(text)
-		if input == "" {
-			fmt.Println("No input found. Please try again.")
-			continue
-		}
-		if input == "exit" || input == "cancel" {
-			// -1 instead of the 0 value for an int because checking to exit
-			return -1, nil
-		}
-
-		output, err := strconv.Atoi(input)
-		if err != nil {
-			// TODO: what's the specific error for putting letters in an atoi?
-			fmt.Println(err)
-			continue
-		}
-
-		return output, nil
+// TODO: decide on which version is better. Note: sql doesnt throw an error when a []struct query returns nothing
+// but will for single values
+func getInvestigatorByFlag2(cfg *Config, input string) (database.Investigator, error) {
+	if input == "" {
+		fmt.Println("No input found, please try again")
+		return database.Investigator{}, nil
 	}
+	investigators, err := cfg.db.GetInvestigatorByName(context.Background(), input)
+	if err != nil {
+		fmt.Println("Error getting investigator from db")
+		return database.Investigator{}, err
+	}
+	if len(investigators) == 0 {
+		fmt.Println("No investigator by that name found. Nicknames also work as well.")
+		return database.Investigator{}, nil
+	}
+	if len(investigators) > 1 {
+		fmt.Println("Vague investigator name. Please try again.")
+		return database.Investigator{}, nil
+	}
+	return investigators[0], nil
 }
 
-// pass into getPrompt functions when no checks need to be done
-func checkFuncNil(cfg *Config, s string) error {
-	// look into optional 1st order func params
-	return nil
+func getInvestigatorByFlag(cfg *Config, i string) (database.Investigator, error) {
+	investigators, err := cfg.db.GetInvestigatorByName(context.Background(), i)
+	if err != nil && err.Error() != "sql: no rows in result set" {
+		// any other error
+		fmt.Println("Error getting investigators from DB")
+		return database.Investigator{}, err
+	}
+	if err != nil && err.Error() == "sql: no rows in result set" {
+		fmt.Println("Investigator not found. Please try again")
+		return database.Investigator{}, nil
+	}
+	if len(investigators) > 1 {
+		fmt.Println("Vague investigator name. Please try again")
+		return database.Investigator{}, nil
+	}
+	if len(investigators) == 0 {
+		fmt.Println("Investigator not found. Please try again")
+		return database.Investigator{}, nil
+	}
+	return investigators[0], nil
 }
 
-// prints prompt, takes an input from the user, then runs check function to fetch a struct from the db.
-// get func is something like getXXXStruct(). Returns an empty struct of T if "exit" or "cancel" entered
-// Uses generics! It's cool! I did not want 10 different functions to return 5 different structs!
-// TODO: return a specific error that informs the function to exit instead of checking for nil
-func getStructPrompt[T any](cfg *Config, prompt string, getFunc func(*Config, string) (T, error)) (T, error) {
-	fmt.Println(prompt + " or exit to cancel")
-	reader := bufio.NewReader(os.Stdin)
-	for {
-		fmt.Print("> ")
-		text, err := reader.ReadString('\n')
-		if err != nil {
-			fmt.Printf("Error reading input string: %s", err)
-			os.Exit(1)
-		}
-		input := strings.TrimSpace(text)
-		if input == "" {
-			fmt.Println("No input found. Please try again.")
-			continue
-		}
-		if input == "exit" || input == "cancel" {
-			var nilT T
-			return nilT, nil
-		}
+func getPositionByFlag(cfg *Config, title string) (database.Position, error) {
+	position, err := cfg.db.GetPositionByTitle(context.Background(), title)
+	if err != nil && err.Error() != "sql: no rows in result set" {
+		fmt.Println("Error getting position from DB")
+		return database.Position{}, err
+	}
+	if err.Error() == "sql: no rows in result set" {
+		fmt.Println("No position by that title found")
+		return database.Position{}, err
+	}
+	return position, nil
+}
 
-		// then have check if unique or check if not unique after
-		output, err := getFunc(cfg, input)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
+func getOrderByFlag(cfg *Config, input string) (database.Order, error) {
+	order, err := cfg.db.GetOrderByNumber(context.Background(), input)
+	if err != nil && err.Error() == "sql: no rows in result set" {
+		// no order found
+		fmt.Println("No order by that number found. Please try again.")
+		return database.Order{}, nil
+	}
+	if err != nil {
+		// any other error
+		fmt.Println("Error getting order from DB.")
+		return database.Order{}, err
+	}
 
-		return output, nil
+	// found and ok
+	return order, nil
+
+}
+
+func getProtocolByFlag(cfg *Config, n string) (database.Protocol, error) {
+	protocol, err := cfg.db.GetProtocolByNumber(context.Background(), n)
+	if err != nil && err.Error() != "sql: no rows in result set" {
+		// any other error
+		fmt.Println("Error getting protocol from DB")
+		return database.Protocol{}, err
 
 	}
+	if err != nil && err.Error() == "sql: no rows in result set" {
+		// no results
+		fmt.Println("Protocol by that number not found. Please try again")
+		return database.Protocol{}, nil
+	}
+
+	return protocol, nil
+}
+
+func getStrainByFlag(cfg *Config, input string) (database.Strain, error) {
+	strain, err := cfg.db.GetStrainByName(context.Background(), input)
+
+	if err != nil && err.Error() != "sql: no rows in result set" {
+		// any other error with DB
+		fmt.Println("Error getting strain from DB")
+		return database.Strain{ID: uuid.Nil}, err
+	}
+
+	if err == nil {
+		// strain found by name
+		return strain, nil
+	}
+
+	strain, err = cfg.db.GetStrainByCode(context.Background(), input)
+	if err != nil && err.Error() != "sql: no rows in result set" {
+		// any other error with DB
+		fmt.Println("Error getting strain from DB")
+		return database.Strain{ID: uuid.Nil}, err
+	}
+	if err != nil && err.Error() == "sql: no rows in result set" {
+		fmt.Println("Strain not found by name or number. Please try again.")
+		return database.Strain{ID: uuid.Nil}, nil
+	}
+
+	// strain found by code
+	return strain, nil
 }

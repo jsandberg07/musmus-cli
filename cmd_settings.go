@@ -9,13 +9,6 @@ import (
 	"github.com/jsandberg07/clitest/internal/database"
 )
 
-// settings and how we want to adjust them
-// check settings
-// and toggle
-// and that should be it
-// save toggles, create a struct, then update
-// flexible for more settings
-
 func getChangeSettingsCmd() Command {
 	settingsFlags := make(map[string]Flag)
 	settingsCmd := Command{
@@ -71,21 +64,14 @@ func getChangeSettingsFlags() map[string]Flag {
 	}
 	settingsFlags[helpFlag.symbol] = helpFlag
 
-	// ect as needed or remove the "-"+ for longer ones
-
 	return settingsFlags
-
 }
 
-// look into removing the args thing, might have to stay
 func changeSettingsFunction(cfg *Config) error {
-	// get flags
 	flags := getChangeSettingsFlags()
 
-	// set defaults
 	exit := false
 
-	// the reader
 	reader := bufio.NewReader(os.Stdin)
 
 	currentSetting, err := cfg.db.GetSettings(context.Background())
@@ -96,7 +82,6 @@ func changeSettingsFunction(cfg *Config) error {
 
 	updatedSettings := currentSetting
 
-	// da loop
 	for {
 		fmt.Print("> ")
 		text, err := reader.ReadString('\n')
@@ -111,22 +96,21 @@ func changeSettingsFunction(cfg *Config) error {
 			continue
 		}
 
-		// do weird behavior here
-
-		// but normal loop now
 		args, err := parseArguments(flags, inputs)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
-		// a r save exit
+
 		for _, arg := range args {
 			switch arg.flag {
 			case "-a":
 				updatedSettings.OnlyActivateSelf = !updatedSettings.OnlyActivateSelf
 				fmt.Printf("Only activate self set to %v\n", updatedSettings.OnlyActivateSelf)
+
 			case "-r":
 				printSettings(&currentSetting)
+
 			case "save":
 				if updatedSettings == currentSetting {
 					fmt.Println("No changes were made. Exiting...")
@@ -141,12 +125,14 @@ func changeSettingsFunction(cfg *Config) error {
 					}
 				}
 				exit = true
+
 			case "exit":
 				fmt.Println("Exiting without saving...")
 				exit = true
 
 			case "help":
 				cmdHelp(flags)
+
 			default:
 				fmt.Printf("%s%s\n", DefaultFlagMsg, arg.flag)
 			}
@@ -161,6 +147,7 @@ func changeSettingsFunction(cfg *Config) error {
 	return nil
 }
 
+// Only setting for now! Ignore first time set up
 func printSettings(s *database.Setting) {
 	fmt.Printf("* Only activate self: %v", s.OnlyActivateSelf)
 }

@@ -24,9 +24,8 @@ func getCCReactivateCmd() Command {
 }
 
 func getCCReactivateFlags() map[string]Flag {
-	// cc, process, exit, help
-
 	ReactivateFlags := make(map[string]Flag)
+
 	ccFlag := Flag{
 		symbol:      "-cc",
 		description: "Adds CC to queue to be reactivated",
@@ -35,9 +34,6 @@ func getCCReactivateFlags() map[string]Flag {
 	}
 	ReactivateFlags[ccFlag.symbol] = ccFlag
 
-	// ect as needed or remove the "-"+ for longer ones
-
-	// maybe remove this
 	processFlag := Flag{
 		symbol:      "process",
 		description: "Reactivates card in queue",
@@ -63,28 +59,22 @@ func getCCReactivateFlags() map[string]Flag {
 	ReactivateFlags[helpFlag.symbol] = helpFlag
 
 	return ReactivateFlags
-
 }
 
-// look into removing the args thing, might have to stay
 func reactivateFunction(cfg *Config) error {
-	// permission check
 	err := checkPermission(cfg.loggedInPosition, PermissionDeactivateReactivate)
 	if err != nil {
 		return err
 	}
-	// get flags
+
 	flags := getCCReactivateFlags()
 
-	// set defaults
 	exit := false
 	cardsToReactivate := []int{}
 
-	// the reader
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Enter cards to reactivate")
 
-	// da loop
 	for {
 		fmt.Print("> ")
 		text, err := reader.ReadString('\n')
@@ -98,9 +88,6 @@ func reactivateFunction(cfg *Config) error {
 			fmt.Println(err)
 			continue
 		}
-
-		// do weird behavior here
-
 		// try to run as a number, and add it to the list of cards to activate using the current values
 		if len(inputs) == 1 {
 			cc, err := strconv.Atoi(inputs[0])
@@ -118,14 +105,12 @@ func reactivateFunction(cfg *Config) error {
 			}
 		}
 
-		// but normal loop now
 		args, err := parseArguments(flags, inputs)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
 
-		// cc, process, exit, help
 		for _, arg := range args {
 			switch arg.flag {
 			case "-cc":
@@ -190,8 +175,6 @@ func reactivateCageCards(cfg *Config, ctr []int) error {
 			reactivationErrors = append(reactivationErrors, tcce)
 			continue
 		}
-
-		// nothing to verbose
 		totalReactivated++
 	}
 
@@ -237,6 +220,6 @@ func checkReactivateError(cfg *Config, cc int) ccError {
 		return tcce
 	}
 
-	// everything ok :^3
+	// everything ok
 	return ccError{}
 }

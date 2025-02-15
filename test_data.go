@@ -431,13 +431,13 @@ func activateTestCageCards(cfg *Config) error {
 
 	cardsToActivate := []int32{100, 102, 103, 104, 108, 109, 111, 121, 123, 134, 139}
 	for i, cardID := range cardsToActivate {
-		aCC := database.TrueActivateCageCardParams{
+		aCC := database.ActivateCageCardParams{
 			CcID:        cardID,
 			ActivatedOn: sql.NullTime{Valid: true, Time: lastWeek},
 			ActivatedBy: uuid.NullUUID{Valid: true, UUID: activatedBy[0].ID},
 			Strain:      uuid.NullUUID{Valid: true, UUID: strain1.ID},
 		}
-		cc, err := cfg.db.TrueActivateCageCard(context.Background(), aCC)
+		cc, err := cfg.db.ActivateCageCard(context.Background(), aCC)
 		if err != nil {
 			fmt.Printf("Error activating cage card %v -- %v", i, cardID)
 			return err

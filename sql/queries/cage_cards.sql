@@ -22,16 +22,19 @@ INSERT INTO cage_cards(cc_id, protocol_id, investigator_id)
 VALUES ($1, $2, $3)
 RETURNING *;
 
--- name: NewActivateCageCard :exec
-UPDATE cage_cards
-SET activated_on = $2,
-    activated_by = $3
-WHERE cc_id = $1;
-
 -- name: DeactivateCageCard :one
 UPDATE cage_cards
 SET deactivated_on = $2,
     deactivated_by = $3
+WHERE cc_id = $1
+RETURNING *;
+
+-- name: ActivateCageCard :one
+UPDATE cage_cards
+SET activated_on = $2,
+    activated_by = $3,
+    strain = $4,
+    notes = $5
 WHERE cc_id = $1
 RETURNING *;
 
@@ -55,7 +58,6 @@ INSERT INTO cage_cards(cc_id, protocol_id, activated_on, investigator_id, strain
 VALUES($1, $2, $3, $4, $5, $6, $7, $8)
 RETURNING *;
 
--- the possibly unused pile
 -- name: GetActiveTestCards :many
 SELECT cage_cards.cc_id, investigators.i_name, protocols.p_number, strains.s_name, cage_cards.activated_on, cage_cards.deactivated_on
 FROM cage_cards

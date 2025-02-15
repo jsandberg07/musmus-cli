@@ -24,9 +24,6 @@ func getCareDaysCmd() Command {
 	return CareDaysCmd
 }
 
-// [s]tart period, [e]nd period, help, run, toggle printing by [i]nvestigator? [p] protocol too? YEAH DO IT it's like a pivot table
-// it's 1 query and and a handful of calculations it's really truly honestly whatever BUT WE CAN ALSO WRITE TESTS HELL YEAH ok now im pumped
-// [s]tart, [e]nd, [i]nvestigator, [p]rotocol, query, print, help, exit
 func getCareDaysFlags() map[string]Flag {
 	CareDaysFlags := make(map[string]Flag)
 	sFlag := Flag{
@@ -115,10 +112,8 @@ func careDaysFunction(cfg *Config) error {
 	protocolReport := false
 	*/
 
-	// the reader
 	reader := bufio.NewReader(os.Stdin)
 
-	// da loop
 	fmt.Println("Enter 'help' to see a list of parameters available to calculate care days")
 	for {
 		fmt.Print("> ")
@@ -134,16 +129,12 @@ func careDaysFunction(cfg *Config) error {
 			continue
 		}
 
-		// do weird behavior here
-
-		// but normal loop now
 		args, err := parseArguments(flags, inputs)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
 
-		// [s]tart, [e]nd, [i]nvestigator, [p]rotocol, query, print, help, exit
 		for _, arg := range args {
 			switch arg.flag {
 			case "-s":
@@ -228,15 +219,9 @@ func careDaysFunction(cfg *Config) error {
 	return nil
 }
 
-// get the cage cards, then pass it into a function instead of being tied into once because testingu
-// uhh its a test i guess print what you want until you get it. how do i run a test on one file?
-// also consistent! sort by name or whatever
-// how do we sort and print these
-// sort and print, but return total care days regardless
 func careDaysQuery(start, end time.Time, ccs []database.GetCardsDateRangeRow) int {
 	var num time.Duration
 	oneDay := 24 * time.Hour
-	fmt.Printf("// Len of CCs: %v\n", len(ccs))
 	for i, cc := range ccs {
 		if cc.ActivatedOn.Time.Before(start) {
 			cc.ActivatedOn.Time = start

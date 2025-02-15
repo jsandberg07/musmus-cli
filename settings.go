@@ -8,13 +8,6 @@ import (
 	"strings"
 )
 
-// TODO: this will load the basic settings, checking if it was set up already
-// as a place holder, just say "first time set up complete"
-// set the values as you want so you don't have to repeatedly
-// not a stored value, grab bools as needed from the db
-// ALSO TODO: there's a first time setup complete row that doesnt do anything yet
-// and i'll add functionality to that later (asking what settings to use, or load test data)
-// but for now this is FINE
 func (cfg *Config) checkFirstTimeSetup() error {
 	setting, err := cfg.db.GetSettings(context.Background())
 	if err != nil && err.Error() != "sql: no rows in result set" {
@@ -63,7 +56,7 @@ func (cfg *Config) checkFirstTimeSetup() error {
 		}
 	}
 
-	// settings loaded, not test data
+	// settings loaded, not test data ie normal use
 	return nil
 
 }

@@ -3,11 +3,8 @@ package main
 import (
 	"bufio"
 	"context"
-	"errors"
 	"fmt"
 	"os"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/jsandberg07/clitest/internal/database"
@@ -26,11 +23,8 @@ func getAddReminderCmd() Command {
 	return addReminderCmd
 }
 
-// just save, exit, help, and prompt everything else
 func getAddReminderFlags() map[string]Flag {
 	addReminderFlags := make(map[string]Flag)
-
-	// ect as needed or remove the "-"+ for longer ones
 
 	saveFlag := Flag{
 		symbol:      "save",
@@ -60,24 +54,18 @@ func getAddReminderFlags() map[string]Flag {
 
 }
 
-// look into removing the args thing, might have to stay
-// prompt stuff, then print or save it. that's about it.
 func addReminderFunction(cfg *Config) error {
-	// permission check
 	err := checkPermission(cfg.loggedInPosition, PermissionReminders)
 	if err != nil {
 		return err
 	}
-	// get flags
+
 	flags := getAddReminderFlags()
 
-	// set defaults
 	exit := false
 
-	// the reader
 	reader := bufio.NewReader(os.Stdin)
 
-	// date, cage card, investigator, note
 	date, err := getDatePrompt("Enter date for the reminder")
 	if err != nil {
 		return err
@@ -89,28 +77,30 @@ func addReminderFunction(cfg *Config) error {
 	}
 
 	cc, err := getStructPrompt(cfg, "Enter cage card id for reminder. Cage card must be active", getCageCardStructActive)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	nilCC := database.CageCard{}
-	if cc == nilCC {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 
 	investigator, err := getStructPrompt(cfg, "Enter investigator who will recieve the reminder", getInvestigatorStruct)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	nilInv := database.Investigator{}
-	if investigator == nilInv {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 
-	note, err := getStringInput("Enter a note for the reminder")
-	if err != nil {
+	note, err := getStringPrompt(cfg, "Enter a note for the reminder", checkFuncNil)
+	if err != nil && err.Error() != CancelError {
 		return err
+	}
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
+		return nil
 	}
 
 	arParams := database.AddReminderParams{
@@ -124,7 +114,6 @@ func addReminderFunction(cfg *Config) error {
 	printAddReminder(&arParams, &investigator)
 	fmt.Println("Enter 'save' to keep or 'exit' to discard")
 
-	// da loop
 	for {
 		fmt.Print("> ")
 		text, err := reader.ReadString('\n')
@@ -139,16 +128,12 @@ func addReminderFunction(cfg *Config) error {
 			continue
 		}
 
-		// do weird behavior here
-
-		// but normal loop now
 		args, err := parseArguments(flags, inputs)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
 
-		// just save, exit, help, and prompt everything else
 		for _, arg := range args {
 			switch arg.flag {
 			case "save":
@@ -192,79 +177,6 @@ func printAddReminder(r *database.AddReminderParams, i *database.Investigator) {
 	fmt.Printf("Note: %v\n", r.Note)
 }
 
-func getDatePrompt(prompt string) (time.Time, error) {
-	fmt.Println(prompt + " or exit to cancel")
-	reader := bufio.NewReader(os.Stdin)
-	for {
-		fmt.Print("> ")
-		text, err := reader.ReadString('\n')
-		if err != nil {
-			fmt.Printf("Error reading input string: %s", err)
-			os.Exit(1)
-		}
-		input := strings.TrimSpace(text)
-		if input == "" {
-			fmt.Println("No input found. Please try again.")
-			continue
-		}
-		if input == "exit" || input == "cancel" {
-			return time.Time{}, nil
-		}
-
-		// then have check if unique or check if not unique after
-		output, err := parseDate(input)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-
-		return output, nil
-
-	}
-}
-
-func getCageCardStructActive(cfg *Config, input string) (database.CageCard, error) {
-
-	ccid, err := strconv.Atoi(input)
-	if err != nil {
-		return database.CageCard{}, err
-	}
-	cc, err := cfg.db.GetCageCardByID(context.Background(), int32(ccid))
-	if err != nil {
-		return database.CageCard{}, err
-	}
-	if !cc.ActivatedOn.Valid {
-		return database.CageCard{}, errors.New("cage card is not active")
-	}
-	if cc.DeactivatedOn.Valid {
-		return database.CageCard{}, errors.New("cage card is deactivated")
-	}
-
-	return cc, nil
-}
-
-// do i add the exit on cancel to this one? dunno
-func getStringInput(prompt string) (string, error) {
-	fmt.Println(prompt)
-	reader := bufio.NewReader(os.Stdin)
-	for {
-		fmt.Print("> ")
-		text, err := reader.ReadString('\n')
-		if err != nil {
-			fmt.Printf("Error reading input string: %s", err)
-			os.Exit(1)
-		}
-		input := strings.TrimSpace(text)
-		if input == "" {
-			fmt.Println("No input found. Please try again.")
-			continue
-		}
-
-		return input, nil
-	}
-
-}
-
 func getDeleteReminderCmd() Command {
 	deleteReminderFlags := make(map[string]Flag)
 	deleteReminderCmd := Command{
@@ -278,10 +190,7 @@ func getDeleteReminderCmd() Command {
 	return deleteReminderCmd
 }
 
-// get all the reminders for a certain date.
-// list them in whatever order, then enter 0 to delete or # to delete that one
 func deleteReminderFunction(cfg *Config) error {
-	// permission check
 	err := checkPermission(cfg.loggedInPosition, PermissionReminders)
 	if err != nil {
 		return err
@@ -300,13 +209,6 @@ func deleteReminderFunction(cfg *Config) error {
 	}
 	date = normalizeDate(date)
 
-	/* removed because this let anybody delete anybody's reminders
-	reminders, err = cfg.db.GetAllTodayReminders(context.Background(), date)
-	if err != nil && err.Error() != "sql: no rows in result set" {
-		// any other error
-		return err
-	}
-	*/
 	udrp := database.GetUserDayReminderParams{
 		InvestigatorID: cfg.loggedInInvestigator.ID,
 		RDate:          date,
@@ -331,12 +233,11 @@ func deleteReminderFunction(cfg *Config) error {
 		fmt.Println("Invalid entry. Exiting...")
 		return nil
 	}
-
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	if num == -1 {
-		fmt.Println("exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 
@@ -355,13 +256,13 @@ func printRemindersList(reminders []database.Reminder) {
 	}
 }
 
-// print reminders for currently logged in user on startup
+// prints reminders for currently logged in user on startup
 func getTodaysReminders(cfg *Config) error {
 	gurParams := database.GetUserTodayRemindersParams{
 		RDate:          normalizeDate(time.Now()),
 		InvestigatorID: cfg.loggedInInvestigator.ID,
 	}
-	// TODO: remember that 0 results wont throw an sql error
+
 	reminders, err := cfg.db.GetUserTodayReminders(context.Background(), gurParams)
 	if err != nil {
 		return err
@@ -380,7 +281,7 @@ func getTodaysReminders(cfg *Config) error {
 	return nil
 }
 
-// adds a reminder X days after the
+// adds a reminder t days after the activation date of the cc (for whoever the cc is under the name of, not who activated it)
 func ccActivationReminder(cfg *Config, t int, cc *database.CageCard) error {
 	// can't create a reminder without a note
 	if !cc.Notes.Valid {

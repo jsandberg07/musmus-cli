@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"syscall"
 
 	"github.com/jsandberg07/clitest/internal/auth"
 	"github.com/jsandberg07/clitest/internal/database"
+	"golang.org/x/term"
 )
 
 func (cfg *Config) login() error {
@@ -44,8 +46,9 @@ func (cfg *Config) login() error {
 		os.Exit(0)
 	}
 
-	for tries := 0; tries < 3; tries++ {
-		password, err := getStringInput("Enter password")
+	tries := 0
+	for {
+		password, err := getSecureInput("Enter password")
 		if err != nil {
 			return err
 		}
@@ -57,8 +60,14 @@ func (cfg *Config) login() error {
 		err = auth.CheckPasswordHash(password, inv.HashedPassword.String)
 		if err != nil && strings.Contains(err.Error(), "is not the hash of the given password") {
 			// wrong password
-			fmt.Println("Incorrect password. Please try again.")
-			continue
+			tries++
+			if tries == 3 {
+				fmt.Println("Too many attempts. Exiting...")
+				os.Exit(0)
+			} else {
+				fmt.Println("Incorrect password. Please try again.")
+				continue
+			}
 		}
 		if err != nil {
 			// any other error
@@ -111,20 +120,19 @@ func (cfg *Config) createAdmin() error {
 	return nil
 }
 
-// TODO: can we make this show stars instead of the password?
 func getNewPassword() (string, error) {
 	fmt.Println("No password found")
 	for {
-		password, err := getStringInput("Enter password")
+		password, err := getSecureInput("Enter password")
 		if err != nil {
 			return "", err
 		}
-		if password == "" {
+		if string(password) == "" {
 			fmt.Println("Exiting...")
 			os.Exit(0)
 		}
 
-		confirm, err := getStringInput("Confirm password")
+		confirm, err := getSecureInput("Confirm password")
 		if err != nil {
 			return "", err
 		}
@@ -143,18 +151,23 @@ func getNewPassword() (string, error) {
 	}
 }
 
-/* removed because it was justed used for logging in, identical to getInv(cfg, name)(inv, err) anyway
-func (cfg *Config) getInvestigator(name string) (database.Investigator, error) {
-	investigators, err := cfg.db.GetInvestigatorByName(context.Background(), name)
-	if err != nil {
-		fmt.Println("Error getting investigator")
-		return database.Investigator{}, nil
+// Gets input (passwords) without displaying it on the CLI for security
+func getSecureInput(prompt string) (string, error) {
+	fmt.Println(prompt + " or exit to cancel")
+	for {
+		fmt.Print("> ")
+		bytes, err := term.ReadPassword(int(syscall.Stdin))
+		if err != nil {
+			return "", err
+		}
+		input := strings.TrimSpace(string(bytes))
+		if input == "" {
+			fmt.Println("No input found. Please try again.")
+			continue
+		}
+		if input == "exit" || input == "cancel" {
+			return "", nil
+		}
+		return input, nil
 	}
-	if len(investigators) > 1 {
-		fmt.Println("Error getting investigator")
-		return database.Investigator{}, errors.New("vague investigator name")
-	}
-
-	return investigators[0], nil
 }
-*/

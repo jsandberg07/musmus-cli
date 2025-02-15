@@ -7,8 +7,7 @@ import (
 	"time"
 )
 
-// NOT expecting a command name
-// if string len = 1, just try to run that, otherwise send to be parsed
+// used in commands to split inputs into an array (does no parsing into flags, args, or values)
 func readSubcommandInput(input string) ([]string, error) {
 	if input == "" {
 		fmt.Println("No input found")
@@ -24,11 +23,8 @@ func readSubcommandInput(input string) ([]string, error) {
 
 }
 
-// maps is already reference type
-// used in commands
-// DONT HANDLE QUOTES
-// JUST REPLACE _ WITH SPACES
-// BINGOBANGO
+// used to turn arrays of strings into flag + value pairs (if the flag takes a value) aka an Argument. Because inputs are split on spaces,
+// replaces underscores '_' with spaces for entering sentences.
 func parseArguments(flags map[string]Flag, parameters []string) ([]Argument, error) {
 	// used when in a subcommand, not expecting a command name. just give it the subcommand map.
 	// flags -p, command like things do not so figure out how to do that
@@ -49,15 +45,11 @@ func parseArguments(flags map[string]Flag, parameters []string) ([]Argument, err
 	var arguments []Argument
 
 	for i := 0; i < len(parameters); i++ {
-		// RIGHT NOW we're looking for "-" as a contains, but we need the first char only
-		// how to we golang the first char of a string
-
 		flag, ok := flags[parameters[i]]
 		if !ok {
 			err := fmt.Sprintf("%s is not a flag allowed for this command", parameters[i])
 			return nil, errors.New(err)
 		}
-
 		tArg := Argument{}
 		if flag.takesValue {
 			tArg.flag = parameters[i]
@@ -74,7 +66,6 @@ func parseArguments(flags map[string]Flag, parameters []string) ([]Argument, err
 
 	}
 
-	// can't use range because it works via value and not reference, wont copy changes
 	if underscore {
 		for i := 0; i < len(arguments); i++ {
 			arguments[i].value = strings.Replace(arguments[i].value, "_", " ", -1)
@@ -84,6 +75,8 @@ func parseArguments(flags map[string]Flag, parameters []string) ([]Argument, err
 	return arguments, nil
 }
 
+// turns string into a time with a few time formats (middle endian format aka American layout). Usually used for
+// getting dates from flags, but also in the getDatePrompt function
 func parseDate(input string) (time.Time, error) {
 	// create an array of the formats (with 0s, without, 4 digit year, 2 digit year)
 	// go through parse works and then return
@@ -104,8 +97,8 @@ func parseDate(input string) (time.Time, error) {
 	return date, nil
 }
 
-// Returns midnight of input
-// TODO: what time are my current stamps in?
+// Returns midnight of input. Dates in the DB are normalized because being active at any time is equal
+// to an entire 'care day.'
 func normalizeDate(t time.Time) time.Time {
 	midnight := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC)
 	return midnight

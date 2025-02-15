@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/google/uuid"
 	"github.com/jsandberg07/clitest/internal/database"
 )
 
@@ -24,8 +23,6 @@ func getAddStrainCmd() Command {
 	return addStrainCmd
 }
 
-// via prompts
-// so just save and exit and help for consistency
 func getAddStrainFlags() map[string]Flag {
 	addStrainFlags := make(map[string]Flag)
 	saveFlag := Flag{
@@ -52,40 +49,35 @@ func getAddStrainFlags() map[string]Flag {
 	}
 	addStrainFlags[helpFlag.symbol] = helpFlag
 
-	// ect as needed or remove the "-"+ for longer ones
-
 	return addStrainFlags
-
 }
 
-// look into removing the args thing, might have to stay
 func addStrainFunction(cfg *Config) error {
-	// no permissions, strains are generally for reference
-
+	// no permission check, strains are generally for reference
 	name, err := getStringPrompt(cfg, "Enter strain name", checkFuncNil)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	if name == "" {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 
 	vendor, err := getStringPrompt(cfg, "Enter vendor", checkFuncNil)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	if vendor == "" {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 
 	code, err := getStringPrompt(cfg, "Enter strain code", checkIfStrainCodeUnique)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	if code == "" {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
 		return nil
 	}
 
@@ -95,16 +87,12 @@ func addStrainFunction(cfg *Config) error {
 		VendorCode: code,
 	}
 
-	// get flags
 	flags := getAddStrainFlags()
 
-	// set defaults
 	exit := false
 
-	// the reader
 	reader := bufio.NewReader(os.Stdin)
 
-	// da loop
 	fmt.Println("Please review the following information")
 	fmt.Println("Enter 'save' to save the strain or 'exit' to leave without saving")
 	printAddStrain(&asParams)
@@ -122,9 +110,6 @@ func addStrainFunction(cfg *Config) error {
 			continue
 		}
 
-		// do weird behavior here
-
-		// but normal loop now
 		args, err := parseArguments(flags, inputs)
 		if err != nil {
 			fmt.Println(err)
@@ -163,23 +148,6 @@ func addStrainFunction(cfg *Config) error {
 	return nil
 }
 
-func checkIfStrainCodeUnique(cfg *Config, s string) error {
-	_, err := cfg.db.GetStrainByCode(context.Background(), s)
-	if err != nil && err.Error() != "sql: no rows in result set" {
-		// any other error
-		fmt.Println("Error retrieving data from the DB")
-		return err
-	}
-	if err == nil {
-		// strain found, meaning input is not unique
-		return errors.New("strain by that ID already exists. Please try again")
-	}
-
-	// strain is unique
-	return nil
-
-}
-
 func printAddStrain(as *database.AddStrainParams) {
 	fmt.Printf("Name: %s\n", as.SName)
 	fmt.Printf("Vendor: %s\n", as.Vendor)
@@ -199,7 +167,6 @@ func getEditStrainCmd() Command {
 	return editStrainCmd
 }
 
-// save, exit, print, [n]ame, [v]endor, [c]ode
 func getEditStrainFlags() map[string]Flag {
 	editStrainFlags := make(map[string]Flag)
 	nFlag := Flag{
@@ -225,8 +192,6 @@ func getEditStrainFlags() map[string]Flag {
 		printOrder:  3,
 	}
 	editStrainFlags[cFlag.symbol] = cFlag
-
-	// ect as needed or remove the "-"+ for longer ones
 
 	helpFlag := Flag{
 		symbol:      "help",
@@ -261,25 +226,21 @@ func getEditStrainFlags() map[string]Flag {
 	editStrainFlags[printFlag.symbol] = printFlag
 
 	return editStrainFlags
-
 }
 
-// look into removing the args thing, might have to stay
 func editStrainFunction(cfg *Config) error {
 	// no permission check, strains are generally for reference
-	nilStrain := database.Strain{}
 	strain, err := getStructPrompt(cfg, "Enter strain name or ID to edit", getStrainStruct)
-	if err != nil {
+	if err != nil && err.Error() != CancelError {
 		return err
 	}
-	if strain == nilStrain {
-		fmt.Println("Exiting...")
+	if err != nil && err.Error() == CancelError {
+		fmt.Println(CancelMsg)
+		return nil
 	}
 
-	// get flags
 	flags := getEditStrainFlags()
 
-	// set defaults
 	exit := false
 
 	usParams := database.UpdateStrainParams(strain)
@@ -289,12 +250,10 @@ func editStrainFunction(cfg *Config) error {
 		ChangesMade: false,
 	}
 
-	// the reader
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Use flags to set new values for strain.")
 	fmt.Println("Enter 'help' for list of available flags.")
 
-	// da loop
 	for {
 		fmt.Print("> ")
 		text, err := reader.ReadString('\n')
@@ -309,19 +268,16 @@ func editStrainFunction(cfg *Config) error {
 			continue
 		}
 
-		// do weird behavior here
 		if reviewed.ChangesMade {
 			reviewed.Printed = false
 		}
 
-		// but normal loop now
 		args, err := parseArguments(flags, inputs)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
 
-		// save, exit, print, [n]ame, [v]endor, [c]ode
 		for _, arg := range args {
 			switch arg.flag {
 			case "-n":
@@ -402,37 +358,4 @@ func printUpdateStrain(us *database.UpdateStrainParams) {
 	fmt.Printf("Name: %s\n", us.SName)
 	fmt.Printf("Vendor: %s\n", us.Vendor)
 	fmt.Printf("Code: %s\n", us.VendorCode)
-}
-
-// works with both code and name
-// TODO: figure out why im checking for x as an input OH TO CANCEL THE STRAIN OUT SOMEHWERE I THINK
-// TODO: handle blanking out the strain before trying to parse from a flag
-func getStrainByFlag(cfg *Config, input string) (database.Strain, error) {
-	strain, err := cfg.db.GetStrainByName(context.Background(), input)
-
-	if err != nil && err.Error() != "sql: no rows in result set" {
-		// any other error with DB
-		fmt.Println("Error getting strain from DB")
-		return database.Strain{ID: uuid.Nil}, err
-	}
-
-	if err == nil {
-		// strain found by name
-		return strain, nil
-	}
-
-	// look for it by code
-	strain, err = cfg.db.GetStrainByCode(context.Background(), input)
-	if err != nil && err.Error() != "sql: no rows in result set" {
-		// any other error with DB
-		fmt.Println("Error getting strain from DB")
-		return database.Strain{ID: uuid.Nil}, err
-	}
-	if err != nil && err.Error() == "sql: no rows in result set" {
-		fmt.Println("Strain not found by name or number. Please try again.")
-		return database.Strain{ID: uuid.Nil}, nil
-	}
-
-	// strain found by code
-	return strain, nil
 }
